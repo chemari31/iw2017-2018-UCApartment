@@ -1,23 +1,29 @@
 
 Sincronizar el repositorio
 
-    La primera vez: ejecutar los siguientes comandos en el directorio donde vaya a almacenar los archivos de la aplicación ("workspace"):
+```sh
 
 C:\Users\josem\eclipse-workspace\Ucapartment>mkdir iw2017-2018-UCApartment
 C:\Users\josem\eclipse-workspace\Ucapartment>cd iw2017-2018-UCApartment
 C:\Users\josem\eclipse-workspace\Ucapartment> git init
 C:\Users\josem\eclipse-workspace\Ucapartment> git remote add origin https://github.com/chemari31/iw2017-2018-UCApartment.git
 C:\Users\josem\eclipse-workspace\Ucapartment> git pull origin master
+```
 
-    El resto de las veces: para descargar archivos con las últimas modificaciones de los demás participantes en el proyecto, ubicados ya dentro del directorio del proyecto ("~/workspace/VideoMusicCloud"):
+    El resto de las veces: para descargar archivos con las últimas modificaciones de los demás participantes en el proyecto, ubicados ya dentro del directorio del proyecto :
+    ```sh
 
 C:\Users\josem\eclipse-workspace\Ucapartment> git pull origin master
+```
 
     Tras realizar nuestras propias aportaciones/modificaciones y subir los nuevos cambios al repositorio:
+    
+    ```sh
 
 C:\Users\josem\eclipse-workspace\Ucapartment> git add --all
 C:\Users\josem\eclipse-workspace\Ucapartment> git commit -m "Descripción de nuestras aportaciones/modificaciones en el proyecto"
 C:\Users\josem\eclipse-workspace\Ucapartment> git push origin master
+```
 
 
 
