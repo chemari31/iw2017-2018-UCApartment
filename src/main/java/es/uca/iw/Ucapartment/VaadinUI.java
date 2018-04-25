@@ -1,5 +1,7 @@
 package es.uca.iw.Ucapartment;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +15,8 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
 
+import es.uca.iw.Ucapartment.apartaments.Apartaments;
+import es.uca.iw.Ucapartment.apartaments.ApartamentsRepository;
 import es.uca.iw.Ucapartment.security.AccessDeniedView;
 import es.uca.iw.Ucapartment.security.ErrorView;
 import es.uca.iw.Ucapartment.security.LoginScreen;
@@ -29,7 +33,14 @@ public class VaadinUI extends UI {
 
 	@Autowired
     MainScreen mainScreen;
-
+	
+	@Autowired
+	ApartamentsRepository repo;
+	
+	List<Apartaments> apartamento;
+	
+	String[] filter = new String[3];
+	
 	
 	@Override
 	protected void init(VaadinRequest request) {
@@ -40,9 +51,21 @@ public class VaadinUI extends UI {
 		if (SecurityUtils.isLoggedIn()) {
 			showMainScreen();
 		} else {
-			showLoginScreen();
+			
+			//showLoginScreen();
+		
+			for(int i = 0; i<3 ;i++)
+			{
+				filter[i] = "Todo";
+			}
+			showHome(apartamento, repo, filter);
 		}
 
+	}
+	
+	private void showHome(List<Apartaments> apartamento, ApartamentsRepository repo, String[] filter)
+	{
+		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen));
 	}
 
 	private void showLoginScreen() {
@@ -51,6 +74,12 @@ public class VaadinUI extends UI {
 
 	private void showMainScreen() {
 		setContent(mainScreen);
+	}
+	
+	private void home(List<Apartaments> apartamento, String[] filter)
+	{
+		//System.out.println(apartamento.getCiudad());
+		showHome(apartamento,repo, filter);
 	}
 
 	

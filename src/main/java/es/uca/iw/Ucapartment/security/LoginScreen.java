@@ -1,8 +1,11 @@
 package es.uca.iw.Ucapartment.security;
 
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;
@@ -11,15 +14,21 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+
+import es.uca.iw.Ucapartment.WelcomeView;
+
 import com.vaadin.ui.CustomComponent;
 
-public class LoginScreen extends VerticalLayout 
+
+@SpringView(name = LoginScreen.VIEW_NAME)
+public class LoginScreen extends VerticalLayout implements View
 {
 	
 	TextField userName = new TextField("Username");
 	//userName.setIcon(VaadinIcons.USER);
 	PasswordField password = new PasswordField("Password");
 	Button sesion = new Button("Iniciar Sesion");
+	public static final String VIEW_NAME = "Login";
 	
 	
 
@@ -94,6 +103,15 @@ public class LoginScreen extends VerticalLayout
   	 * 
   	 */
   	private static final long serialVersionUID = 5304492736395275231L;
+
+
+
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 }
