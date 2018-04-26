@@ -27,6 +27,7 @@ import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -36,6 +37,7 @@ import com.vaadin.ui.Button.ClickListener;
 
 import es.uca.iw.Ucapartment.apartaments.Apartaments;
 import es.uca.iw.Ucapartment.apartaments.ApartamentsRepository;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 public class Home extends VerticalLayout
 {
@@ -43,30 +45,51 @@ public class Home extends VerticalLayout
 	TextField home = new TextField();
 	List<Apartaments> apartamentoo = null;
 	
-
 	
-	
-	
-	
-	public Home(HomeCallback callback, List<Apartaments> apartamento, ApartamentsRepository repo, String[] filter, LoginCallback callback2)
+	public Home(HomeCallback callback, List<Apartaments> apartamento, ApartamentsRepository repo, String[] filter, 
+			LoginCallback callback2, RegistroCallback regcallback)
 	{ 
 		apartamentoo = apartamento;
-		final Button button = new Button("Iniciar Sesion");
+
+		final Button login = new Button("Iniciar Sesion");
+		final Button registro = new Button("Registrarse");
 		final Button input = new Button("Buscar");
-        button.setIcon(VaadinIcons.USER);
+		final Button perfil = new Button("Mi perfil");
+		final Button logoutButton = new Button("Logout", event -> logout());
+		
+        login.setIcon(VaadinIcons.USER);
         
 	    
 		VerticalLayout layout = new VerticalLayout();
 		HorizontalLayout layout2 = new HorizontalLayout();
-		
+		HorizontalLayout barra_superior = new HorizontalLayout(); // Barra superior con botones
 		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
 		loginPanel.setWidth("800px");
 	    loginPanel.setHeight("800px");
-	    layout.addComponent(button);
+	    
+	    // Aquí lo que hacemos es que si no estamos logueados se muestran los botones de login y registro
+		if(!SecurityUtils.isLoggedIn()) {
+			
+			barra_superior.addComponent(login);
+			barra_superior.setComponentAlignment(login, Alignment.MIDDLE_CENTER);
+			barra_superior.addComponent(registro);
+			barra_superior.setComponentAlignment(registro,Alignment.MIDDLE_CENTER);
+		}
+		else {
+			barra_superior.addComponent(perfil);
+			barra_superior.setComponentAlignment(perfil, Alignment.MIDDLE_CENTER);
+			logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
+			barra_superior.addComponent(logoutButton);
+		}
+		
+		// Añadimos la barra superior a la ventana
+	    addComponent(barra_superior);
+	    setComponentAlignment(barra_superior, Alignment.MIDDLE_CENTER);
+	    
 	    layout.addComponent(loginPanel);
 	    
 	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );
-	    layout.setComponentAlignment(button, Alignment.MIDDLE_CENTER  );
+	    
 	    
 	    
         //setMargin(true);
@@ -108,14 +131,18 @@ public class Home extends VerticalLayout
 		select3.setItems("Todo","20","30","40");
 		select3.setSelectedItem(filter[2]);
 		
-		button.addClickListener(new ClickListener(){
+		login.addClickListener(new ClickListener(){
 			public void buttonClick(ClickEvent event)
 			{
 				callback2.showLoginScreen();
 			}
 		});
 		
-		
+		registro.addClickListener(new ClickListener() {
+			public void buttonClick(ClickEvent event) {
+				regcallback.showRegisterScreen();
+			}
+		});
 				
 				
 		input.addClickListener(new ClickListener() {
@@ -238,6 +265,17 @@ public class Home extends VerticalLayout
 	public interface LoginCallback
 	{
 		void showLoginScreen();
+	}
+	
+    @FunctionalInterface
+    public interface RegistroCallback {
+        void showRegisterScreen();
+    }
+
+	// Con esta función lo que hacemos es cerrar la sesión de usuario y recargar la página 
+	private void logout() {
+		getUI().getPage().reload();
+		getSession().close();
 	}
 	
 

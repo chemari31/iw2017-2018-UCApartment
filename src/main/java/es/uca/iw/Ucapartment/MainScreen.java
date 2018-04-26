@@ -17,13 +17,8 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import es.uca.iw.Ucapartment.users.UserManagementView;
-import es.uca.iw.Ucapartment.users.UserView;
 
-/**
- * @author ruizrube
- *
- */
+
 @SpringViewDisplay
 public class MainScreen extends VerticalLayout implements ViewDisplay {
 
@@ -42,20 +37,20 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		root.setSizeFull();
 		
 		// Creamos la cabecera 
-		root.addComponent(new Label("This is the session: " + VaadinSession.getCurrent()));
-		root.addComponent(new Label("This is the UI: " + this.toString()));
+		//root.addComponent(new Label("This is the session: " + VaadinSession.getCurrent()));
+		//root.addComponent(new Label("This is the UI: " + this.toString()));
 		
 		Button logoutButton = new Button("Logout", event -> logout());
 		logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
 		root.addComponent(logoutButton);
 
 		// Creamos la barra de navegación
-		final CssLayout navigationBar = new CssLayout();
-		navigationBar.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
-		navigationBar.addComponent(createNavigationButton("Welcome", WelcomeView.VIEW_NAME));
-		navigationBar.addComponent(createNavigationButton("Users", UserView.VIEW_NAME));
-		navigationBar.addComponent(createNavigationButton("User Management", UserManagementView.VIEW_NAME));
-		root.addComponent(navigationBar);
+		//final CssLayout navigationBar = new CssLayout();
+		//navigationBar.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		//navigationBar.addComponent(createNavigationButton("Welcome", WelcomeView.VIEW_NAME));
+		//navigationBar.addComponent(createNavigationButton("Users", UserView.VIEW_NAME));
+		//navigationBar.addComponent(createNavigationButton("User Management", UserManagementView.VIEW_NAME));
+		//root.addComponent(navigationBar);
 
 		// Creamos el panel
 		springViewDisplay = new Panel();

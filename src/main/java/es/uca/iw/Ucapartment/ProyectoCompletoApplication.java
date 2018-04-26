@@ -20,8 +20,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.uca.iw.Ucapartment.security.VaadinSessionSecurityContextHolderStrategy;
-import es.uca.iw.Ucapartment.users.User;
-import es.uca.iw.Ucapartment.users.UserService;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.Rol;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class ProyectoCompletoApplication {
@@ -33,40 +34,41 @@ public class ProyectoCompletoApplication {
 	}
 
 	@Bean
-	public CommandLineRunner loadData(UserService service) {
+	public CommandLineRunner loadData(UsuarioService service) {
 		return (args) -> {
 
 			if (service.findAll().size() == 0) {
 				// save a couple of users with default password: default
-				service.save(new User("Jack", "Bauer"));
-				service.save(new User("Chloe", "O'Brian"));
-				service.save(new User("Kim", "Bauer"));
-				service.save(new User("David", "Palmer"));
-				service.save(new User("Michelle", "Dessler"));
+				service.save(new Usuario("Jack", "Bauer","11111111A"));
+				service.save(new Usuario("Chloe", "O'Brian","22222222B"));
+				service.save(new Usuario("Kim", "Bauer","33333333C"));
+				service.save(new Usuario("David", "Palmer","44444444D"));
+				service.save(new Usuario("Michelle", "Dessler","55555555E"));
 
-				User root = new User("root", "root");
-				root.setPassword("root");
+				Usuario root = new Usuario("root", "root","98765432R");
+				root.setPassword("rootroot");
+				root.setRol(Rol.ADMINISTRADOR);
 				service.save(root);
 
 				// fetch all users
 				log.info("Users found with findAll():");
 				log.info("-------------------------------");
-				for (User user : service.findAll()) {
-					log.info(user.toString());
+				for (Usuario usuario : service.findAll()) {
+					log.info(usuario.toString());
 				}
 				log.info("");
 
 				// fetch an individual user by ID
-				User user = service.findOne(1L);
+				Usuario usuario = service.findOne(1L);
 				log.info("User found with findOne(1L):");
 				log.info("--------------------------------");
-				log.info(user.toString());
+				log.info(usuario.toString());
 				log.info("");
 
 				// fetch users by last name
-				log.info("User found with findByLastNameStartsWithIgnoreCase('Bauer'):");
+				log.info("User found with findByApellidosStartsWithIgnoreCase('Bauer'):");
 				log.info("--------------------------------------------");
-				for (User bauer : service.findByLastNameStartsWithIgnoreCase("Bauer")) {
+				for (Usuario bauer : service.findByApellidosStartsWithIgnoreCase("Bauer")) {
 					log.info(bauer.toString());
 				}
 				log.info("");

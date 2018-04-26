@@ -1,5 +1,9 @@
 package es.uca.iw.Ucapartment.Usuario;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,19 +11,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity//Indica a Hibernate que es una entidad
 @Table(name = "usuarios")//Nombre de la tabla en la BD
-public class Usuario {
+public class Usuario implements UserDetails{
 
 	@Id//Clave primaria
 	@GeneratedValue(strategy = GenerationType.AUTO)//Valor autogenerado
 	private Long id;
 	
 	@Column(length = 32)
-	private String Nombre;
+	private String nombre;
 	
 	@Column(length = 64)
-	private String Apellidos;
+	private String apellidos;
 	
 	@Column(unique = true, length = 9)
 	private String dni;
@@ -35,19 +43,23 @@ public class Usuario {
 	
 	private Rol rol;
 	
-	//Constructor sin parámetros
+	// Constructor predeterminado
 	protected Usuario() {}
 
-	//Contructor con parámetros
+	// Contructor con parámetros
 	public Usuario(String nombre, String apellidos, String dni, String email,
-			String nombreUsuario, String password, Rol rol) {
-		Nombre = nombre;
-		Apellidos = apellidos;
+			String nombreUsuario, String password) {
+		this.nombre = nombre;
+		this.apellidos = apellidos;
 		this.dni = dni;
 		this.email = email;
 		this.nombreUsuario = nombreUsuario;
 		this.password = password;
-		this.rol = rol;
+		this.rol = Rol.ANFITRION;
+	}
+	
+	public Usuario(String nombre, String apellidos, String dni) {
+		this(nombre, apellidos, dni, new String(nombre+"@"+apellidos+".es"), nombre, "default");
 	}
 
 	//Getters & Setters
@@ -56,19 +68,19 @@ public class Usuario {
 	}
 	
 	public String getNombre() {
-		return Nombre;
+		return nombre;
 	}
 	
 	public void setNombre(String nombre) {
-		Nombre = nombre;
+		this.nombre = nombre;
 	}
 	
 	public String getApellidos() {
-		return Apellidos;
+		return apellidos;
 	}
 	
 	public void setApellidos(String apellidos) {
-		Apellidos = apellidos;
+		this.apellidos = apellidos;
 	}
 	
 	public String getDni() {
@@ -109,5 +121,56 @@ public class Usuario {
 	
 	public void setRol(Rol rol) {
 		this.rol = rol;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Usuario[id=%d, Nombre='%s', Apellidos='%s', DNI='%s', Correo electrónico"
+				+ "='%s', Nombre de usuario='%s', Contraseña='%s']", id, nombre, apellidos, dni, 
+				email,nombreUsuario,password);
+	}
+	
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		List<GrantedAuthority> list=new ArrayList<GrantedAuthority>();
+		//list.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
+		if (this.rol.getId() == 0) 
+			list.add(new SimpleGrantedAuthority("ADMINISTRADOR"));
+		else if (this.rol.getId() == 1)
+			list.add(new SimpleGrantedAuthority("GERENTE"));
+		else if (this.rol.getId() == 2)
+			list.add(new SimpleGrantedAuthority("ANFITRION"));
+		
+		return list;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public String getUsername() {
+		// TODO Auto-generated method stub
+		return nombreUsuario;
 	}
 }
