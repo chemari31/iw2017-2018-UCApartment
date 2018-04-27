@@ -21,6 +21,8 @@ public class Reserva {
 	@GeneratedValue(strategy = GenerationType.AUTO)//Valor autogenerado
 	private Long id;
 	
+	private Date fecha;
+	
 	private Date fechaInicio;
 	
 	private Date fechaFin;
@@ -54,6 +56,14 @@ public class Reserva {
 		return id;
 	}
 	
+	public Date getFecha() {
+		return fecha;
+	}
+
+	public void setFecha(Date fecha) {
+		this.fecha = fecha;
+	}
+
 	public Date getFechaInicio() {
 		return fechaInicio;
 	}

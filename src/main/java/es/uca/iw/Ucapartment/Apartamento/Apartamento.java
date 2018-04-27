@@ -7,11 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import es.uca.iw.Ucapartment.Precio.Precio;
-import es.uca.iw.Ucapartment.Ubicacion.Ubicacion;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 
 @Entity//Indica a Hibernate que es una entidad
@@ -28,36 +25,53 @@ public class Apartamento {
 	@Column(length = 13)
 	private String contacto;
 	
+	@Column(length = 32)
+	private String ciudad;
+	
+	@Column(length = 128)
+	private String calle;
+	
+	@Column(length = 16)
+	private String numero;
+	
+	@Column(length = 5)
+	private String cp;
+	
 	@ManyToOne//Poner fetch?
 	@JoinColumn(name = "usuario_id")//Clave foránea
 	private Usuario usuario;
 	
-	@OneToOne
-	@JoinColumn(name = "ubicacion_id")//Clave foránea
-	private Ubicacion ubicacion;
+	@Column(length = 2)
+	private int habitaciones;
 	
-	@OneToOne
-	@JoinColumn(name = "Precio_id")//Clave foránea
-	private Precio precio;
+	@Column(length = 2)
+	private int camas;
+	
+	private boolean ac;
 	
 	//Constructor sin parámetros
 	protected Apartamento() {}
 
 	//Constructor con parámetros
-	public Apartamento(String descripcion, String contacto, Usuario usuario,
-		Ubicacion ubicacion, Precio precio) {
+	public Apartamento(String descripcion, String contacto, String ciudad, String calle,
+		String numero, String cp, Usuario usuario, int habitaciones, int camas, boolean ac) {
 		this.descripcion = descripcion;
 		this.contacto = contacto;
+		this.ciudad = ciudad;
+		this.calle = calle;
+		this.numero = numero;
+		this.cp = cp;
 		this.usuario = usuario;
-		this.ubicacion = ubicacion;
-		this.precio = precio;
+		this.habitaciones = habitaciones;
+		this.camas = camas;
+		this.ac = ac;
 	}
 
 	//Getters & Setters
 	public Long getId() {
 		return id;
 	}
-	
+
 	public String getDescripcion() {
 		return descripcion;
 	}
@@ -74,6 +88,38 @@ public class Apartamento {
 		this.contacto = contacto;
 	}
 
+	public String getCiudad() {
+		return ciudad;
+	}
+
+	public void setCiudad(String ciudad) {
+		this.ciudad = ciudad;
+	}
+
+	public String getCalle() {
+		return calle;
+	}
+
+	public void setCalle(String calle) {
+		this.calle = calle;
+	}
+
+	public String getNumero() {
+		return numero;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
+
+	public String getCp() {
+		return cp;
+	}
+
+	public void setCp(String cp) {
+		this.cp = cp;
+	}
+
 	public Usuario getUsuario() {
 		return usuario;
 	}
@@ -82,19 +128,29 @@ public class Apartamento {
 		this.usuario = usuario;
 	}
 
-	public Ubicacion getUbicacion() {
-		return ubicacion;
+	public int getHabitaciones() {
+		return habitaciones;
 	}
 
-	public void setUbicacion(Ubicacion ubicacion) {
-		this.ubicacion = ubicacion;
+	public void setHabitaciones(int habitaciones) {
+		this.habitaciones = habitaciones;
 	}
 
-	public Precio getPrecio() {
-		return precio;
+	public int getCamas() {
+		return camas;
 	}
 
-	public void setPrecio(Precio precio) {
-		this.precio = precio;
+	public void setCamas(int camas) {
+		this.camas = camas;
 	}
+
+	public boolean isAc() {
+		return ac;
+	}
+
+	public void setAc(boolean ac) {
+		this.ac = ac;
+	}
+
+
 }
