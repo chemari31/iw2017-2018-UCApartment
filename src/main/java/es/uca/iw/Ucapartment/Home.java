@@ -39,16 +39,14 @@ import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
-public class Home extends VerticalLayout
+public class Home extends VerticalLayout 
 {
 	
 	TextField home = new TextField();
 	List<Apartamento> apartamentoo = null;
-	
-	
-	public Home(Object callback, List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter,
-			LoginCallback callback2, RegistroCallback regcallback) 
-	{ 
+
+	public Home(HomeCallback callback, List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter,
+			LoginCallback callback2, RegistroCallback regcallback) { 
 		
 		apartamentoo = apartamento;
 
@@ -242,12 +240,9 @@ public class Home extends VerticalLayout
 		
 	}
 
-
 	@FunctionalInterface
     public interface HomeCallback {
-
         void home(List<Apartamento> apartamento, String[] filter);
-       
     }
 	
 	@FunctionalInterface

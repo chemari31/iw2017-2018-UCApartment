@@ -70,7 +70,7 @@ public class VaadinUI extends UI {
 	private void showHome(List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter)
 	{
 		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen));
-	}
+	} 
 	
 	// Función que llama a la vista de login pasandole los métodos login y showRegisterScreen requeridos
 	// para la funcionalidad de los botones de esta
@@ -86,6 +86,11 @@ public class VaadinUI extends UI {
 	// para la funcionalidad de los botones de esta
 	private void showRegisterScreen() {
 		setContent(new RegistroScreen(this::registro, this::atras));
+	}
+	
+	private void home(List<Apartamento> apartamento, String[] filter) {
+		//System.out.println(apartamento.getCiudad());
+		showHome(apartamento,repo, filter);
 	}
 	
 	
