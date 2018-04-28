@@ -19,6 +19,9 @@ public class Apartamento {
 	@GeneratedValue(strategy = GenerationType.AUTO)//Valor autogenerado
 	private Long id;
 	
+	@Column(length = 128)//La longitud es provisional
+	private String nombre;
+	
 	@Column(length = 256)//La longitud es provisional
 	private String descripcion;
 	
@@ -42,7 +45,7 @@ public class Apartamento {
 	private Usuario usuario;
 	
 	@Column(length = 2)
-	private int habitaciones;
+	private int habitacion;
 	
 	@Column(length = 2)
 	private int camas;
@@ -62,7 +65,7 @@ public class Apartamento {
 		this.numero = numero;
 		this.cp = cp;
 		this.usuario = usuario;
-		this.habitaciones = habitaciones;
+		this.habitacion = habitaciones;
 		this.camas = camas;
 		this.ac = ac;
 	}
@@ -129,11 +132,11 @@ public class Apartamento {
 	}
 
 	public int getHabitaciones() {
-		return habitaciones;
+		return habitacion;
 	}
 
 	public void setHabitaciones(int habitaciones) {
-		this.habitaciones = habitaciones;
+		this.habitacion = habitaciones;
 	}
 
 	public int getCamas() {
