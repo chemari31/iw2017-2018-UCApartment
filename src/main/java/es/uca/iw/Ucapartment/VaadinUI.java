@@ -15,10 +15,10 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
 
+import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
-import es.uca.iw.Ucapartment.apartaments.Apartaments;
-import es.uca.iw.Ucapartment.apartaments.ApartamentsRepository;
 import es.uca.iw.Ucapartment.security.AccessDeniedView;
 import es.uca.iw.Ucapartment.security.ErrorView;
 import es.uca.iw.Ucapartment.security.LoginScreen;
@@ -38,12 +38,12 @@ public class VaadinUI extends UI {
     MainScreen mainScreen;
 	
 	@Autowired
-	ApartamentsRepository repo;
+	ApartamentoRepository repo;
 	
 	@Autowired
 	UsuarioService servicio;
 	
-	List<Apartaments> apartamento;
+	List<Apartamento> apartamento;
 	
 	String[] filter = new String[3];
 	
@@ -67,7 +67,7 @@ public class VaadinUI extends UI {
 
 	}
 	
-	private void showHome(List<Apartaments> apartamento, ApartamentsRepository repo, String[] filter)
+	private void showHome(List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter)
 	{
 		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen));
 	}
@@ -88,12 +88,6 @@ public class VaadinUI extends UI {
 		setContent(new RegistroScreen(this::registro, this::atras));
 	}
 	
-	private void home(List<Apartaments> apartamento, String[] filter)
-	{
-		//System.out.println(apartamento.getCiudad());
-		showHome(apartamento,repo, filter);
-	}
-
 	
 	private boolean login(String username, String password) {
 		try {

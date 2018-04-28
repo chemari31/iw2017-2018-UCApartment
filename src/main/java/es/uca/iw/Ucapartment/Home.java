@@ -35,20 +35,21 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
-import es.uca.iw.Ucapartment.apartaments.Apartaments;
-import es.uca.iw.Ucapartment.apartaments.ApartamentsRepository;
+import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 public class Home extends VerticalLayout
 {
 	
 	TextField home = new TextField();
-	List<Apartaments> apartamentoo = null;
+	List<Apartamento> apartamentoo = null;
 	
 	
-	public Home(HomeCallback callback, List<Apartaments> apartamento, ApartamentsRepository repo, String[] filter, 
-			LoginCallback callback2, RegistroCallback regcallback)
+	public Home(Object callback, List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter,
+			LoginCallback callback2, RegistroCallback regcallback) 
 	{ 
+		
 		apartamentoo = apartamento;
 
 		final Button login = new Button("Iniciar Sesion");
@@ -160,18 +161,14 @@ public class Home extends VerticalLayout
 					}
 					else
 					{
-						apartamentoo = repo.findByPrecio(select3.getValue());
+						Apartamento apar = repo.findByNombre((select3.getValue()));
 					}
 				}
 				else
 				{
 					if(select3.getValue() == "Todo")
 					{
-						apartamentoo = repo.findByHabitacion(select2.getValue());
-					}
-					else
-					{
-						apartamentoo = repo.findByHabitacionAndPrecio(select2.getValue(), select3.getValue());
+						apartamentoo = repo.findByHabitacion(Integer.parseInt(select2.getValue()));
 					}
 					
 				}
@@ -184,22 +181,13 @@ public class Home extends VerticalLayout
 					{
 						apartamentoo = repo.findByCiudad(select.getValue());
 					}
-					else
-					{
-						apartamentoo = repo.findByCiudadAndPrecio(select.getValue(), select3.getValue());
-					}
 				}
 				else
 				{
 					if(select3.getValue() == "Todo")
 					{
-						apartamentoo = repo.findByCiudadAndHabitacion(select.getValue(), select2.getValue());
+						apartamentoo = repo.findByCiudadAndHabitacion(select.getValue(), Integer.parseInt(select2.getValue()));
 					}
-					else
-					{
-						apartamentoo = repo.findByCiudadAndHabitacionAndPrecio(select.getValue(), select2.getValue(), select3.getValue());
-					}
-					
 				}
 			}
 			
@@ -207,7 +195,7 @@ public class Home extends VerticalLayout
 			filter[1] = select2.getValue();
 			filter[2] = select3.getValue();
 			
-			callback.home(apartamentoo, filter);	
+			((HomeCallback) callback).home(apartamentoo, filter);	
 		}
 				});
 				
@@ -228,21 +216,21 @@ public class Home extends VerticalLayout
 		
 		
 		try{
-			for(Apartaments apartamentoa : apartamentoo)
+			for(Apartamento apartamentoa : apartamentoo)
 			{
-				loginLayout.addComponent(new Image(null,
-				        new ClassResource(apartamentoa.getImage())));
-				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
+				//loginLayout.addComponent(new Image(null,
+				        //new ClassResource(apartamentoa.getImage())));
+				//loginLayout.addComponent(new Label(apartamentoa.getNombre()));
 				loginLayout.addComponent(new Button("Reservar"));
 				loginLayout.addComponent(new Button("Informacion"));
 			}
 		}catch(Exception e) {
 			
-			for(Apartaments apartamentoa : repo.findAll())
+			for(Apartamento apartamentoa : repo.findAll())
 			{
-				loginLayout.addComponent(new Image(null,
-				        new ClassResource(apartamentoa.getImage())));
-				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
+				//loginLayout.addComponent(new Image(null,
+				        //new ClassResource(apartamentoa.getImage())));
+				//loginLayout.addComponent(new Label(apartamentoa.getNombre()));
 				loginLayout.addComponent(new Button("Reservar"));
 				loginLayout.addComponent(new Button("Informacion"));
 			}
@@ -254,10 +242,11 @@ public class Home extends VerticalLayout
 		
 	}
 
+
 	@FunctionalInterface
     public interface HomeCallback {
 
-        void home(List<Apartaments> apartamento, String[] filter);
+        void home(List<Apartamento> apartamento, String[] filter);
        
     }
 	
