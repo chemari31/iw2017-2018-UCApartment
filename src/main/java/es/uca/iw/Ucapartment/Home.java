@@ -16,6 +16,7 @@ import com.vaadin.server.FileResource;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -39,6 +40,7 @@ import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
+@SpringViewDisplay
 public class Home extends VerticalLayout 
 {
 	
@@ -46,7 +48,7 @@ public class Home extends VerticalLayout
 	List<Apartamento> apartamentoo = null;
 
 	public Home(HomeCallback callback, List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter,
-			LoginCallback callback2, RegistroCallback regcallback) { 
+			LoginCallback callback2, RegistroCallback regcallback, ApartamentosCallback aparCallback) { 
 		
 		apartamentoo = apartamento;
 
@@ -54,6 +56,7 @@ public class Home extends VerticalLayout
 		final Button registro = new Button("Registrarse");
 		final Button input = new Button("Buscar");
 		final Button perfil = new Button("Mi perfil");
+		final Button apartamentos = new Button("Apartamentos");
 		final Button logoutButton = new Button("Logout", event -> logout());
 		
         login.setIcon(VaadinIcons.USER);
@@ -79,6 +82,8 @@ public class Home extends VerticalLayout
 			barra_superior.setComponentAlignment(perfil, Alignment.MIDDLE_CENTER);
 			logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
 			barra_superior.addComponent(logoutButton);
+			barra_superior.addComponent(apartamentos);
+			barra_superior.setComponentAlignment(apartamentos,Alignment.MIDDLE_CENTER);
 		}
 		
 		// Añadimos la barra superior a la ventana
@@ -140,6 +145,12 @@ public class Home extends VerticalLayout
 		registro.addClickListener(new ClickListener() {
 			public void buttonClick(ClickEvent event) {
 				regcallback.showRegisterScreen();
+			}
+		});
+		
+		apartamentos.addClickListener(new ClickListener() {
+			public void buttonClick(ClickEvent event) {
+				aparCallback.showApartamentosScreen();
 			}
 		});
 				
@@ -254,6 +265,11 @@ public class Home extends VerticalLayout
     @FunctionalInterface
     public interface RegistroCallback {
         void showRegisterScreen();
+    }
+    
+    @FunctionalInterface
+    public interface ApartamentosCallback {
+        void showApartamentosScreen();
     }
 
 	// Con esta función lo que hacemos es cerrar la sesión de usuario y recargar la página 

@@ -26,8 +26,12 @@ public class ApartamentoService {
 		return repo.findByNombre(nombre);
 	}
 	
-	public Apartamento findById(int id) {
-		return repo.findById(id);
+	public Apartamento findByNombreStartsWithIgnoreCase(String nombre) {
+		return repo.findByNombreStartsWithIgnoreCase(nombre);
+	}
+	
+	public Apartamento findById(Long long1) {
+		return repo.findById(long1);
 	}
 	
 	public List<Apartamento> findAll() {
@@ -45,4 +49,8 @@ public class ApartamentoService {
 	/*public List<Apartamento> findByHabitacion(String ciudad, int habitacion, double precio){
 		
 	}*/
+	
+	public void delete(Apartamento arg0) {
+		repo.delete(arg0);
+	}
 }

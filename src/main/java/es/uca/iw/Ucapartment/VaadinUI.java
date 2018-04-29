@@ -9,14 +9,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Title;
+import com.vaadin.annotations.Viewport;
+import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoEditor;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.security.AccessDeniedView;
@@ -25,7 +33,10 @@ import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.RegistroScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
-@SpringUI
+@SpringUI(path="/")
+//@Theme("material")
+@Viewport("user-scalable=no,initial-scale=1.0")
+@Title("Ucapartment")
 public class VaadinUI extends UI {
 
 	@Autowired
@@ -36,6 +47,10 @@ public class VaadinUI extends UI {
 
 	@Autowired
     MainScreen mainScreen;
+	
+	@Autowired
+    ApartamentoService service;
+	
 	
 	@Autowired
 	ApartamentoRepository repo;
@@ -50,7 +65,9 @@ public class VaadinUI extends UI {
 	
 	@Override
 	protected void init(VaadinRequest request) {
-
+		Responsive.makeResponsive(this);
+        addStyleName(ValoTheme.UI_WITH_MENU);
+        
 	   	this.getUI().getNavigator().setErrorView(ErrorView.class);
 		viewProvider.setAccessDeniedViewClass(AccessDeniedView.class);
 	 
@@ -69,7 +86,7 @@ public class VaadinUI extends UI {
 	
 	private void showHome(List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter)
 	{
-		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen));
+		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen, this::showApartamentosScreen));
 	} 
 	
 	// Función que llama a la vista de login pasandole los métodos login y showRegisterScreen requeridos
@@ -90,7 +107,11 @@ public class VaadinUI extends UI {
 	
 	private void home(List<Apartamento> apartamento, String[] filter) {
 		//System.out.println(apartamento.getCiudad());
-		showHome(apartamento,repo, filter);
+		showHome(apartamento, repo, filter);
+	}
+	
+	private void showApartamentosScreen() {
+		setContent(new ApartamentoManagementView(service, new ApartamentoEditor(service)));
 	}
 	
 	

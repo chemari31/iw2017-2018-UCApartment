@@ -56,8 +56,9 @@ public class Apartamento {
 	protected Apartamento() {}
 
 	//Constructor con parámetros
-	public Apartamento(String descripcion, String contacto, String ciudad, String calle,
+	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
 		String numero, String cp, Usuario usuario, int habitaciones, int camas, boolean ac) {
+		this.nombre = Nombre;
 		this.descripcion = descripcion;
 		this.contacto = contacto;
 		this.ciudad = ciudad;
@@ -69,6 +70,21 @@ public class Apartamento {
 		this.camas = camas;
 		this.ac = ac;
 	}
+	
+	//Constructor sin usuario
+	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
+			String numero, String cp, int habitaciones, int camas, boolean ac) {
+			this.nombre = Nombre;
+			this.descripcion = descripcion;
+			this.contacto = contacto;
+			this.ciudad = ciudad;
+			this.calle = calle;
+			this.numero = numero;
+			this.cp = cp;
+			this.habitacion = habitaciones;
+			this.camas = camas;
+			this.ac = ac;
+		}
 
 	//Getters & Setters
 	public Long getId() {
