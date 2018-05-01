@@ -25,6 +25,7 @@ import es.uca.iw.Ucapartment.Apartamento.ApartamentoEditor;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.security.AccessDeniedView;

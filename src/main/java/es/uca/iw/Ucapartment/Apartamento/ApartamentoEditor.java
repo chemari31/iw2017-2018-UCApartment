@@ -31,13 +31,13 @@ public class ApartamentoEditor extends VerticalLayout{
 	/* Fields to edit properties in User entity */
 	TextField nombre = new TextField("Nombre");
 	TextField descripcion = new TextField("Descripcion");
-	TextField habitacion = new TextField("Habitaciones");
-	TextField camas = new TextField("Camas");
-	NativeSelect<String> sel = new NativeSelect<>("Acondicionamiento");
+	ComboBox<Integer> habitaciones = new ComboBox<>("Habitaciones");
+	ComboBox<Integer> camas = new ComboBox<>("Camas");
+	ComboBox<Boolean> ac = new ComboBox<>("Acondicionamiento");
 	TextField contacto = new TextField("Contacto");
 	TextField ciudad = new TextField("Ciudad");
 	TextField calle = new TextField("Calle");
-	TextField numero = new TextField("CNumero");
+	TextField numero = new TextField("Numero");
 	TextField cp = new TextField("Código Postal");
 	
 	/* Action buttons */
@@ -51,12 +51,15 @@ public class ApartamentoEditor extends VerticalLayout{
 	@Autowired
 	public ApartamentoEditor(ApartamentoService service) {
 		this.service = service;
-		sel.setItems("Sí", "No");
-		addComponents(nombre, descripcion, habitacion, camas, sel, contacto, ciudad,
+		ac.setItems(true, false);
+	    ac.setItemCaptionGenerator(bool -> {return bool?"Si":"No";});
+		habitaciones.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		camas.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		addComponents(nombre, descripcion, habitaciones, camas, ac, contacto, ciudad,
 				calle, numero, cp, actions);
 
-		// bind using naming convention
-		//binder.bindInstanceFields(this);
+		// asigna los campos del formulario al objeto apartamento
+		binder.bindInstanceFields(this);
 
 		
 		// Configure and style components

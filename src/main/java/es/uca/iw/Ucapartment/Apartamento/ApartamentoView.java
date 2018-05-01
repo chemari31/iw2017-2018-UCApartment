@@ -31,7 +31,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		this.service = service;
 		this.grid = new Grid<>(Apartamento.class);
 		this.filter = new TextField();
-	    
+	    init();
 	}
 	
 	@PostConstruct
@@ -43,9 +43,9 @@ public class ApartamentoView extends VerticalLayout implements View {
 		addComponents(actions, grid);
 
 		grid.setHeight(300, Unit.PIXELS);
-		grid.setColumns("id", "firstName", "lastName");
+		grid.setColumns("id", "descripcion", "contacto");
 
-		filter.setPlaceholder("Filter by last name");
+		filter.setPlaceholder("Filter by descripcion");
 
 		// Hook logic to components
 
