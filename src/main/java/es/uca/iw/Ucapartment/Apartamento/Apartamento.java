@@ -52,6 +52,9 @@ public class Apartamento {
 	
 	private boolean ac;
 	
+	@Column(length = 256)//La longitud es provisional
+	private String Foto1; //falta añadirlo al constructor
+	
 	//Constructor sin parámetros
 	protected Apartamento() {}
 
@@ -177,6 +180,14 @@ public class Apartamento {
 
 	public void setAc(boolean ac) {
 		this.ac = ac;
+	}
+	
+	public void setFoto1(String cadena) {
+		this.Foto1 = cadena;
+	}
+	
+	public String getFoto1() {
+		return Foto1;
 	}
 
 
