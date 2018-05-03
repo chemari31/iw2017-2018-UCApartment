@@ -1,10 +1,21 @@
 package es.uca.iw.Ucapartment.security;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.vaadin.data.Binder;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
@@ -17,30 +28,40 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import es.uca.iw.Ucapartment.Home;
+import es.uca.iw.Ucapartment.MainScreen;
 import es.uca.iw.Ucapartment.WelcomeView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
-import es.uca.iw.Ucapartment.security.LoginScreen.RegistroCallback;
 
 import com.vaadin.ui.CustomComponent;
 
 
 @SpringView(name = LoginScreen.VIEW_NAME)
-public class LoginScreen extends VerticalLayout implements View
-{
+public class LoginScreen extends VerticalLayout implements View {
+	public static final String VIEW_NAME = "loginScreen";
+	
 	// Campos del formulario de login
 	TextField nombreUsuario = new TextField("Nombre de usuario");
 	PasswordField password = new PasswordField("Contraseña");
 	
 	Button sesion = new Button("Iniciar Sesion");
-	public static final String VIEW_NAME = "Login";
+	
+	@Autowired
+    MainScreen mainScreen;
 	
 	// El objeto binder se utiliza para validar los campos
 	Binder<Usuario> binder = new Binder<>(Usuario.class);
-
-  
-	public LoginScreen(LoginCallback callback, RegistroCallback rcallback) 
-	{
-		
+	
+	@Autowired
+	AuthenticationManager authenticationManager;
+	
+	@Autowired
+	public LoginScreen() {
+	    
+    }
+	
+	@PostConstruct
+	public void init () {
 		VerticalLayout layout = new VerticalLayout();
 		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>Login</h1>");
 		loginPanel.setWidth("600px");
@@ -84,7 +105,7 @@ public class LoginScreen extends VerticalLayout implements View
         		String pword = password.getValue();
                 password.setValue("");
                 System.out.println(nombreUsuario.getValue()+" "+pword);
-                if (!callback.login(nombreUsuario.getValue(), pword)) {
+                if (login(nombreUsuario.getValue(), pword)) {
                     Notification.show("Error en el login. Introduzca de nuevo las credenciales");
                     nombreUsuario.focus();
                 }
@@ -93,44 +114,39 @@ public class LoginScreen extends VerticalLayout implements View
         		Notification.show("Comprueba los datos introducidos");
             
         });
-        
-        // Botón para registrarse
-        Button registro = new Button("Registrarse", evt -> {
-        	rcallback.showRegisterScreen();
-        });
-        
+             
         // Layout Horizontal para poner los botones en una misma fila
         HorizontalLayout botones = new HorizontalLayout();
         
         botones.addComponent(login);
-        botones.addComponent(registro);
         
         loginLayout.addComponent(botones);
         
         loginPanel.setContent(loginLayout);
 		
 		addComponent(layout);
-        
-    }
+	}
 
-    @FunctionalInterface
-    public interface LoginCallback {
-        boolean login(String username, String password);
-    }
-    
-    @FunctionalInterface
-    public interface RegistroCallback {
-        void showRegisterScreen();
-    }
-
-	
-    /**
-  	 * 
-  	 */
-  	private static final long serialVersionUID = 5304492736395275231L;
-
-
-
+	private boolean login(String username, String password) {
+		try {
+			Authentication token = authenticationManager
+					.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+			// Reinitialize the session to protect against session fixation
+			// attacks. This does not work with websocket communication.
+			VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
+			SecurityContextHolder.getContext().setAuthentication(token);
+			System.out.println(token);
+			
+			// Show the home view
+			getUI().getPage().reload();
+			getUI().getNavigator().navigateTo(Home.VIEW_NAME);
+			
+			return true;
+		} catch (AuthenticationException ex) {
+			System.out.println(ex);
+			return false;
+		}
+	}
 
 	@Override
 	public void enter(ViewChangeEvent event) {

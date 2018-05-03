@@ -16,14 +16,16 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	
     	System.out.println("COMPROBANDO " + beanName + " PARA USUARIO CON ROLES: "+SecurityUtils.roles());
 
-    	if(SecurityUtils.hasRole("ROLE_ADMIN")){
+    	if(SecurityUtils.hasRole("ADMINISTRADOR")){
     		return true;
-    	} else if (beanName.equals("welcomeView")) {
+    	} else if (beanName.equals("registroScreen")){
             return true;
-        } else if (beanName.equals("userView")) {
-            return SecurityUtils.hasRole("ROLE_USER") || SecurityUtils.hasRole("ROLE_MANAGER");
-        } else if (beanName.equals("userManagementView")) {
-            return SecurityUtils.hasRole("ROLE_MANAGER");
+    	} else if(beanName.equals("loginScreen")) {
+    		return true;
+    	} else if(beanName.equals("home")) {
+    		return true;
+        } else if (beanName.equals("apartamentoView")) {
+            return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
         } else {
         	return false;
         }

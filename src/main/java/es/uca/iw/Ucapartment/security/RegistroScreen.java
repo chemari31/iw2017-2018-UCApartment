@@ -1,12 +1,20 @@
 package es.uca.iw.Ucapartment.security;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.data.Binder;
 import com.vaadin.data.validator.EmailValidator;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.Position;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -15,9 +23,18 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import es.uca.iw.Ucapartment.Home;
+import es.uca.iw.Ucapartment.MainScreen;
+import es.uca.iw.Ucapartment.WelcomeView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 
-public class RegistroScreen extends VerticalLayout {
+@SpringView(name = RegistroScreen.VIEW_NAME)
+public class RegistroScreen extends VerticalLayout implements View{
+	
+	public static final String VIEW_NAME = "registroScreen";
+	
+	private final UsuarioService usuarioService;
 	
 	// Campos del formulario
 	TextField nombreUsuario = new TextField("Nombre de usuario");
@@ -30,8 +47,13 @@ public class RegistroScreen extends VerticalLayout {
 	// Mediante el objeto binder validamos los campos
 	Binder<Usuario> binder = new Binder<>(Usuario.class);
 	
-	public RegistroScreen(RegistroCallback callback, VolverAtras back) {
-		
+	@Autowired
+	public RegistroScreen(UsuarioService usuarioService) {
+		this.usuarioService = usuarioService;
+	}
+	
+	@PostConstruct
+	void init() {
 		VerticalLayout layout = new VerticalLayout();
 		Panel registerPanel = new Panel("Registro");
 		registerPanel.setWidth("600px");
@@ -101,7 +123,7 @@ public class RegistroScreen extends VerticalLayout {
 
                 // Llamamos a la funcion registro definidad en VaadinUI con el usuario
                 // la cual comprueba que el usuario con ese username y email no existe en la BD ya
-                if(!callback.registro(usuario)) {
+               if(!registro(usuario)) {
                 	Notification.show("Nombre de usuario "+usuario.getNombreUsuario()
                 	+ " o Correo electrónico "+usuario.getEmail()+" ya existentes");
                     nombreUsuario.focus(); // Esto lo que hace es que el cursor para introducir texto
@@ -112,29 +134,31 @@ public class RegistroScreen extends VerticalLayout {
         		Notification.show("Comprueba los datos introducidos");
         });
         
-        // Botón volver atrás (esto hay que arreglarlo ya que vuelve al login y lo ideal sería volver
-        // a la vista anterior
-        Button atras = new Button("Volver al login", evt -> {
-        	back.atras();
-        });
-        
         // Creamos un layout horizontal para añadir los botones de registro y atras
         HorizontalLayout botones = new HorizontalLayout();
         botones.addComponent(registro);
-        botones.addComponent(atras);
         registerLayout.addComponent(botones); // Con esto añadimos el layout creado a la ventana
 
         registerPanel.setContent(registerLayout);
 		addComponent(layout);
 	}
 	
-    @FunctionalInterface
-    public interface RegistroCallback {
-        boolean registro(Usuario usuario);
-    }
-    
-    @FunctionalInterface
-    public interface VolverAtras {
-    	void atras();
-    }
+	private boolean registro(Usuario usuario) {
+		boolean valido = false;
+		if(!usuarioService.nombreUsuarioExistente(usuario.getNombreUsuario())
+				&& !usuarioService.emailExistente(usuario.getEmail())) {
+			usuarioService.save(usuario); // Se guarda el usuario en la BD
+			//springViewDisplay.setContent((Component) view);
+				valido = true;
+				getUI().getNavigator().navigateTo(LoginScreen.VIEW_NAME);
+		}
+		return valido;
+
+	}
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -9,13 +9,20 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringViewDisplay;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.security.LoginScreen;
+import es.uca.iw.Ucapartment.security.RegistroScreen;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 
 
@@ -27,13 +34,15 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 	@Override
     public void attach() {
         super.attach();
-        this.getUI().getNavigator().navigateTo("");
+        this.getUI().getNavigator().navigateTo(Home.VIEW_NAME);
     }
 	
 	@PostConstruct
 	void init() {
 
 		final VerticalLayout root = new VerticalLayout();
+		HorizontalLayout menuSuperior = new HorizontalLayout();
+		
 		root.setSizeFull();
 		
 		// Creamos la cabecera 
@@ -42,24 +51,34 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		
 		Button logoutButton = new Button("Logout", event -> logout());
 		logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
-		root.addComponent(logoutButton);
+		//root.addComponent(logoutButton);
 
 		// Creamos la barra de navegación
-		//final CssLayout navigationBar = new CssLayout();
-		//navigationBar.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		/*final CssLayout navigationBar = new CssLayout();*/
+		menuSuperior.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		menuSuperior.addComponent(createNavigationButton("Inicio", Home.VIEW_NAME));
+		
+		if(SecurityUtils.isLoggedIn()) {
+			menuSuperior.addComponent(createNavigationButton("Mi perfil", WelcomeView.VIEW_NAME));
+			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", WelcomeView.VIEW_NAME));
+			menuSuperior.addComponent(logoutButton);
+		}
+		else {
+			menuSuperior.addComponent(createNavigationButton("Iniciar sesión", LoginScreen.VIEW_NAME));
+			menuSuperior.addComponent(createNavigationButton("Registro", RegistroScreen.VIEW_NAME));
+		}
 		//navigationBar.addComponent(createNavigationButton("Welcome", WelcomeView.VIEW_NAME));
 		//navigationBar.addComponent(createNavigationButton("Users", UserView.VIEW_NAME));
 		//navigationBar.addComponent(createNavigationButton("User Management", UserManagementView.VIEW_NAME));
-		//root.addComponent(navigationBar);
+		root.addComponent(menuSuperior);
+		root.setComponentAlignment(menuSuperior, Alignment.BOTTOM_CENTER);
 
 		// Creamos el panel
 		springViewDisplay = new Panel();
 		springViewDisplay.setSizeFull();
 		root.addComponent(springViewDisplay);
 		root.setExpandRatio(springViewDisplay, 1.0f);
-
 		addComponent(root);
-		
 	}
 
 	private Button createNavigationButton(String caption, final String viewName) {

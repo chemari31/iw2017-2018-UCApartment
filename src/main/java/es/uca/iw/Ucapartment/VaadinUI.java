@@ -52,7 +52,6 @@ public class VaadinUI extends UI {
 	@Autowired
     ApartamentoService service;
 	
-	
 	@Autowired
 	ApartamentoRepository repo;
 	
@@ -72,28 +71,28 @@ public class VaadinUI extends UI {
 	   	this.getUI().getNavigator().setErrorView(ErrorView.class);
 		viewProvider.setAccessDeniedViewClass(AccessDeniedView.class);
 	 
-		if (SecurityUtils.isLoggedIn()) {
+		//if (SecurityUtils.isLoggedIn()) {
 			showMainScreen();
-		} else {
+		/*} else {
 		
 			for(int i = 0; i<3 ;i++)
 			{
 				filter[i] = "Todo";
 			}
 			showHome(apartamento, repo, filter);
-		}
+		}*/
 
 	}
 	
 	private void showHome(List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter)
 	{
-		setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen, this::showApartamentosScreen));
+		//setContent(new Home(this::home, apartamento, repo, filter, this::showLoginScreen, this::showRegisterScreen, this::showApartamentosScreen));
 	} 
 	
 	// Función que llama a la vista de login pasandole los métodos login y showRegisterScreen requeridos
 	// para la funcionalidad de los botones de esta
 	private void showLoginScreen() {
-		setContent(new LoginScreen(this::login, this::showRegisterScreen));
+		//setContent(new LoginScreen(this::login, this::showRegisterScreen));
 	}
 
 	private void showMainScreen() {
@@ -103,7 +102,7 @@ public class VaadinUI extends UI {
 	// Función que llama a la vista de registro pasandole los métodos registro y atras requeridos
 	// para la funcionalidad de los botones de esta
 	private void showRegisterScreen() {
-		setContent(new RegistroScreen(this::registro, this::atras));
+		//setContent(new RegistroScreen(this::registro, this::atras));
 	}
 	
 	private void home(List<Apartamento> apartamento, String[] filter) {

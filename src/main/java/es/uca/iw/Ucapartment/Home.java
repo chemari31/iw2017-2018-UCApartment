@@ -10,12 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.AbstractErrorMessage.ContentMode;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.Alignment;
@@ -38,68 +41,41 @@ import com.vaadin.ui.Button.ClickListener;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
+import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
-@SpringViewDisplay
-public class Home extends VerticalLayout 
-{
+@SpringView(name = Home.VIEW_NAME)
+public class Home extends VerticalLayout implements View {
 	
 	TextField home = new TextField();
 	List<Apartamento> apartamentoo = null;
-
-	public Home(HomeCallback callback, List<Apartamento> apartamento, ApartamentoRepository repo, String[] filter,
-			LoginCallback callback2, RegistroCallback regcallback, ApartamentosCallback aparCallback) { 
+	
+	public static final String VIEW_NAME = "home";
+	String [] filter;
+	
+	@Autowired
+	ApartamentoRepository repo;
+	
+	@Autowired
+	public Home() { 
+		filter = new String[3];
+	}
+	
+	@PostConstruct
+	public void init() {
 		
-		apartamentoo = apartamento;
-
-		final Button login = new Button("Iniciar Sesion");
-		final Button registro = new Button("Registrarse");
 		final Button input = new Button("Buscar");
-		final Button perfil = new Button("Mi perfil");
-		final Button apartamentos = new Button("Apartamentos");
-		final Button logoutButton = new Button("Logout", event -> logout());
-		
-        login.setIcon(VaadinIcons.USER);
         
-	    
 		VerticalLayout layout = new VerticalLayout();
 		HorizontalLayout layout2 = new HorizontalLayout();
-		HorizontalLayout barra_superior = new HorizontalLayout(); // Barra superior con botones
+		
 		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
 		loginPanel.setWidth("800px");
 	    loginPanel.setHeight("800px");
 	    
-	    // Aquí lo que hacemos es que si no estamos logueados se muestran los botones de login y registro
-		if(!SecurityUtils.isLoggedIn()) {
-			
-			barra_superior.addComponent(login);
-			barra_superior.setComponentAlignment(login, Alignment.MIDDLE_CENTER);
-			barra_superior.addComponent(registro);
-			barra_superior.setComponentAlignment(registro,Alignment.MIDDLE_CENTER);
-		}
-		else {
-			barra_superior.addComponent(perfil);
-			barra_superior.setComponentAlignment(perfil, Alignment.MIDDLE_CENTER);
-			logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
-			barra_superior.addComponent(logoutButton);
-			barra_superior.addComponent(apartamentos);
-			barra_superior.setComponentAlignment(apartamentos,Alignment.MIDDLE_CENTER);
-		}
-		
-		// Añadimos la barra superior a la ventana
-	    addComponent(barra_superior);
-	    setComponentAlignment(barra_superior, Alignment.MIDDLE_CENTER);
-	    
 	    layout.addComponent(loginPanel);
 	    
 	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );
-	    
-	    
-	    
-        //setMargin(true);
-        //setSpacing(true);
-	    
-	    //loginPanel.setHeight(100.0f, Unit.PERCENTAGE);
 		
 		loginPanel.setWidth(null);
 		
@@ -116,7 +92,10 @@ public class Home extends VerticalLayout
 		
 		Image image = new Image("Image from file", resource);*/
 		
-		
+		for(int i = 0; i<3 ;i++)
+		{
+			filter[i] = "Todo";
+		}
 		
 		NativeSelect<String> select = new NativeSelect<>("Ciudad");
 		
@@ -134,27 +113,7 @@ public class Home extends VerticalLayout
 		
 		select3.setItems("Todo","20","30","40");
 		select3.setSelectedItem(filter[2]);
-		
-		login.addClickListener(new ClickListener(){
-			public void buttonClick(ClickEvent event)
-			{
-				callback2.showLoginScreen();
-			}
-		});
-		
-		registro.addClickListener(new ClickListener() {
-			public void buttonClick(ClickEvent event) {
-				regcallback.showRegisterScreen();
-			}
-		});
-		
-		apartamentos.addClickListener(new ClickListener() {
-			public void buttonClick(ClickEvent event) {
-				aparCallback.showApartamentosScreen();
-			}
-		});
-				
-				
+					
 		input.addClickListener(new ClickListener() {
 		public void buttonClick(ClickEvent event) 
 		{
@@ -203,21 +162,9 @@ public class Home extends VerticalLayout
 			filter[0] = select.getValue();
 			filter[1] = select2.getValue();
 			filter[2] = select3.getValue();
-			
-			((HomeCallback) callback).home(apartamentoo, filter);	
 		}
 				});
-				
-				/*Button input = new Button("Buscar", evt -> {
-		            String nombre = select.getValue();
-		            //System.out.println(nombre);
-		            Apartaments apartamentoo = repo.findByNombre(nombre);
-		            System.out.println(apartamentoo.getCiudad());
-		            //callback.home(apartamentoo);
-		        });*/
-				
-				
-		//loginLayout.addComponent(image);
+			
 		loginLayout.addComponent(select);
 		loginLayout.addComponent(select2);
 		loginLayout.addComponent(select3);
@@ -248,34 +195,12 @@ public class Home extends VerticalLayout
 		
 		
 		addComponent(layout);
+	}
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		// TODO Auto-generated method stub
 		
-	}
-
-	@FunctionalInterface
-    public interface HomeCallback {
-        void home(List<Apartamento> apartamento, String[] filter);
-    }
-	
-	@FunctionalInterface
-	public interface LoginCallback
-	{
-		void showLoginScreen();
-	}
-	
-    @FunctionalInterface
-    public interface RegistroCallback {
-        void showRegisterScreen();
-    }
-    
-    @FunctionalInterface
-    public interface ApartamentosCallback {
-        void showApartamentosScreen();
-    }
-
-	// Con esta función lo que hacemos es cerrar la sesión de usuario y recargar la página 
-	private void logout() {
-		getUI().getPage().reload();
-		getSession().close();
 	}
 	
 
