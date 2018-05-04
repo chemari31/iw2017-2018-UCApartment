@@ -140,6 +140,7 @@ public class LoginScreen extends VerticalLayout implements View {
 			// Show the home view
 			getUI().getPage().reload();
 			getUI().getNavigator().navigateTo(Home.VIEW_NAME);
+			//getUI().getPage().reload();
 			
 			return true;
 		} catch (AuthenticationException ex) {

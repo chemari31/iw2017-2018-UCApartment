@@ -42,7 +42,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo Apartamento", FontAwesome.PLUS);
 		
-		init();
+		//init();
 		
 	}
 	

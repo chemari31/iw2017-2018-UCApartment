@@ -19,12 +19,18 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	if(SecurityUtils.hasRole("ADMINISTRADOR")){
     		return true;
     	} else if (beanName.equals("registroScreen")){
+    		if(!SecurityUtils.isLoggedIn())
             return true;
+    		else
+    			return false;
     	} else if(beanName.equals("loginScreen")) {
+    		if(!SecurityUtils.isLoggedIn())
     		return true;
+    		else
+    			return false;
     	} else if(beanName.equals("home")) {
     		return true;
-        } else if (beanName.equals("apartamentoView")) {
+        } else if (beanName.equals("apartamentoManagementView")) {
             return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
         } else {
         	return false;
