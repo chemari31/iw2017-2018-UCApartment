@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import es.uca.iw.Ucapartment.Usuario.Usuario;
+
 public final class SecurityUtils {
 
     private SecurityUtils() {
@@ -30,6 +32,12 @@ public final class SecurityUtils {
         } else{
         	return null;
         }
+    }
+    
+public static Usuario LogedUser() {
+    	
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (Usuario)authentication.getPrincipal();	
     }
 
 }

@@ -21,6 +21,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.RegistroScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
@@ -60,11 +61,12 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		menuSuperior.addComponent(createNavigationButton("Inicio", Home.VIEW_NAME));
 		
 		if(SecurityUtils.isLoggedIn()) {
-			menuSuperior.addComponent(createNavigationButton("Mi perfil", WelcomeView.VIEW_NAME));
+			menuSuperior.addComponent(createNavigationButton("Mi perfil", MiPerfilView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", ApartamentoManagementView.VIEW_NAME));
 			menuSuperior.addComponent(logoutButton);
 		}
 		else {
+			
 			menuSuperior.addComponent(createNavigationButton("Iniciar sesión", LoginScreen.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Registro", RegistroScreen.VIEW_NAME));
 		}
