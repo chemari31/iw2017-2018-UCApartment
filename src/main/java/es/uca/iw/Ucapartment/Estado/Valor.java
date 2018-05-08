@@ -3,7 +3,8 @@ package es.uca.iw.Ucapartment.Estado;
 public enum Valor{
 	PENDIENTE("Pendiente", 0),
 	ACEPTADA("Aceptada", 1),
-	CANCELADA("Cancelada", 2);
+	CANCELADA("Cancelada", 2),
+	REALIZADA("Realizada", 3);
 	
 	//Atributos
 	private final String eValor;

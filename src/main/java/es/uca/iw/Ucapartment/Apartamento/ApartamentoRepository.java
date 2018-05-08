@@ -16,9 +16,10 @@ public interface ApartamentoRepository extends JpaRepository<Apartamento, Long> 
 	public List<Apartamento> findAll();
 	public List<Apartamento> findByCiudad(String ciudad);
 	public List<Apartamento> findByCiudadAndHabitacion(String ciudad, int habitacion);
-	//public List<Apartamento> findByCiudadAndHabitacionAndPrecio(String ciudad, int habitacion, double Precio);
-	//public List<Apartamento> findByCiudadAndPrecio(String ciudad, double precio);
+	public List<Apartamento> findByCiudadAndHabitacionAndCamas(String ciudad, int habitacion, int camas);
+	public List<Apartamento> findByCiudadAndCamas(String ciudad, int camas);
 	public List<Apartamento> findByHabitacion(int habitacion);
-	//public List<Apartamento> findByHabitacionAndPrecio(int habitacion, double Precio);
+	public List<Apartamento> findByCamas(int camas);
+	public List<Apartamento> findByHabitacionAndCamas(int habitacion, int camas);
 	//public List<Apartamento> findByPrecio(double precio);
 }

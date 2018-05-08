@@ -1,11 +1,13 @@
 package es.uca.iw.Ucapartment;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Layout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -34,13 +36,16 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.DateTimeField;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
+import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
@@ -67,17 +72,22 @@ public class Home extends VerticalLayout implements View {
 		final Button input = new Button("Buscar");
         
 		VerticalLayout layout = new VerticalLayout();
-		HorizontalLayout layout2 = new HorizontalLayout();
+		HorizontalLayout layout2;
 		
 		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
 		loginPanel.setWidth("800px");
-	    loginPanel.setHeight("800px");
-	    
-	    layout.addComponent(loginPanel);
-	    
-	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );
-		
+	    loginPanel.setHeight("800px");	    
+	    layout.addComponent(loginPanel);	    
+	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );		
 		loginPanel.setWidth(null);
+		DateTimeField ida = new DateTimeField();
+		DateTimeField vuelta = new DateTimeField();
+		ida.setValue(LocalDateTime.now());
+		PopupPago sub = new PopupPago();
+		HorizontalLayout popupHorizontal = new HorizontalLayout();
+		VerticalLayout popupVertical = new VerticalLayout();
+		Button reservar = new Button("Reservar");
+		Label mensaje = new Label("Introduzca la fecha de ida y vuelta");
 		
 		final FormLayout loginLayout = new FormLayout();
 		// Add some components inside the layout
@@ -109,9 +119,9 @@ public class Home extends VerticalLayout implements View {
 		select2.setItems("Todo","1", "2","3");
 		select2.setSelectedItem(filter[1]);
 		
-		NativeSelect<String> select3 = new NativeSelect<>("Precio");
+		NativeSelect<String> select3 = new NativeSelect<>("Camas");
 		
-		select3.setItems("Todo","20","30","40");
+		select3.setItems("Todo","1","2","3");
 		select3.setSelectedItem(filter[2]);
 					
 		input.addClickListener(new ClickListener() {
@@ -129,7 +139,7 @@ public class Home extends VerticalLayout implements View {
 					}
 					else
 					{
-						Apartamento apar = repo.findByNombre((select3.getValue()));
+						apartamentoo = repo.findByCamas(Integer.parseInt(select3.getValue()));
 					}
 				}
 				else
@@ -137,6 +147,10 @@ public class Home extends VerticalLayout implements View {
 					if(select3.getValue() == "Todo")
 					{
 						apartamentoo = repo.findByHabitacion(Integer.parseInt(select2.getValue()));
+					}
+					else
+					{
+						apartamentoo = repo.findByHabitacionAndCamas(Integer.parseInt(select2.getValue()), Integer.parseInt(select3.getValue()));
 					}
 					
 				}
@@ -149,12 +163,20 @@ public class Home extends VerticalLayout implements View {
 					{
 						apartamentoo = repo.findByCiudad(select.getValue());
 					}
+					else
+					{
+						apartamentoo = repo.findByCiudadAndCamas(select.getValue(), Integer.parseInt(select3.getValue()));
+					}
 				}
 				else
 				{
 					if(select3.getValue() == "Todo")
 					{
 						apartamentoo = repo.findByCiudadAndHabitacion(select.getValue(), Integer.parseInt(select2.getValue()));
+					}
+					else
+					{
+						apartamentoo = repo.findByCiudadAndHabitacionAndCamas(select.getValue(), Integer.parseInt(select2.getValue()), Integer.parseInt(select3.getValue()));
 					}
 				}
 			}
@@ -164,11 +186,17 @@ public class Home extends VerticalLayout implements View {
 			filter[2] = select3.getValue();
 		}
 				});
+		layout2 = new HorizontalLayout();
+		layout2.addComponent(select);
+		layout2.addComponent(select2);
+		layout2.addComponent(select3);
+		layout2.addComponent(input);
+		loginLayout.addComponents(layout2);
+		//loginLayout.addComponent(ida);
+		reservar.addClickListener(event -> {
+			sub.close();
 			
-		loginLayout.addComponent(select);
-		loginLayout.addComponent(select2);
-		loginLayout.addComponent(select3);
-		loginLayout.addComponent(input);
+		});
 		
 		
 		try{
@@ -176,9 +204,28 @@ public class Home extends VerticalLayout implements View {
 			{
 				//loginLayout.addComponent(new Image(null,
 				        //new ClassResource(apartamentoa.getImage())));
-				//loginLayout.addComponent(new Label(apartamentoa.getNombre()));
-				loginLayout.addComponent(new Button("Reservar"));
-				loginLayout.addComponent(new Button("Informacion"));
+				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
+				layout2 = new HorizontalLayout();
+					layout2.addComponent(new Button("Reservar",event -> {
+					
+					popupVertical.addComponents(mensaje);
+					popupHorizontal.addComponent(ida);
+					vuelta.setValue(ida.getValue());
+					popupHorizontal.addComponent(vuelta);
+					popupVertical.addComponent(popupHorizontal);
+					popupVertical.addComponent(reservar);
+					sub.setWidth("800px");
+					sub.setHeight("600px");
+					sub.setPosition(550, 200);
+					sub.setContent(popupVertical);
+					sub.center();
+					UI.getCurrent().addWindow(sub);
+					
+					
+				}));
+				layout2.addComponent(new Button("Informacion"));
+				loginLayout.addComponent(layout2);
+				
 			}
 		}catch(Exception e) {
 			
@@ -186,15 +233,34 @@ public class Home extends VerticalLayout implements View {
 			{
 				//loginLayout.addComponent(new Image(null,
 				        //new ClassResource(apartamentoa.getImage())));
-				//loginLayout.addComponent(new Label(apartamentoa.getNombre()));
-				loginLayout.addComponent(new Button("Reservar"));
-				loginLayout.addComponent(new Button("Informacion"));
+				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
+				layout2 = new HorizontalLayout();
+				layout2.addComponent(new Button("Reservar",event -> {
+					
+					popupVertical.addComponents(new Label("Introduzca la fecha de ida y vuelta"));
+					popupHorizontal.addComponent(ida);
+					vuelta.setValue(ida.getValue());
+					popupHorizontal.addComponent(vuelta);
+					popupVertical.addComponent(popupHorizontal);
+					popupVertical.addComponent(reservar);
+					sub.setWidth("800px");
+					sub.setHeight("600px");
+					sub.setPosition(550, 200);
+					sub.setContent(popupVertical);
+					sub.center();
+					UI.getCurrent().addWindow(sub);
+					
+					
+				}));
+				layout2.addComponent(new Button("Informacion"));
+				loginLayout.addComponent(layout2);
 			}
 			
 		}
 		
 		
 		addComponent(layout);
+		addComponent(popupVertical);
 	}
 
 	@Override

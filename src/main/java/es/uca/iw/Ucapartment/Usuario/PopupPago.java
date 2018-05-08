@@ -6,14 +6,11 @@ import com.vaadin.ui.Window;
 
 public class PopupPago extends Window {
 	
-	//VerticalLayout vertical = new VerticalLayout();
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 
 	public PopupPago() {
-        super("Introduzca el número de Cuenta"); // Set window caption
+        super("Ventana emergente");
         center();
         
         setClosable(true);
