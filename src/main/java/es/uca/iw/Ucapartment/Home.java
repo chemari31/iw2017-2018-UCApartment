@@ -44,7 +44,9 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.DateTimeField;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
@@ -252,7 +254,7 @@ public class Home extends VerticalLayout implements View {
 					
 					
 				}));
-				layout2.addComponent(new Button("Informacion"));
+				layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME));
 				loginLayout.addComponent(layout2);
 			}
 			
@@ -263,6 +265,14 @@ public class Home extends VerticalLayout implements View {
 		addComponent(popupVertical);
 	}
 
+	private Button createNavigationButton(String caption, final String viewName) {
+		Button button = new Button(caption);
+		button.addStyleName(ValoTheme.BUTTON_SMALL);
+		// If you didn't choose Java 8 when creating the project, convert this
+		// to an anonymous listener class
+		button.addClickListener(event -> getUI().getNavigator().navigateTo(viewName));
+		return button;
+	}
 	@Override
 	public void enter(ViewChangeEvent event) {
 		// TODO Auto-generated method stub

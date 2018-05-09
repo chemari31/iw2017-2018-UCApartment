@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
 
 
 @Service
@@ -32,6 +33,10 @@ public class ApartamentoService {
 	
 	public Apartamento findById(Long long1) {
 		return repo.findById(long1);
+	}
+	
+	public List<Apartamento> findByUsuario(Usuario user){
+		return repo.findByUsuario(user);
 	}
 	
 	public List<Apartamento> findAll() {

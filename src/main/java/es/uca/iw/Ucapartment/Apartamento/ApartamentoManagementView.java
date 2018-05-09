@@ -20,6 +20,9 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
+
 @SpringUI(path="/")
 @SpringView(name = ApartamentoManagementView.VIEW_NAME)
 public class ApartamentoManagementView extends VerticalLayout implements View{
@@ -28,6 +31,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private Grid<Apartamento> grid;
 	private TextField filter;
 	private Button addNewBtn;
+	Usuario user = SecurityUtils.LogedUser();
+	
 
 	private ApartamentoEditor editor;
 
@@ -48,6 +53,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	
 	@PostConstruct
 	void init() {
+		System.out.println(user.getId());
 		VerticalLayout layout = new VerticalLayout();
 		// build layout
 		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
@@ -71,7 +77,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		});
 
 		// Instantiate and edit new User the new button is clicked
-		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", "", "", 0, 0, false)));
+		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", "", "",user, 0, 0, false)));
 
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {
@@ -95,7 +101,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 
 	private void listApartamentos(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
-			grid.setItems(service.findAll());
+			grid.setItems(service.findByUsuario(user));
 		} else {
 			grid.setItems(service.findByNombreStartsWithIgnoreCase(filterText));
 		}
