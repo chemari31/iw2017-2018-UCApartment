@@ -225,7 +225,7 @@ public class Home extends VerticalLayout implements View {
 					
 					
 				}));
-				layout2.addComponent(new Button("Informacion"));
+				//layout2.addComponent(createNavigationButton("Informacion"));
 				loginLayout.addComponent(layout2);
 				
 			}
@@ -254,7 +254,8 @@ public class Home extends VerticalLayout implements View {
 					
 					
 				}));
-				layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME));
+
+				layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
 				loginLayout.addComponent(layout2);
 			}
 			
