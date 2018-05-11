@@ -11,6 +11,7 @@ import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
@@ -60,7 +61,8 @@ public class ApartamentoEditor extends VerticalLayout{
 	TextField numero = new TextField("Numero");
 	TextField cp = new TextField("Código Postal");
 	
-	
+	// Directorio base de la aplicación. Lo utilizamos para guardar las imágenes
+	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath(); 
 	
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
@@ -84,7 +86,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		final Image image = new Image("foto");
 		
 		//creamos el directorio si no existe.
-		File uploads = new File("/uploads");
+		File uploads = new File(basepath+"/uploads");
         if (!uploads.exists() && !uploads.mkdir())
             System.out.println(new Label("ERROR: Could not create upload dir"));
         else
@@ -101,7 +103,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		    	FileOutputStream fos = null; // Stream to write to
 		        try {
 		            // Open the file for writing.
-		            file = new File("/uploads/" + filename);
+		            file = new File(basepath+"/uploads/" + filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
 		            new Notification("Could not open file<br/>",
@@ -111,7 +113,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		            return null;
 		        }
 		        //asignamos la ruta de la foto al atributo de la clase
-		        apartamento.setFoto1("/uploads/" + filename);
+		        apartamento.setFoto1(basepath+"/uploads/" + filename);
 		        return fos; // Return the output stream to write to
 		        
 		    }

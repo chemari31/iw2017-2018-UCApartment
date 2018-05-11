@@ -11,17 +11,29 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.DateTimeField;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
+
+import es.uca.iw.Ucapartment.Usuario.PopupPago;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = ApartamentoView.VIEW_NAME)
 public class ApartamentoView extends VerticalLayout implements View {
@@ -38,17 +50,38 @@ public class ApartamentoView extends VerticalLayout implements View {
 	public ApartamentoView(ApartamentoService service) {
 		this.service = service;
 	}
-
+	
 	void init() {
 		
-		VerticalLayout camposApartamento = new VerticalLayout();
-		/*Panel panel = new Panel("Apartamento "+apartamento.getNombre());
-		panel.setWidth("800px");
-	    panel.setHeight("500px");
-	    camposApartamento.addComponent(panel);
-	    camposApartamento.setComponentAlignment(panel, Alignment.BOTTOM_CENTER);*/
+		Usuario duenio = apartamento.getUsuario();
+		Button botonPerfil = new Button("Ver perfil");
+		HorizontalLayout camposApartamento = new HorizontalLayout();
+		VerticalLayout layoutDerecho = new VerticalLayout();
+		VerticalLayout layoutIzquierdo = new VerticalLayout();
+		Panel panelApartamento = new Panel("Apartamento "+apartamento.getNombre());
+		Panel panelFoto = new Panel("Foto");
+		Panel panelDuenio = new Panel("Dueño del apartamento");
+		Button botonReserva = new Button("Reservar");
+		botonReserva.setVisible(false);
+		if(SecurityUtils.isLoggedIn() && (SecurityUtils.LogedUser().getId() != duenio.getId())) {
+			botonReserva.setVisible(true);
+		}
+
+		panelApartamento.setWidth("600px");
+		panelApartamento.setHeight("570px");
+		panelFoto.setWidth("320px");
+		panelFoto.setHeight("350px");
+		panelDuenio.setWidth("320px");
+		layoutIzquierdo.addComponent(panelApartamento);
+		layoutDerecho.addComponent(panelFoto);
+		layoutDerecho.addComponent(panelDuenio);
+
+	    camposApartamento.addComponent(layoutIzquierdo);
+	    camposApartamento.addComponent(layoutDerecho);
+
+	    VerticalLayout elementosApartamento = new VerticalLayout();
+	    VerticalLayout datosDuenio = new VerticalLayout();
 	    
-	    HorizontalLayout campos = new HorizontalLayout();
 		HorizontalLayout hlNombre = new HorizontalLayout();
 		HorizontalLayout hlDesc = new HorizontalLayout();
 		HorizontalLayout hlContacto = new HorizontalLayout();
@@ -59,8 +92,12 @@ public class ApartamentoView extends VerticalLayout implements View {
 		HorizontalLayout hlHabit = new HorizontalLayout();
 		HorizontalLayout hlCamas = new HorizontalLayout();
 		HorizontalLayout hlAcond = new HorizontalLayout();
+		HorizontalLayout hlNomDuenio = new HorizontalLayout();
+		HorizontalLayout hlApellDuenio = new HorizontalLayout();
+		HorizontalLayout hlEmailDuenio = new HorizontalLayout();
 		
-		Label vNombre, vDesc, vContacto, vCiudad, vCalle, vNumero, vCp, vHabit, vCamas, vAcond;
+		Label vNombre, vDesc, vContacto, vCiudad, vCalle, vNumero, vCp, vHabit, vCamas, vAcond,
+			vNombreDuenio, vApellidosDuenio, vEmailDuenio;
 		Label nombre = new Label("Nombre: ");
 		Label desc = new Label("Descripción: ");
 		Label contacto = new Label("Contacto: ");
@@ -71,6 +108,9 @@ public class ApartamentoView extends VerticalLayout implements View {
 		Label habit = new Label("Número de habitaciones: ");
 		Label camas = new Label("Número de camas: ");
 		Label acond = new Label("¿Tiene aire acondicionado? ");
+		Label nombreDuenio = new Label("Nombre: ");
+		Label apellidosDuenio = new Label("Apellidos: ");
+		Label emailDuenio = new Label("Correo electrónico: ");
 		
 		vNombre = new Label(apartamento.getNombre());
 		vDesc = new Label(apartamento.getDescripcion());
@@ -86,10 +126,17 @@ public class ApartamentoView extends VerticalLayout implements View {
 		else
 			vAcond = new Label("No");
 		
-		/*Image image = new Image("foto");
+		vNombreDuenio = new Label(duenio.getNombre());
+		vApellidosDuenio = new Label(duenio.getApellidos());
+		vEmailDuenio = new Label(duenio.getEmail());
+		
+		Image image = new Image("foto");
+		image.setWidth(300, Unit.PIXELS);
+		image.setHeight(300, Unit.PIXELS);
 		
     	image.setVisible(true);
-        image.setSource(new FileResource(new File(apartamento.getFoto1())));*/
+    	if(apartamento.getFoto1() != null)
+    		image.setSource(new FileResource(new File(apartamento.getFoto1())));
 		
 		hlNombre.addComponents(nombre, vNombre);
 		hlDesc.addComponents(desc, vDesc);
@@ -102,21 +149,33 @@ public class ApartamentoView extends VerticalLayout implements View {
 		hlCamas.addComponents(camas, vCamas);
 		hlAcond.addComponents(acond, vAcond);
 		
-		camposApartamento.addComponent(hlNombre);
-		camposApartamento.addComponent(hlDesc);
-		camposApartamento.addComponent(hlContacto);
-		camposApartamento.addComponent(hlCiudad);
-		camposApartamento.addComponent(hlCalle);
-		camposApartamento.addComponent(hlNumero);
-		camposApartamento.addComponent(hlCP);
-		camposApartamento.addComponent(hlHabit);
-		camposApartamento.addComponent(hlCamas);
-		camposApartamento.addComponent(hlAcond);
-		campos.addComponent(camposApartamento);
-		//campos.addComponent(image);
+		hlNomDuenio.addComponents(nombreDuenio, vNombreDuenio);
+		hlApellDuenio.addComponents(apellidosDuenio, vApellidosDuenio);
+		hlEmailDuenio.addComponents(emailDuenio, vEmailDuenio);
 		
+		elementosApartamento.addComponent(hlNombre);
+		elementosApartamento.addComponent(hlDesc);
+		elementosApartamento.addComponent(hlContacto);
+		elementosApartamento.addComponent(hlCiudad);
+		elementosApartamento.addComponent(hlCalle);
+		elementosApartamento.addComponent(hlNumero);
+		elementosApartamento.addComponent(hlCP);
+		elementosApartamento.addComponent(hlHabit);
+		elementosApartamento.addComponent(hlCamas);
+		elementosApartamento.addComponent(hlAcond);
+		elementosApartamento.addComponent(botonReserva);
+		
+		datosDuenio.addComponent(hlNomDuenio);
+		datosDuenio.addComponent(hlApellDuenio);
+		datosDuenio.addComponent(hlEmailDuenio);
+		datosDuenio.addComponent(botonPerfil);
+		
+		panelFoto.setContent(image);
+		panelApartamento.setContent(elementosApartamento);
+		panelDuenio.setContent(datosDuenio);
 		
 		addComponent(camposApartamento);
+	    setComponentAlignment(camposApartamento, Alignment.TOP_CENTER);
 		
 	}	
 	
