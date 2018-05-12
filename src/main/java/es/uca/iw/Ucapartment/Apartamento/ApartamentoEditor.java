@@ -14,6 +14,7 @@ import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
@@ -71,6 +72,9 @@ public class ApartamentoEditor extends VerticalLayout{
 	final Image image2 = new Image("Foto 2");
 	final Image image3 = new Image("Foto 3");
 	
+	// Directorio base de la aplicación. Lo utilizamos para guardar las imágenes
+	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath(); 
+	
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
 	Button cancel = new Button("Cancel");
@@ -89,7 +93,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		camas.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		
 		//creamos el directorio si no existe.
-		File uploads = new File("/uploads");
+		File uploads = new File(basepath +"/apartamentos/" + apartamento.getId());
         if (!uploads.exists() && !uploads.mkdir())
             System.out.println(new Label("ERROR: Could not create upload dir"));
 
@@ -109,7 +113,8 @@ public class ApartamentoEditor extends VerticalLayout{
 		    	FileOutputStream fos = null; // Stream to write to
 		        try {
 		            // Open the file for writing.
-		            file = new File("/uploads/apartamentos" + apartamento.getId() + filename);
+		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
 		            new Notification("Could not open file<br/>",
@@ -119,11 +124,11 @@ public class ApartamentoEditor extends VerticalLayout{
 		            return null;
 		        }
 		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1("/uploads/" + filename);
+		        	apartamento.setFoto1(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 2)
-		        	apartamento.setFoto2("/uploads/" + filename);
+		        	apartamento.setFoto2(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 3)
-		        	apartamento.setFoto3("/uploads/" + filename);
+		        	apartamento.setFoto3(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		        return fos; // Return the output stream to write to
 		        
 		    }
