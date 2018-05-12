@@ -27,7 +27,7 @@ public class ApartamentoService {
 		return repo.findByNombre(nombre);
 	}
 	
-	public Apartamento findByNombreStartsWithIgnoreCase(String nombre) {
+	public List<Apartamento> findByNombreStartsWithIgnoreCase(String nombre) {
 		return repo.findByNombreStartsWithIgnoreCase(nombre);
 	}
 	

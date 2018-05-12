@@ -53,7 +53,6 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	
 	@PostConstruct
 	void init() {
-		System.out.println(user.getId());
 		VerticalLayout layout = new VerticalLayout();
 		// build layout
 		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
@@ -76,8 +75,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 			editor.editApartamento(e.getValue());
 		});
 
-		// Instantiate and edit new User the new button is clicked
-		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", "", "",user, 0, 0, false)));
+		// Instantiate and edit new Apartamento the new button is clicked
+		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", 0, 0,user, 0, 0, false)));
 
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {

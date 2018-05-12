@@ -12,7 +12,7 @@ public interface ApartamentoRepository extends JpaRepository<Apartamento, Long> 
 	public void save(String string);
 	public void delete(Apartamento arg0);
 	public Apartamento findByNombre(String nombre);
-	public Apartamento findByNombreStartsWithIgnoreCase(String nombre);
+	public List<Apartamento> findByNombreStartsWithIgnoreCase(String nombre);
 	public Apartamento findById(Long long1);
 	public List<Apartamento> findByUsuario(Usuario user);
 	public List<Apartamento> findAll();

@@ -35,10 +35,10 @@ public class Apartamento {
 	private String calle;
 	
 	@Column(length = 16)
-	private String numero;
+	private Integer numero;
 	
 	@Column(length = 5)
-	private String cp;
+	private Integer cp;
 	
 	@ManyToOne//Poner fetch?
 	@JoinColumn(name = "usuario_id")//Clave foránea
@@ -55,12 +55,34 @@ public class Apartamento {
 	@Column(length = 256)//La longitud es provisional
 	private String Foto1; //falta añadirlo al constructor
 	
+	@Column(length = 256)//La longitud es provisional
+	private String Foto2; //falta añadirlo al constructor
+	
+	public String getFoto2() {
+		return Foto2;
+	}
+
+	public void setFoto2(String foto2) {
+		Foto2 = foto2;
+	}
+
+	@Column(length = 256)//La longitud es provisional
+	private String Foto3; //falta añadirlo al constructor
+	
+	public String getFoto3() {
+		return Foto3;
+	}
+
+	public void setFoto3(String foto3) {
+		Foto3 = foto3;
+	}
+
 	//Constructor sin parámetros
 	protected Apartamento() {}
 
 	//Constructor con parámetros
 	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
-		String numero, String cp, Usuario usuario, int habitaciones, int camas, boolean ac) {
+		Integer numero, Integer cp, Usuario usuario, int habitaciones, int camas, boolean ac) {
 		this.nombre = Nombre;
 		this.descripcion = descripcion;
 		this.contacto = contacto;
@@ -76,7 +98,7 @@ public class Apartamento {
 	
 	//Constructor sin usuario
 	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
-			String numero, String cp, int habitaciones, int camas, boolean ac) {
+			Integer numero, int cp, int habitaciones, int camas, boolean ac) {
 			this.nombre = Nombre;
 			this.descripcion = descripcion;
 			this.contacto = contacto;
@@ -134,19 +156,19 @@ public class Apartamento {
 		this.calle = calle;
 	}
 
-	public String getNumero() {
+	public int getNumero() {
 		return numero;
 	}
 
-	public void setNumero(String numero) {
+	public void setNumero(int numero) {
 		this.numero = numero;
 	}
 
-	public String getCp() {
+	public Integer getCp() {
 		return cp;
 	}
 
-	public void setCp(String cp) {
+	public void setCp(int cp) {
 		this.cp = cp;
 	}
 
