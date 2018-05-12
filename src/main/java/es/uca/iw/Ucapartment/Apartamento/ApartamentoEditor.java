@@ -93,7 +93,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		camas.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		
 		//creamos el directorio si no existe.
-		File uploads = new File(basepath +"/apartamentos/" + apartamento.getId());
+		File uploads = new File(basepath +"/apartamentos/");
         if (!uploads.exists() && !uploads.mkdir())
             System.out.println(new Label("ERROR: Could not create upload dir"));
 
@@ -113,7 +113,6 @@ public class ApartamentoEditor extends VerticalLayout{
 		    	FileOutputStream fos = null; // Stream to write to
 		        try {
 		            // Open the file for writing.
-		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
@@ -292,7 +291,10 @@ public class ApartamentoEditor extends VerticalLayout{
 	
 	
 	public final void editApartamento(Apartamento apar) {
+		//borra las imagenes para cuando se cambia de apartamento o se le da a nuevo.
 		image.setVisible(false);
+		image2.setVisible(false);
+		image3.setVisible(false);
 		if (apar == null) {
 			setVisible(false);
 			return;

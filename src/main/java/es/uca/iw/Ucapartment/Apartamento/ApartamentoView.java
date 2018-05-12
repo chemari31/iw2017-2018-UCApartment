@@ -117,8 +117,8 @@ public class ApartamentoView extends VerticalLayout implements View {
 		vContacto = new Label(apartamento.getContacto());
 		vCiudad = new Label(apartamento.getCiudad());
 		vCalle = new Label(apartamento.getCalle());
-		vNumero = new Label(apartamento.getNumero());
-		vCp = new Label(apartamento.getCp());
+		vNumero = new Label(String.valueOf(apartamento.getNumero()));
+		vCp = new Label(String.valueOf(apartamento.getCp()));
 		vHabit = new Label(String.valueOf(apartamento.getHabitaciones()));
 		vCamas = new Label(String.valueOf(apartamento.getCamas()));
 		if(apartamento.isAc())
