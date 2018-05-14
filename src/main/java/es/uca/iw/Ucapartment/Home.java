@@ -1,158 +1,202 @@
 package es.uca.iw.Ucapartment;
 
-import java.io.File;
-import java.time.LocalDateTime;
+
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.log4j.Layout;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.AbstractErrorMessage.ContentMode;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.FileResource;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.SpringViewDisplay;
-import com.vaadin.ui.AbsoluteLayout;
+
+
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
+
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
+
 import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+
+
 import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.ui.components.grid.SingleSelectionModel;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ImageRenderer;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.DateTimeField;
+
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
-import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
+
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Reserva.Reserva;
+import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
-import es.uca.iw.Ucapartment.security.LoginScreen;
-import es.uca.iw.Ucapartment.security.SecurityUtils;
 
+
+@Theme("mytheme")
 @SpringView(name = Home.VIEW_NAME)
 public class Home extends VerticalLayout implements View {
 	
+	
+	private static final long serialVersionUID = 1L;
+	
 	TextField home = new TextField();
-	List<Apartamento> apartamentoo = null;
+	List<Apartamento> apartamento = new ArrayList<>();//Lista de apartamentos segun los filtros de fechas
+	List<String> ciudad = new ArrayList<>();
+	List<String> precio = new ArrayList<>();
+	List<Double> precioDouble = new ArrayList<>();
+	List<Apartamento> apartFinal = new ArrayList<>();//Lista de apartamentos finales segun de todos los filtros
+	private List<Apartamento> listApart = null;//Lista de apartamentos segun los filtros de Ciudad, habitacion y precio
+	private List<Apartamento> ApartFilter = null;//Lista apartamento temporal para los filtros
+	private List<Reserva> listReserva = null;//Lista de todas las reservas
 	
 	public static final String VIEW_NAME = "home";
-	String [] filter;
 	
 	@Autowired
 	ApartamentoRepository repo;
 	
 	@Autowired
-	public Home() { 
-		filter = new String[3];
-	}
+	ReservaRepository repoReserva;
+	
+	
 	
 	@PostConstruct
 	public void init() {
 		
+		
 		final Button input = new Button("Buscar");
+		input.setStyleName("mystyle");
+		input.addStyleName("mystyle");
+		
+        listApart = repo.findAll();  
+        ApartFilter = repo.findAll();
+        listReserva =  repoReserva.findAll();
         
+        //Layout principales
 		VerticalLayout layout = new VerticalLayout();
 		HorizontalLayout layout2;
+		HorizontalLayout layout3 = new HorizontalLayout();
 		
+		Grid<Apartamento> filter2 = new Grid<>();
+		filter2.setHeight("600");
+		filter2.setHeightByRows(600);
+		
+		//Panel principal
 		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
 		loginPanel.setWidth("800px");
 	    loginPanel.setHeight("800px");	    
-	    layout.addComponent(loginPanel);	    
+	    layout.addComponent(loginPanel);
 	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );		
 		loginPanel.setWidth(null);
-		DateTimeField ida = new DateTimeField();
-		DateTimeField vuelta = new DateTimeField();
-		ida.setValue(LocalDateTime.now());
-		PopupPago sub = new PopupPago();
-		HorizontalLayout popupHorizontal = new HorizontalLayout();
-		VerticalLayout popupVertical = new VerticalLayout();
-		Button reservar = new Button("Reservar");
-		Label mensaje = new Label("Introduzca la fecha de ida y vuelta");
 		
+		//Declaracion de los dos calendario para entrada y salida
+		DateField ida = new DateField("Entrada");
+		DateField vuelta = new DateField("Salida");
+		ida.setValue(LocalDate.now());
+		Date hoy = java.sql.Date.valueOf(ida.getValue());
+		vuelta.setValue(LocalDate.now().plusDays(1));
+
 		final FormLayout loginLayout = new FormLayout();
-		// Add some components inside the layout
-		loginLayout.setWidth(500, Unit.PIXELS);
+		loginLayout.setWidth(1300, Unit.PIXELS);
+	
+		layout2 = new HorizontalLayout();
 		
-		loginPanel.setContent(loginLayout);
-		String basepath = VaadinService.getCurrent()
-                .getBaseDirectory().getAbsolutePath();
 		
-		/*FileResource resource = new FileResource(new File(basepath +
-                "/WEB-INF/images/descarga.png"));
-		
-		Image image = new Image("Image from file", resource);*/
-		
-		for(int i = 0; i<3 ;i++)
+		//Cargando los filtros de busqueda
+		for(Apartamento i : ApartFilter)
 		{
-			filter[i] = "Todo";
+			
+			precioDouble.add(i.getPrecio());
+		
+			ciudad.add(i.getCiudad());
+			
+			precio.add(Double.toString(i.getPrecio()));
+			
 		}
 		
-		NativeSelect<String> select = new NativeSelect<>("Ciudad");
+		ciudad.add("Todo");
+		precio.add("Todo");
 		
-		// Add some items
-		select.setItems("Todo","Cadiz", "Malaga","Jaen");
-		select.setSelectedItem(filter[0]);
-			
+		//Metodos para seleccionar los filtros sin repeticiones
+		List<String> listDistinctCiudad = ciudad.stream().distinct().collect(Collectors.toList());
+		List<String> listDistinctPrecio = precio.stream().distinct().collect(Collectors.toList());
+		
+		//Mostrar filtros
+		ComboBox<String> Ciudad = new ComboBox<>("Ciudad");
+		ComboBox<String> Precio = new ComboBox<>("Precio");
+		
+		Collections.sort(listDistinctPrecio);
+		Collections.sort(listDistinctCiudad);
+		Ciudad.setItems(listDistinctCiudad);
+		Precio.setItems(listDistinctPrecio);
+		Ciudad.setValue("Todo");
+		Precio.setValue("Todo");
+		layout2.addComponent(Ciudad);
+		layout2.addComponent(Precio);
+		
+		//Select para las habitaciones
 		NativeSelect<String> select2 = new NativeSelect<>("Habitaciones");
+		
+		select2.setItems("Todo","1", "2","3","4","5","6","7","8");
+		select2.setValue("Todo");
+		
+		//Funcion al pulsar el boton "Buscar"
+		input.addClickListener(new ClickListener() 
+		{
+		
+			private static final long serialVersionUID = 1L;
 
-				// Add some items
-		select2.setItems("Todo","1", "2","3");
-		select2.setSelectedItem(filter[1]);
-		
-		NativeSelect<String> select3 = new NativeSelect<>("Camas");
-		
-		select3.setItems("Todo","1","2","3");
-		select3.setSelectedItem(filter[2]);
-					
-		input.addClickListener(new ClickListener() {
 		public void buttonClick(ClickEvent event) 
 		{
 			
+			apartFinal.clear();//Limpiamos los apartamentos finales para que no se repitan
+			apartamento.clear();
 			
-			if(select.getValue() == "Todo")
+			//Condiciones para buscar los apartamentos según su Ciudad, Habitacion y Precio
+			if(Ciudad.getValue() == "Todo")
 			{
 				if(select2.getValue() == "Todo")
 				{
-					if(select3.getValue() == "Todo")
+					if(Precio.getValue() == "Todo")
 					{
-						apartamentoo = repo.findAll();
+						listApart = repo.findAll();
 					}
 					else
 					{
-						apartamentoo = repo.findByCamas(Integer.parseInt(select3.getValue()));
+						listApart = repo.findByPrecio(Double.parseDouble(Precio.getValue()));
 					}
 				}
 				else
 				{
-					if(select3.getValue() == "Todo")
+					if(Precio.getValue() == "Todo")
 					{
-						apartamentoo = repo.findByHabitacion(Integer.parseInt(select2.getValue()));
+						listApart = repo.findByHabitacion(Integer.parseInt(select2.getValue()));
 					}
 					else
 					{
-						apartamentoo = repo.findByHabitacionAndCamas(Integer.parseInt(select2.getValue()), Integer.parseInt(select3.getValue()));
+						listApart = repo.findByHabitacionAndPrecio(Integer.parseInt(select2.getValue()), Double.parseDouble(Precio.getValue()));
 					}
 					
 				}
@@ -161,110 +205,131 @@ public class Home extends VerticalLayout implements View {
 			{
 				if(select2.getValue() == "Todo")
 				{
-					if(select3.getValue() == "Todo")
+					if(Precio.getValue() == "Todo")
 					{
-						apartamentoo = repo.findByCiudad(select.getValue());
+						listApart = repo.findByCiudad(Ciudad.getValue());
 					}
 					else
 					{
-						apartamentoo = repo.findByCiudadAndCamas(select.getValue(), Integer.parseInt(select3.getValue()));
+						listApart = repo.findByCiudadAndPrecio(Ciudad.getValue(), Double.parseDouble(Precio.getValue()));
 					}
 				}
 				else
 				{
-					if(select3.getValue() == "Todo")
+					if(Precio.getValue() == "Todo")
 					{
-						apartamentoo = repo.findByCiudadAndHabitacion(select.getValue(), Integer.parseInt(select2.getValue()));
+						listApart = repo.findByCiudadAndHabitacion(Ciudad.getValue(), Integer.parseInt(select2.getValue()));
 					}
 					else
 					{
-						apartamentoo = repo.findByCiudadAndHabitacionAndCamas(select.getValue(), Integer.parseInt(select2.getValue()), Integer.parseInt(select3.getValue()));
+						listApart = repo.findByCiudadAndHabitacionAndPrecio(Ciudad.getValue(), Integer.parseInt(select2.getValue()), Double.parseDouble(Precio.getValue()));
 					}
 				}
 			}
 			
-			filter[0] = select.getValue();
-			filter[1] = select2.getValue();
-			filter[2] = select3.getValue();
+			//Quitamos los apartamentos repetidos
+			listApart = listApart.stream().distinct().collect(Collectors.toList());
+			
+			Date entrada = java.sql.Date.valueOf(ida.getValue());
+			Date salida = java.sql.Date.valueOf(vuelta.getValue());
+			
+			
+			//Seleccionamos todos los apartamentos sin reservar
+			for(Apartamento a : ApartFilter)
+			{
+				if(repoReserva.findByApartamento(a).size() == 0)
+				{
+					if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
+					{
+						apartamento.add(a);
+					}
+					
+				}
+			}
+			
+			//Apartamentos disponible segun la fecha de entrada y salida seleccionada
+			for(Reserva r : listReserva)
+			{
+				
+				if(!(entrada.compareTo(r.getFechaInicio())>=0 && salida.compareTo(r.getFechaFin()) <= 0))
+				{
+					if(!(entrada.compareTo(r.getFechaInicio())<0 && salida.compareTo(r.getFechaInicio()) > 0))
+					{
+						
+						if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
+						{
+							System.out.println(hoy);
+							apartamento.add(r.getApartamento());
+						}
+						
+					}
+				}
+			}
+			
+			apartamento = apartamento.stream().distinct().collect(Collectors.toList());
+			
+			//Unimos los apartamentos buscado por los filtros de Ciudad, Habitacion y Precio con los
+			//apartamentos disponible en las fechas seleccionadas
+			for(Apartamento a : listApart)
+			{
+				for(Apartamento b : apartamento)
+				{
+					if(a.getId() == b.getId())
+					{
+						apartFinal.add(a);
+						
+					}
+						
+				}
+			}
+			
+			//Nuestros apartamentos finales 
+			apartFinal = apartFinal.stream().distinct().collect(Collectors.toList());
+			
+			
+			
+			//Grid de busqueda de apartamento
+			
+			filter2.setItems(apartFinal);
+			filter2.setWidth("600");
+			//filter2.getSelectionModel().get
+			//Object select = ((SingleSelectionModel) filter2.getSelectionModel()).getSelectedItem();
+			
+			
+			filter2.addColumn(p ->new ExternalResource(p.getFoto1()),new ImageRenderer()).setCaption("Imagen").setWidth(200);
+			filter2.addColumn(Apartamento::getNombre).setCaption("Nombre");
+			filter2.addColumn(Apartamento::getCiudad).setCaption("Ciudad");
+			filter2.addColumn(e -> "Informacion", new ButtonRenderer(clickEvent-> { 
+				Apartamento a = ((Apartamento) clickEvent.getItem());
+				getUI().getNavigator().navigateTo(ApartamentoView.VIEW_NAME + '/'+String.valueOf(a.getId()));
+				
+				}));
+			
+			layout3.removeAllComponents();//Borramos la busqueda anterior
+			layout3.addComponent(filter2);
+			//layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
 		}
 				});
-		layout2 = new HorizontalLayout();
-		layout2.addComponent(select);
+		http://localhost:8080/home/migue-pc/Escritorio/MySiteIW/iw2017-2018-UCApartment/src/main/webapp/apartamentos/1casa.jpg
+		
+
+		//Añadimos los componentes de nuestro Home
+			//Label prueba = new Label("prueba");
 		layout2.addComponent(select2);
-		layout2.addComponent(select3);
+		layout2.addComponent(ida);
+		layout2.addComponent(vuelta);
 		layout2.addComponent(input);
 		loginLayout.addComponents(layout2);
-		//loginLayout.addComponent(ida);
-		reservar.addClickListener(event -> {
-			sub.close();
-			
-		});
+		loginLayout.addComponent(layout3);
 		
-		
-		try{
-			for(Apartamento apartamentoa : apartamentoo)
-			{
-				//loginLayout.addComponent(new Image(null,
-				        //new ClassResource(apartamentoa.getImage())));
-				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
-				layout2 = new HorizontalLayout();
-					layout2.addComponent(new Button("Reservar",event -> {
-					
-					popupVertical.addComponents(mensaje);
-					popupHorizontal.addComponent(ida);
-					vuelta.setValue(ida.getValue());
-					popupHorizontal.addComponent(vuelta);
-					popupVertical.addComponent(popupHorizontal);
-					popupVertical.addComponent(reservar);
-					sub.setWidth("800px");
-					sub.setHeight("600px");
-					sub.setPosition(550, 200);
-					sub.setContent(popupVertical);
-					sub.center();
-					UI.getCurrent().addWindow(sub);
-					
-					
-				}));
-				//layout2.addComponent(createNavigationButton("Informacion"));
-				loginLayout.addComponent(layout2);
-				
-			}
-		}catch(Exception e) {
-			
-			for(Apartamento apartamentoa : repo.findAll())
-			{
-				//loginLayout.addComponent(new Image(null,
-				        //new ClassResource(apartamentoa.getImage())));
-				loginLayout.addComponent(new Label(apartamentoa.getNombre()));
-				layout2 = new HorizontalLayout();
-				layout2.addComponent(new Button("Reservar",event -> {
-					
-					popupVertical.addComponents(new Label("Introduzca la fecha de ida y vuelta"));
-					popupHorizontal.addComponent(ida);
-					vuelta.setValue(ida.getValue());
-					popupHorizontal.addComponent(vuelta);
-					popupVertical.addComponent(popupHorizontal);
-					popupVertical.addComponent(reservar);
-					sub.setWidth("800px");
-					sub.setHeight("600px");
-					sub.setPosition(550, 200);
-					sub.setContent(popupVertical);
-					sub.center();
-					UI.getCurrent().addWindow(sub);
-					
-					
-				}));
-
-				layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
-				loginLayout.addComponent(layout2);
-			}
-			
-		}
-		
-		
+		loginPanel.setContent(loginLayout);
 		addComponent(layout);
-		addComponent(popupVertical);
+		
+		
+		
+		
 	}
+	
 
 	private Button createNavigationButton(String caption, final String viewName) {
 		Button button = new Button(caption);

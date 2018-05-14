@@ -76,7 +76,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		});
 
 		// Instantiate and edit new Apartamento the new button is clicked
-		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", 0, 0,user, 0, 0, false)));
+		addNewBtn.addClickListener(e -> editor.editApartamento(new Apartamento("", "", "", "", "", 0, 0,user, 0, 0, false,0)));
 
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {

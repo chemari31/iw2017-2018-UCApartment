@@ -43,6 +43,9 @@ public class Usuario implements UserDetails{
 	
 	private Rol rol;
 	
+	@Column(length = 256)//La longitud es provisional
+	private String Foto1; //falta añadirlo al constructor
+	
 	// Constructor predeterminado
 	protected Usuario() {}
 
@@ -121,6 +124,14 @@ public class Usuario implements UserDetails{
 	
 	public void setRol(Rol rol) {
 		this.rol = rol;
+	}
+	
+	public void setFoto1(String cadena) {
+		this.Foto1 = cadena;
+	}
+	
+	public String getFoto1() {
+		return Foto1;
 	}
 	
 	@Override

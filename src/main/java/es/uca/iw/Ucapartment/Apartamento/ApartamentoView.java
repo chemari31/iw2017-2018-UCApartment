@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinService;
@@ -31,6 +32,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
@@ -136,7 +138,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		
     	image.setVisible(true);
     	if(apartamento.getFoto1() != null)
-    		image.setSource(new FileResource(new File(apartamento.getFoto1())));
+    		image.setSource(new ExternalResource(apartamento.getFoto1()));
 		
 		hlNombre.addComponents(nombre, vNombre);
 		hlDesc.addComponents(desc, vDesc);
@@ -164,6 +166,10 @@ public class ApartamentoView extends VerticalLayout implements View {
 		elementosApartamento.addComponent(hlCamas);
 		elementosApartamento.addComponent(hlAcond);
 		elementosApartamento.addComponent(botonReserva);
+		
+		/*botonPerfil.addClickListener(event -> {
+			getUI().getNavigator().navigateTo(MiPerfilView.VIEW_NAME + '/'+String.valueOf(duenio.getId()));
+		});*/
 		
 		datosDuenio.addComponent(hlNomDuenio);
 		datosDuenio.addComponent(hlApellDuenio);

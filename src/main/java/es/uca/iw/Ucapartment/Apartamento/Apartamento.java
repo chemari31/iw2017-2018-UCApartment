@@ -52,6 +52,9 @@ public class Apartamento {
 	
 	private boolean ac;
 	
+	@Column(length = 10)
+	private double precio;
+	
 	@Column(length = 256)//La longitud es provisional
 	private String Foto1; //falta añadirlo al constructor
 	
@@ -82,7 +85,7 @@ public class Apartamento {
 
 	//Constructor con parámetros
 	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
-		Integer numero, Integer cp, Usuario usuario, int habitaciones, int camas, boolean ac) {
+		Integer numero, Integer cp, Usuario usuario, int habitaciones, int camas, boolean ac, double precio) {
 		this.nombre = Nombre;
 		this.descripcion = descripcion;
 		this.contacto = contacto;
@@ -94,11 +97,12 @@ public class Apartamento {
 		this.habitacion = habitaciones;
 		this.camas = camas;
 		this.ac = ac;
+		this.precio = precio;
 	}
 	
 	//Constructor sin usuario
 	public Apartamento(String Nombre, String descripcion, String contacto, String ciudad, String calle,
-			Integer numero, int cp, int habitaciones, int camas, boolean ac) {
+			Integer numero, int cp, int habitaciones, int camas, boolean ac, double precio) {
 			this.nombre = Nombre;
 			this.descripcion = descripcion;
 			this.contacto = contacto;
@@ -109,6 +113,7 @@ public class Apartamento {
 			this.habitacion = habitaciones;
 			this.camas = camas;
 			this.ac = ac;
+			this.precio = precio;
 		}
 
 	//Getters & Setters
@@ -202,6 +207,16 @@ public class Apartamento {
 
 	public void setAc(boolean ac) {
 		this.ac = ac;
+	}
+	
+	public double getPrecio()
+	{
+		return precio;
+	}
+	
+	public void setPrecio(double precio)
+	{
+		this.precio = precio;
 	}
 	
 	public void setFoto1(String cadena) {

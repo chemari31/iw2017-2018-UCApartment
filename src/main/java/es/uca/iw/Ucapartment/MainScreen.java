@@ -7,13 +7,16 @@ import javax.annotation.PostConstruct;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -22,6 +25,8 @@ import com.vaadin.ui.themes.ValoTheme;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
+import es.uca.iw.Ucapartment.Usuario.MisReserva;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.security.LoginScreen;
 import es.uca.iw.Ucapartment.security.RegistroScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
@@ -44,6 +49,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 
 		final VerticalLayout root = new VerticalLayout();
 		HorizontalLayout menuSuperior = new HorizontalLayout();
+		final Image image = new Image();
 		
 		root.setSizeFull();
 		
@@ -63,7 +69,13 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		if(SecurityUtils.isLoggedIn()) {
 			menuSuperior.addComponent(createNavigationButton("Mi perfil", MiPerfilView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", ApartamentoManagementView.VIEW_NAME));
+			menuSuperior.addComponent(createNavigationButton("Mis Reserva", MisReserva.VIEW_NAME));
 			menuSuperior.addComponent(logoutButton);
+			Usuario user = SecurityUtils.LogedUser();
+			image.setSource(new ExternalResource(user.getFoto1()));
+			image.setWidth(100, Unit.PIXELS);
+			image.setHeight(100, Unit.PIXELS);
+			menuSuperior.addComponent(image);
 		}
 		else {
 			

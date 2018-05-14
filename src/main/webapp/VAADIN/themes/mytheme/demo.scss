@@ -34,11 +34,11 @@
 @mixin mytheme {
   @include valo;
 
-  .v-button-mystyle{
-
-    color: blue;
-    background: yellow;
-    font-size: 40px;
-
-  }
+  .demoContentLayout {
+		background-color: $gray;
+		background-image: url(images/radial-gradient.png);
+		background-size: 90%;
+		background-position: center center;
+		background-repeat: no-repeat;
+	}
 }

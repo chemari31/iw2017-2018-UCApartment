@@ -35,7 +35,7 @@ import es.uca.iw.Ucapartment.security.RegistroScreen;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringUI(path="/")
-//@Theme("material")
+@Theme("mytheme")
 @Viewport("user-scalable=no,initial-scale=1.0")
 @Title("Ucapartment")
 public class VaadinUI extends UI {

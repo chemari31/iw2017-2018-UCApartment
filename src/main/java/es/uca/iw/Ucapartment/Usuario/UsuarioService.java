@@ -25,7 +25,12 @@ public class UsuarioService implements UserDetailsService {
 		}
 		return usuario;
 	}
-
+	
+	public Usuario findById(long id)
+	{
+		return repo.findById(id);
+	}
+	
 	public Usuario save(Usuario usuario) {
 		usuario.setPassword(passwordEncoder.encode(usuario.getPassword() != null ? usuario.getPassword() : "default"));
 		return repo.save(usuario);

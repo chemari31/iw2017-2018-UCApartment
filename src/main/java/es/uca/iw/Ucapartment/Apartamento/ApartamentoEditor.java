@@ -11,6 +11,7 @@ import com.vaadin.data.ValidationException;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -123,7 +124,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		            return null;
 		        }
 		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 2)
 		        	apartamento.setFoto2(basepath +"/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 3)
@@ -306,7 +307,7 @@ public class ApartamentoEditor extends VerticalLayout{
 			if(apartamento.getFoto1() != null) {
 				File file = new File(apartamento.getFoto1());
 				image.setVisible(true);
-				image.setSource(new FileResource(file));
+				image.setSource(new ExternalResource(apartamento.getFoto1()));
 				image.setWidth(200, Unit.PIXELS);
 				image.setHeight(200, Unit.PIXELS);
 			}else
@@ -314,7 +315,7 @@ public class ApartamentoEditor extends VerticalLayout{
 			if(apartamento.getFoto2() != null) {
 				File file = new File(apartamento.getFoto2());
 				image2.setVisible(true);
-				image2.setSource(new FileResource(file));
+				image2.setSource(new ExternalResource(apartamento.getFoto2()));
 				image2.setWidth(200, Unit.PIXELS);
 				image2.setHeight(200, Unit.PIXELS);
 			}else
@@ -322,7 +323,7 @@ public class ApartamentoEditor extends VerticalLayout{
 			if(apartamento.getFoto3() != null) {
 				File file = new File(apartamento.getFoto3());
 				image3.setVisible(true);
-				image3.setSource(new FileResource(file));
+				image3.setSource(new ExternalResource(apartamento.getFoto3()));
 				image3.setWidth(200, Unit.PIXELS);
 				image3.setHeight(200, Unit.PIXELS);
 			}else
