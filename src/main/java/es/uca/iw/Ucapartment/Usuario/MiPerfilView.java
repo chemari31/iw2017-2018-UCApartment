@@ -67,7 +67,9 @@ public class MiPerfilView extends VerticalLayout implements View
 	void init()
 	{
 		//Datos Personales de los Usuarios
-		image.setSource(new ExternalResource(user.getFoto1()));
+		try{
+			image.setSource(new ExternalResource(user.getFoto1()));
+		}catch(Exception e) {image.setSource(new ExternalResource("/perfiluser/null.png"));}
 		image.setWidth(200, Unit.PIXELS);
 		image.setHeight(200, Unit.PIXELS);
 		addComponents(image);

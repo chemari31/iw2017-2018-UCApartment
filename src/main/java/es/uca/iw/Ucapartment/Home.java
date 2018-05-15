@@ -17,6 +17,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.spring.annotation.SpringView;
@@ -50,9 +51,13 @@ import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Estado.Estado;
+import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 
 @Theme("mytheme")
@@ -68,17 +73,27 @@ public class Home extends VerticalLayout implements View {
 	List<String> precio = new ArrayList<>();
 	List<Double> precioDouble = new ArrayList<>();
 	List<Apartamento> apartFinal = new ArrayList<>();//Lista de apartamentos finales segun de todos los filtros
+	List<Estado> listEstado = new ArrayList<>();
 	private List<Apartamento> listApart = null;//Lista de apartamentos segun los filtros de Ciudad, habitacion y precio
 	private List<Apartamento> ApartFilter = null;//Lista apartamento temporal para los filtros
 	private List<Reserva> listReserva = null;//Lista de todas las reservas
+	private Usuario user;
+	
 	
 	public static final String VIEW_NAME = "home";
+	
+	private Panel loginPanel;
 	
 	@Autowired
 	ApartamentoRepository repo;
 	
 	@Autowired
 	ReservaRepository repoReserva;
+	@Autowired
+	EstadoRepository repoEstado;
+	
+	Estado estado;
+	Grid<Apartamento> filter2 = new Grid<>();
 	
 	
 	
@@ -99,17 +114,18 @@ public class Home extends VerticalLayout implements View {
 		HorizontalLayout layout2;
 		HorizontalLayout layout3 = new HorizontalLayout();
 		
-		Grid<Apartamento> filter2 = new Grid<>();
-		filter2.setHeight("600");
-		filter2.setHeightByRows(600);
+		
+		
 		
 		//Panel principal
-		Panel loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
+		loginPanel = new Panel("<h1 style='color:blue; text-align: center;'>UCApartment</h1>");
 		loginPanel.setWidth("800px");
-	    loginPanel.setHeight("800px");	    
+	    loginPanel.setHeight("800px");
 	    layout.addComponent(loginPanel);
 	    layout.setComponentAlignment(loginPanel, Alignment.BOTTOM_CENTER );		
 		loginPanel.setWidth(null);
+		loginPanel.setStyleName("mytheme");
+		Responsive.makeResponsive(loginPanel);
 		
 		//Declaracion de los dos calendario para entrada y salida
 		DateField ida = new DateField("Entrada");
@@ -242,10 +258,12 @@ public class Home extends VerticalLayout implements View {
 					if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
 					{
 						apartamento.add(a);
+						
 					}
 					
 				}
 			}
+			
 			
 			//Apartamentos disponible segun la fecha de entrada y salida seleccionada
 			for(Reserva r : listReserva)
@@ -254,14 +272,11 @@ public class Home extends VerticalLayout implements View {
 				if(!(entrada.compareTo(r.getFechaInicio())>=0 && salida.compareTo(r.getFechaFin()) <= 0))
 				{
 					if(!(entrada.compareTo(r.getFechaInicio())<0 && salida.compareTo(r.getFechaInicio()) > 0))
-					{
-						
+					{		
 						if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
-						{
-							System.out.println(hoy);
-							apartamento.add(r.getApartamento());
-						}
-						
+						{	
+							apartamento.add(r.getApartamento());	
+						}	
 					}
 				}
 			}
@@ -276,7 +291,19 @@ public class Home extends VerticalLayout implements View {
 				{
 					if(a.getId() == b.getId())
 					{
-						apartFinal.add(a);
+						if(SecurityUtils.isLoggedIn())
+						{
+							if(a.getUsuario().getId() != user.getId())
+							{
+								System.out.println("entro");
+								apartFinal.add(a);
+							}		
+						}
+						else
+						{
+							apartFinal.add(a);
+						}
+						
 						
 					}
 						
@@ -291,7 +318,7 @@ public class Home extends VerticalLayout implements View {
 			//Grid de busqueda de apartamento
 			
 			filter2.setItems(apartFinal);
-			filter2.setWidth("600");
+			filter2.setWidth("550");
 			//filter2.getSelectionModel().get
 			//Object select = ((SingleSelectionModel) filter2.getSelectionModel()).getSelectedItem();
 			
@@ -301,16 +328,16 @@ public class Home extends VerticalLayout implements View {
 			filter2.addColumn(Apartamento::getCiudad).setCaption("Ciudad");
 			filter2.addColumn(e -> "Informacion", new ButtonRenderer(clickEvent-> { 
 				Apartamento a = ((Apartamento) clickEvent.getItem());
-				getUI().getNavigator().navigateTo(ApartamentoView.VIEW_NAME + '/'+String.valueOf(a.getId()));
+				getUI().getNavigator().navigateTo(ApartamentoView.VIEW_NAME + '/'+String.valueOf(a.getId()) + '/'+ entrada + '/'+ salida);
 				
-				}));
+				})).setCaption("Información");
 			
 			layout3.removeAllComponents();//Borramos la busqueda anterior
 			layout3.addComponent(filter2);
 			//layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
 		}
 				});
-		http://localhost:8080/home/migue-pc/Escritorio/MySiteIW/iw2017-2018-UCApartment/src/main/webapp/apartamentos/1casa.jpg
+		
 		
 
 		//Añadimos los componentes de nuestro Home
@@ -321,8 +348,9 @@ public class Home extends VerticalLayout implements View {
 		layout2.addComponent(input);
 		loginLayout.addComponents(layout2);
 		loginLayout.addComponent(layout3);
-		
+		layout.setStyleName("mytheme");
 		loginPanel.setContent(loginLayout);
+		Responsive.makeResponsive(layout);
 		addComponent(layout);
 		
 		
@@ -341,6 +369,12 @@ public class Home extends VerticalLayout implements View {
 	}
 	@Override
 	public void enter(ViewChangeEvent event) {
+		
+		try {
+			user = SecurityUtils.LogedUser();
+		}catch(Exception e) {}
+		
+		init();
 		// TODO Auto-generated method stub
 		
 	}

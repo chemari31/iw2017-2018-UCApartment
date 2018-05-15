@@ -1,6 +1,11 @@
 package es.uca.iw.Ucapartment.Apartamento;
 
 import java.io.File;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -9,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.sass.internal.parser.ParseException;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
@@ -25,6 +31,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
@@ -32,6 +39,12 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import es.uca.iw.Ucapartment.Home;
+import es.uca.iw.Ucapartment.Estado.Estado;
+import es.uca.iw.Ucapartment.Estado.EstadoService;
+import es.uca.iw.Ucapartment.Estado.Valor;
+import es.uca.iw.Ucapartment.Reserva.Reserva;
+import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
@@ -46,12 +59,22 @@ public class ApartamentoView extends VerticalLayout implements View {
 	
 	
 	private final ApartamentoService service;
+	private final ReservaService serviceReserva;
+	private final EstadoService serviceEstado;
 	private Apartamento apartamento;
+	private Date entrada;
+	private Date salida;
+	private PopupPago sub = new PopupPago();
+	private Usuario user;
+	
 
 	@Autowired
-	public ApartamentoView(ApartamentoService service) {
+	public ApartamentoView(ApartamentoService service, ReservaService serviceReserva, EstadoService serviceEstado) {
 		this.service = service;
-	}
+		this.serviceReserva = serviceReserva;
+		this.serviceEstado = serviceEstado;
+		
+	}	
 	
 	void init() {
 		
@@ -60,6 +83,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		HorizontalLayout camposApartamento = new HorizontalLayout();
 		VerticalLayout layoutDerecho = new VerticalLayout();
 		VerticalLayout layoutIzquierdo = new VerticalLayout();
+		Panel reserva = new Panel("Información de la Reserva");
 		Panel panelApartamento = new Panel("Apartamento "+apartamento.getNombre());
 		Panel panelFoto = new Panel("Foto");
 		Panel panelDuenio = new Panel("Dueño del apartamento");
@@ -68,19 +92,27 @@ public class ApartamentoView extends VerticalLayout implements View {
 		if(SecurityUtils.isLoggedIn() && (SecurityUtils.LogedUser().getId() != duenio.getId())) {
 			botonReserva.setVisible(true);
 		}
-
+		
+		reserva.setWidth("600px");
+		reserva.setHeight("250px");
 		panelApartamento.setWidth("600px");
 		panelApartamento.setHeight("570px");
 		panelFoto.setWidth("320px");
 		panelFoto.setHeight("350px");
 		panelDuenio.setWidth("320px");
+		if(SecurityUtils.isLoggedIn())
+		{
+			layoutIzquierdo.addComponent(reserva);
+		}
+		
 		layoutIzquierdo.addComponent(panelApartamento);
 		layoutDerecho.addComponent(panelFoto);
 		layoutDerecho.addComponent(panelDuenio);
 
 	    camposApartamento.addComponent(layoutIzquierdo);
 	    camposApartamento.addComponent(layoutDerecho);
-
+	    
+	    VerticalLayout datosReserva = new VerticalLayout();
 	    VerticalLayout elementosApartamento = new VerticalLayout();
 	    VerticalLayout datosDuenio = new VerticalLayout();
 	    
@@ -155,6 +187,66 @@ public class ApartamentoView extends VerticalLayout implements View {
 		hlApellDuenio.addComponents(apellidosDuenio, vApellidosDuenio);
 		hlEmailDuenio.addComponents(emailDuenio, vEmailDuenio);
 		
+		
+		
+			
+		//Para el Panel Reserva
+		if(SecurityUtils.isLoggedIn())
+		{
+			datosReserva.addComponent(new Label("Ustedes ha elegido el apartamento "+apartamento.getNombre() +
+					" de "+ apartamento.getHabitaciones() + " habitaciones  y con "+apartamento.getCamas()+" camas"));
+			datosReserva.addComponent(new Label("Entrada: "+ entrada));
+			datosReserva.addComponent(new Label("Salida: "+salida));
+			long diasTotales = entrada.getTime() - salida.getTime();
+			diasTotales = TimeUnit.DAYS.convert(diasTotales, TimeUnit.MILLISECONDS) * -1;
+			System.out.println(diasTotales);
+			double precioTotal = diasTotales * apartamento.getPrecio();
+			datosReserva.addComponent(new Label("Precio Total: "+precioTotal+"€"));
+			HorizontalLayout reservaHorizontal = new HorizontalLayout();
+			Button modificar = new Button("Modificar");
+			Button reservar = new Button("Reservar");
+			Button cancelar = new Button("Cancelar");
+			Button reservarConfirmada = new Button("Reservar");
+			reservaHorizontal.addComponent(modificar);
+			reservaHorizontal.addComponent(reservar);
+			datosReserva.addComponent(reservaHorizontal);
+			VerticalLayout popupLayout = new VerticalLayout();
+			
+			modificar.addClickListener(event->{
+				getUI().getNavigator().navigateTo(Home.VIEW_NAME);
+			});
+			cancelar.addClickListener(event ->{
+				sub.close();
+			});
+			
+			reservarConfirmada.addClickListener(event ->{
+				Date hoy = java.sql.Date.valueOf(LocalDate.now());
+				Reserva r = new Reserva(hoy,entrada,salida,precioTotal,user,apartamento);
+				serviceReserva.save(r);
+				
+				Estado e = new Estado(hoy,Valor.PENDIENTE,r);
+				serviceEstado.save(e);
+				Notification.show("Gracias por confiar en UCApartment.\nSu reserva se ha realizado correctamente.", Notification.Type.TRAY_NOTIFICATION);
+				sub.close();
+			});
+			
+			reservar.addClickListener(event->{
+				popupLayout.removeAllComponents();
+				popupLayout.addComponent(new Label("¿Estás seguro que deseas reservar?"));
+				HorizontalLayout horizontal = new HorizontalLayout();
+				horizontal.addComponent(cancelar);
+				horizontal.addComponent(reservarConfirmada);
+				popupLayout.addComponent(horizontal);
+				sub.setWidth("400px");
+				sub.setHeight("300px");
+				sub.setPosition(550, 200);
+				sub.setContent(popupLayout);
+				sub.center();
+				UI.getCurrent().addWindow(sub);
+			});
+		}
+		
+		
 		elementosApartamento.addComponent(hlNombre);
 		elementosApartamento.addComponent(hlDesc);
 		elementosApartamento.addComponent(hlContacto);
@@ -177,6 +269,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		datosDuenio.addComponent(botonPerfil);
 		
 		panelFoto.setContent(image);
+		reserva.setContent(datosReserva);
 		panelApartamento.setContent(elementosApartamento);
 		panelDuenio.setContent(datosDuenio);
 		
@@ -189,7 +282,21 @@ public class ApartamentoView extends VerticalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		// Obtenemos el id del apartamento de la URI
 		String args[] = event.getParameters().split("/");
-	    String value1 = args[0]; 
+	    String value1 = args[0];
+	    String dateString = args[1];
+	    
+	    try {
+           
+            entrada = java.sql.Date.valueOf(dateString);
+            salida = java.sql.Date.valueOf(args[2]);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+	    
+	    try {
+	    	user = SecurityUtils.LogedUser();
+	    }catch(Exception e) {}
+
 	    long id_apart = Long.parseLong(value1); // Como es un String lo convertimos a Long
 	    apartamento = service.findById(id_apart); // Obtenemos el apartamento en cuestión de la BD
 	    init(); // Y llamamos al metodo init que genera la vista

@@ -31,6 +31,7 @@ import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
+import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
@@ -55,6 +56,8 @@ public class MisReserva extends VerticalLayout implements View
 	private ReservaRepository repoReserva;
 	@Autowired
 	private EstadoRepository repoEstado;
+	@Autowired
+	private EstadoService serviceEstado;
 	
 	@Autowired
 	private ReservaService serviceReserva;
@@ -101,12 +104,14 @@ public class MisReserva extends VerticalLayout implements View
 		
 		Grid<Reserva> grid = new Grid<>();
 		grid.setItems(listReserva);
+		grid.setWidth("650px");
 		grid.addColumn(Reserva::getFecha).setCaption("Fecha");
 		grid.addColumn(reserva -> {
 			  apart = reserva.getApartamento();
 			  
 			  return apart.getNombre();
 			}).setCaption("Apartamento");
+		grid.addColumn(Reserva::getPrecio).setCaption("Precio");
 		
 		grid.addColumn(e ->{
 			estado = repoEstado.findByReserva(e);
@@ -152,6 +157,8 @@ public class MisReserva extends VerticalLayout implements View
 				horizontal.addComponent(vuelta);
 				horizontal.addComponent(aceptar);
 				cancelar.addClickListener(event ->{
+					estado.setValor(Valor.CANCELADA);
+					serviceEstado.save(estado);
 					sub.close();
 				});
 				

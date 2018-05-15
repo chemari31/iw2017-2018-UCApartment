@@ -42,13 +42,14 @@ public class Reserva {
 	protected Reserva() {}
 
 	//Constructor con parámetros
-	public Reserva(Date fechaInicio, Date fechaFin, double precio,
+	public Reserva(Date fecha,Date fechaInicio, Date fechaFin, double precio,
 		Usuario usuario, Apartamento apartamento) {
 		this.fechaInicio = fechaInicio;
 		this.fechaFin = fechaFin;
 		this.precio = precio;
 		this.usuario = usuario;
 		this.apartamento = apartamento;
+		this.fecha = fecha;
 	}
 
 	//Getters & Setters

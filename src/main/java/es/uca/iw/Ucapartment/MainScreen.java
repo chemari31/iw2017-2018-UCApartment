@@ -72,7 +72,9 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 			menuSuperior.addComponent(createNavigationButton("Mis Reserva", MisReserva.VIEW_NAME));
 			menuSuperior.addComponent(logoutButton);
 			Usuario user = SecurityUtils.LogedUser();
-			image.setSource(new ExternalResource(user.getFoto1()));
+			try{
+				image.setSource(new ExternalResource(user.getFoto1()));
+			}catch(Exception e) {image.setSource(new ExternalResource("/perfiluser/null.png"));}
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			menuSuperior.addComponent(image);
