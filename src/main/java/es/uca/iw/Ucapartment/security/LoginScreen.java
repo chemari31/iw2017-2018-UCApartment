@@ -105,7 +105,7 @@ public class LoginScreen extends VerticalLayout implements View {
         		String pword = password.getValue();
                 password.setValue("");
                 System.out.println(nombreUsuario.getValue()+" "+pword);
-                if (login(nombreUsuario.getValue(), pword)) {
+                if (!login(nombreUsuario.getValue(), pword)) {
                     Notification.show("Error en el login. Introduzca de nuevo las credenciales");
                     nombreUsuario.focus();
                 }
@@ -141,8 +141,6 @@ public class LoginScreen extends VerticalLayout implements View {
 			
 			// Show the home view
 			getUI().getPage().reload();
-			getUI().getNavigator().navigateTo(Home.VIEW_NAME);
-			//getUI().getPage().reload();
 			
 			return true;
 		} catch (AuthenticationException ex) {

@@ -53,7 +53,13 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	else if(beanName.equals("apartamentoView")) 
     	{
         	return true;
-        } 
+        }
+    	else if(beanName.equals("MiPerfil") || (beanName.equals("MisReserva"))) {
+    		if(SecurityUtils.isLoggedIn())
+    			return true;
+    		else
+    			return false;
+    	}
     	else 
     	{
         	return false;

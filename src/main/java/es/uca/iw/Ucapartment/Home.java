@@ -313,10 +313,11 @@ public class Home extends VerticalLayout implements View {
 			//Nuestros apartamentos finales 
 			apartFinal = apartFinal.stream().distinct().collect(Collectors.toList());
 			
+			Grid grid = new Grid();
+			
 			
 			
 			//Grid de busqueda de apartamento
-			
 			filter2.setItems(apartFinal);
 			filter2.setWidth("550");
 			//filter2.getSelectionModel().get
@@ -332,6 +333,7 @@ public class Home extends VerticalLayout implements View {
 				
 				})).setCaption("Información");
 			
+			filter2.setHeightByRows(300);
 			layout3.removeAllComponents();//Borramos la busqueda anterior
 			layout3.addComponent(filter2);
 			//layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
@@ -380,4 +382,6 @@ public class Home extends VerticalLayout implements View {
 	}
 	
 
+
 }
+
