@@ -114,6 +114,8 @@ public class LoginScreen extends VerticalLayout implements View {
         		Notification.show("Comprueba los datos introducidos");
             
         });
+        
+        login.setClickShortcut(ShortcutAction.KeyCode.ENTER);
              
         // Layout Horizontal para poner los botones en una misma fila
         HorizontalLayout botones = new HorizontalLayout();

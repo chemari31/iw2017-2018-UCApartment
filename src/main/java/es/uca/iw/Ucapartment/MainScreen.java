@@ -18,10 +18,13 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import es.uca.iw.Ucapartment.Administracion.UsuariosView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
@@ -46,10 +49,12 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 	
 	@PostConstruct
 	void init() {
-
+		
 		final VerticalLayout root = new VerticalLayout();
 		HorizontalLayout menuSuperior = new HorizontalLayout();
 		final Image image = new Image();
+		MenuBar menuDesplegable = new MenuBar();
+		menuDesplegable.setWidth(100.0f, Unit.PERCENTAGE);
 		
 		root.setSizeFull();
 		
@@ -66,18 +71,35 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		menuSuperior.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 		menuSuperior.addComponent(createNavigationButton("Inicio", Home.VIEW_NAME));
 		
+		MenuItem gestion = menuDesplegable.addItem("Gestión", null, null);
+		gestion.addItem("Usuarios", null, new MenuBar.Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				getUI().getNavigator().navigateTo(UsuariosView.VIEW_NAME);
+				
+			}
+		});
+		//gestion.addItem("Apartamentos", null, createNavigationButton("ApartamentosView", ApartamentosView.VIEW_NAME));
+		//gestion.addItem("Reservas", null, createNavigationButton("ReservasView", ReservasView.VIEW_NAME));
+		
 		if(SecurityUtils.isLoggedIn()) {
 			menuSuperior.addComponent(createNavigationButton("Mi perfil", MiPerfilView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", ApartamentoManagementView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis Reserva", MisReserva.VIEW_NAME));
-			menuSuperior.addComponent(logoutButton);
+			if(SecurityUtils.hasRole("ADMINISTRADOR"))
+				menuSuperior.addComponent(menuDesplegable);
 			Usuario user = SecurityUtils.LogedUser();
+
 			try{
 				image.setSource(new ExternalResource(user.getFoto1()));
 			}catch(Exception e) {image.setSource(new ExternalResource("/perfiluser/null.png"));}
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			menuSuperior.addComponent(image);
+
+			menuSuperior.addComponent(new Label("Hola, "+user.getUsername()));
+			menuSuperior.addComponent(logoutButton);
 		}
 		else {
 			
