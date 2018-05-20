@@ -41,6 +41,9 @@ public class Usuario implements UserDetails{
 	@Column(length = 255)
 	private String password;
 	
+	@Column
+	private boolean cuentaNoBloqueada;
+	
 	private Rol rol;
 	
 	@Column(length = 256)//La longitud es provisional
@@ -59,6 +62,7 @@ public class Usuario implements UserDetails{
 		this.nombreUsuario = nombreUsuario;
 		this.password = password;
 		this.rol = Rol.ANFITRION;
+		this.cuentaNoBloqueada = true;
 	}
 	
 	public Usuario(String nombre, String apellidos, String dni) {
@@ -134,6 +138,10 @@ public class Usuario implements UserDetails{
 		return Foto1;
 	}
 	
+	public void setDesbloqueo(boolean valor) {
+		this.cuentaNoBloqueada = valor;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("Usuario[id=%d, Nombre='%s', Apellidos='%s', DNI='%s', Correo electrónico"
@@ -164,7 +172,8 @@ public class Usuario implements UserDetails{
 	@Override
 	public boolean isAccountNonLocked() {
 		// TODO Auto-generated method stub
-		return true;
+		return cuentaNoBloqueada;
+		//return true; 
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import es.uca.iw.Ucapartment.Home;
 import es.uca.iw.Ucapartment.MainScreen;
 import es.uca.iw.Ucapartment.WelcomeView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 
 import com.vaadin.ui.CustomComponent;
 
@@ -54,6 +55,9 @@ public class LoginScreen extends VerticalLayout implements View {
 	
 	@Autowired
 	AuthenticationManager authenticationManager;
+	
+	@Autowired
+	UsuarioService service;
 	
 	@Autowired
 	public LoginScreen() {
@@ -105,10 +109,15 @@ public class LoginScreen extends VerticalLayout implements View {
         		String pword = password.getValue();
                 password.setValue("");
                 System.out.println(nombreUsuario.getValue()+" "+pword);
-                if (!login(nombreUsuario.getValue(), pword)) {
-                    Notification.show("Error en el login. Introduzca de nuevo las credenciales");
-                    nombreUsuario.focus();
-                }
+                
+	            if (!login(nombreUsuario.getValue(), pword)) {
+	            	if(service.loadUserByUsername(nombreUsuario.getValue()).isAccountNonExpired())
+	            		Notification.show("Su cuenta está bloqueada. Contacta con un administrador");
+	            	else {
+	                    Notification.show("Error en el login. Introduzca de nuevo las credenciales");
+	                    nombreUsuario.focus();
+	            	}
+	            }
         	}
         	else
         		Notification.show("Comprueba los datos introducidos");

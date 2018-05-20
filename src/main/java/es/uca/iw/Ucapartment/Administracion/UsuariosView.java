@@ -20,6 +20,7 @@ import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = UsuariosView.VIEW_NAME)
 public class UsuariosView extends VerticalLayout implements View {
@@ -49,6 +50,7 @@ public class UsuariosView extends VerticalLayout implements View {
 		layout.setComponentAlignment(listaUsuariosPanel, Alignment.TOP_CENTER);
 
 		lista_usuarios = usuarioService.findAll();
+		
 		//grid.setColumns("nombreUsuario", "email");
 		grid.setItems(lista_usuarios);
 		grid.addColumn(Usuario::getUsername).setCaption("Nombre de usuario").setWidth(200)

@@ -42,7 +42,7 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	{
             return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
         }
-    	else if(beanName.equals("MiPerfil"))
+    	else if(beanName.equals("MiPerfilView"))
     	{
     		return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
     	}
@@ -54,12 +54,6 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	{
         	return true;
         }
-    	else if(beanName.equals("MiPerfil") || (beanName.equals("MisReserva"))) {
-    		if(SecurityUtils.isLoggedIn())
-    			return true;
-    		else
-    			return false;
-    	}
     	else 
     	{
         	return false;
