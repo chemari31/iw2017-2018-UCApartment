@@ -24,6 +24,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import es.uca.iw.Ucapartment.Administracion.ApartamentosView;
 import es.uca.iw.Ucapartment.Administracion.UsuariosView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
@@ -80,7 +81,14 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 				
 			}
 		});
-		gestion.addItem("Apartamentos", null);
+		gestion.addItem("Apartamentos", null, new MenuBar.Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				getUI().getNavigator().navigateTo(ApartamentosView.VIEW_NAME);
+				
+			}
+		});
 		gestion.addItem("Valoraciones", null);
 		gestion.addItem("Reservas", null);
 		gestion.addItem("Ciudades", null);
