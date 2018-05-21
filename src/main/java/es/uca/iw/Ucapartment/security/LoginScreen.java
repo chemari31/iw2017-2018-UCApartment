@@ -39,6 +39,11 @@ import com.vaadin.ui.CustomComponent;
 
 @SpringView(name = LoginScreen.VIEW_NAME)
 public class LoginScreen extends VerticalLayout implements View {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String VIEW_NAME = "loginScreen";
 	
 	// Campos del formulario de login

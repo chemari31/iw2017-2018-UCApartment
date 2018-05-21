@@ -38,28 +38,27 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	{
     		return true;
         } 
+    	else if(beanName.equals("miPerfilView"))
+    	{
+    		return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
+    	}
     	else if (beanName.equals("apartamentoManagementView")) 
     	{
             return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
         }
-    	else if(beanName.equals("MiPerfilView"))
-    	{
-    		return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
-    	}
-    	else if(beanName.equals("MisReserva"))
+    	else if(beanName.equals("misReserva"))
     	{
     		return SecurityUtils.hasRole("ANFITRION") || SecurityUtils.hasRole("GERENTE");
     	}
     	else if(beanName.equals("apartamentoView")) 
     	{
         	return true;
-        }
+        } 
     	else 
     	{
         	return false;
         }
     }
 }
-
 
 

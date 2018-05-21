@@ -52,6 +52,7 @@ public class MisReserva extends VerticalLayout implements View
 	private Usuario user = SecurityUtils.LogedUser();
 	private List<Reserva> listReserva = new ArrayList<Reserva>();
 	private List<Reserva> listReserva2 = new ArrayList<Reserva>();
+	private List<Reserva> listReservaFinal = new ArrayList<Reserva>();
 	@Autowired
 	private ReservaRepository repoReserva;
 	@Autowired
@@ -62,6 +63,7 @@ public class MisReserva extends VerticalLayout implements View
 	@Autowired
 	private ReservaService serviceReserva;
 	private Apartamento apart = null;
+	private static Reserva r = null;
 	private Estado estado = null;
 	private String i;
 	private VerticalLayout layout = new VerticalLayout();
@@ -78,15 +80,18 @@ public class MisReserva extends VerticalLayout implements View
 	Date hoy = java.sql.Date.valueOf(LocalDate.now());
 	
 	
+	@Autowired
+	public MisReserva() {}
 	
 	
 	@PostConstruct
 	public void init()
 	{
+		System.out.println("entro en init()");
 		
 		
 		//Label principal
-		addComponents(new Label("Historial de Reserva"));
+		Label historial = new Label("Historial de Reserva");
 		ButtonRenderer button = new ButtonRenderer("Pulsa");
 		
 		//Lista de reserva
@@ -99,10 +104,12 @@ public class MisReserva extends VerticalLayout implements View
 		
 		
 		
+		Grid<Reserva> grid = new Grid<>();	
+		layout.addComponent(historial);
+		layout.addComponent(grid);
 		
 		
 		
-		Grid<Reserva> grid = new Grid<>();
 		grid.setItems(listReserva);
 		grid.setWidth("650px");
 		grid.addColumn(Reserva::getFecha).setCaption("Fecha");
@@ -118,7 +125,11 @@ public class MisReserva extends VerticalLayout implements View
 			return estado.getValor();	
 		}, new ButtonRenderer(clickEvent-> {
 			
-			Reserva r = ((Reserva) clickEvent.getItem());
+			r = ((Reserva) clickEvent.getItem());
+			long idReserva = r.getId();
+			
+			
+			
 			estado = repoEstado.findByReserva((Reserva) clickEvent.getItem());
 			if(estado.getValor() == Valor.ACEPTADA)
 			{
@@ -127,7 +138,11 @@ public class MisReserva extends VerticalLayout implements View
 				horizontal = new HorizontalLayout();
 				horizontal.addComponent(aceptar);
 				cancelar.addClickListener(event ->{
+					estado.setValor(Valor.CANCELADA);
+					serviceEstado.save(estado);
 					sub.close();
+					layout.removeAllComponents();
+					init();
 				});
 
 				horizontal.addComponent(cancelar);
@@ -142,7 +157,6 @@ public class MisReserva extends VerticalLayout implements View
 			}
 			if(estado.getValor() == Valor.PENDIENTE)
 			{
-				
 				
 				ida.setValue(r.getFechaInicio().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 				vuelta.setValue(r.getFechaFin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
@@ -160,59 +174,80 @@ public class MisReserva extends VerticalLayout implements View
 					estado.setValor(Valor.CANCELADA);
 					serviceEstado.save(estado);
 					sub.close();
+					layout.removeAllComponents();
+					init();
 				});
 				
 				ModificarReserva.addClickListener(event ->{
 					
+					//System.out.println(idReserva);
 					listReserva2 = repoReserva.findByApartamento(apart);
+					for(Reserva res : listReserva2)
+					{
+						
+						if(res.getId()!=idReserva)
+						{
+							System.out.println(idReserva);
+							listReservaFinal.add(res);
+						}
+							
+							
+					}
 					Date entrada = java.sql.Date.valueOf(ida.getValue());
 					Date salida = java.sql.Date.valueOf(vuelta.getValue());
 					int correcto = 0;
-					for(Reserva re : listReserva2)
+					for(Reserva re : listReservaFinal)
 					{
-						
+						System.out.println("entro en el bucle");
 						if(!(entrada.compareTo(re.getFechaInicio())>=0 && salida.compareTo(re.getFechaFin()) <= 0))
 						{
-							
+							System.out.println("entro en el 1 if");
 							if(!(entrada.compareTo(re.getFechaInicio())<0 && salida.compareTo(re.getFechaInicio()) > 0))
 							{
+								System.out.println("entro en el 2 if");
+								System.out.println(entrada);
+								System.out.println(re.getFechaInicio());
+								System.out.println(re.getFechaFin());
 								
-								if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
+								if(!(entrada.compareTo(re.getFechaInicio())>=0 && entrada.compareTo(re.getFechaFin()) < 0))
 								{
-									correcto++;
+									System.out.println("entro en el 3 if");
+									if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
+									{
+										System.out.println("entro en correcto");
+										correcto++;
+									}
 								}
-								else
-								{
-									Notification.show("no se puede modificar a esa fecha", Notification.Type.WARNING_MESSAGE);
-										
-								}	
 							}
-							else
-							{
-								Notification.show("no se puede modificar a esa fecha", Notification.Type.WARNING_MESSAGE);
-								
-							}
-							
-						}
-						else
-						{
-							Notification.show("no se puede modificar a esa fecha", Notification.Type.WARNING_MESSAGE);
-							
-						}
-							
+						}						
 					}
 					
 					
-					if(correcto == listReserva2.size())
+					if(correcto == listReservaFinal.size() && (entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0) )
 					{
+						System.out.println("Entro en si");
+						System.out.println(r.getId());
 						r.setFechaInicio(entrada);
 						r.setFechaFin(salida);
 						r.setFecha(hoy);
 						serviceReserva.save(r);
-						
-						
-						Notification.show("Su reserva se ha modificado", Notification.Type.WARNING_MESSAGE);
 						sub.close();
+						layout.removeAllComponents();
+						Notification.show("Su reserva se ha modificado", Notification.Type.WARNING_MESSAGE);
+						
+						getUI().getNavigator().navigateTo(MisReserva.VIEW_NAME);
+						
+					}
+					else
+					{
+						System.out.println("Entro en no");
+						System.out.println(r.getId());
+						sub.close();
+						layout.removeAllComponents();
+						Notification.show("Su Reserva no se ha podido modificar", Notification.Type.WARNING_MESSAGE);
+						
+						getUI().getNavigator().navigateTo(MisReserva.VIEW_NAME);
+						
 					}
 	
 				});
@@ -271,21 +306,13 @@ public class MisReserva extends VerticalLayout implements View
 				sub.center();
 				UI.getCurrent().addWindow(sub);
 			}
-			
-			
-			
-			
-			
-			
-				
+
 				})).setCaption("Estado");
 		
 		
 				
 				
-			
 		
-		layout.addComponent(grid);
 		addComponent(layout);
 	}
 

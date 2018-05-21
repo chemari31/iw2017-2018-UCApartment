@@ -5,6 +5,9 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +46,11 @@ import es.uca.iw.Ucapartment.Home;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
+import es.uca.iw.Ucapartment.Iva.Iva;
+import es.uca.iw.Ucapartment.Iva.IvaRespository;
+import es.uca.iw.Ucapartment.Precio.Precio;
+import es.uca.iw.Ucapartment.Precio.PrecioRepository;
+import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
@@ -57,10 +65,16 @@ public class ApartamentoView extends VerticalLayout implements View {
 	private Grid<Apartamento> grid;
 	private TextField filter;
 	
+	@Autowired
+	PrecioRepository repo;
+	@Autowired
+	IvaRespository repoIva;
+	
 	
 	private final ApartamentoService service;
 	private final ReservaService serviceReserva;
 	private final EstadoService serviceEstado;
+	private final PrecioService precioService;
 	private Apartamento apartamento;
 	private Date entrada;
 	private Date salida;
@@ -69,10 +83,11 @@ public class ApartamentoView extends VerticalLayout implements View {
 	
 
 	@Autowired
-	public ApartamentoView(ApartamentoService service, ReservaService serviceReserva, EstadoService serviceEstado) {
+	public ApartamentoView(ApartamentoService service, ReservaService serviceReserva, EstadoService serviceEstado, PrecioService precioService) {
 		this.service = service;
 		this.serviceReserva = serviceReserva;
 		this.serviceEstado = serviceEstado;
+		this.precioService = precioService;
 		
 	}	
 	
@@ -199,9 +214,12 @@ public class ApartamentoView extends VerticalLayout implements View {
 			datosReserva.addComponent(new Label("Salida: "+salida));
 			long diasTotales = entrada.getTime() - salida.getTime();
 			diasTotales = TimeUnit.DAYS.convert(diasTotales, TimeUnit.MILLISECONDS) * -1;
-			System.out.println(diasTotales);
-			double precioTotal = diasTotales * apartamento.getPrecio();
-			datosReserva.addComponent(new Label("Precio Total: "+precioTotal+"€"));
+			double precioTotalSinIva = precioService.TotalPrecio(apartamento, entrada, salida);
+			Iva iva = repoIva.findByPais("España");
+			double porcentaje = (double)iva.getPorcentaje()/100;
+			porcentaje = porcentaje * precioTotalSinIva;
+			double precioTotal = precioTotalSinIva + porcentaje;
+			datosReserva.addComponent(new Label("Precio Total: "+precioTotal+"€ (Precios especiales + IVA)"));
 			HorizontalLayout reservaHorizontal = new HorizontalLayout();
 			Button modificar = new Button("Modificar");
 			Button reservar = new Button("Reservar");
@@ -226,8 +244,9 @@ public class ApartamentoView extends VerticalLayout implements View {
 				
 				Estado e = new Estado(hoy,Valor.PENDIENTE,r);
 				serviceEstado.save(e);
-				Notification.show("Gracias por confiar en UCApartment.\nSu reserva se ha realizado correctamente.", Notification.Type.TRAY_NOTIFICATION);
+				Notification.show("Gracias por confiar en UCApartment.\nSu reserva se ha realizado correctamente.", Notification.Type.HUMANIZED_MESSAGE );
 				sub.close();
+				getUI().getNavigator().navigateTo(Home.VIEW_NAME);
 			});
 			
 			reservar.addClickListener(event->{
