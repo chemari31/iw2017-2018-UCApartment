@@ -21,6 +21,7 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
@@ -33,6 +34,7 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 import es.uca.iw.Ucapartment.Usuario.Usuario;
@@ -224,7 +226,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		// wire action buttons to save, delete and reset
 		save.addClickListener(e -> validar());
 		delete.addClickListener(e -> service.delete(apartamento));
-		cancel.addClickListener(e -> editApartamento(null));
+		cancel.addClickListener(e -> {return;});
 		setVisible(false);
 		
 	}
@@ -341,12 +343,14 @@ public class ApartamentoEditor extends VerticalLayout{
 		nombre.selectAll();
 	}
 	
+	
 	public void setChangeHandler(ChangeHandler h) {
 		// ChangeHandler is notified when either save or delete
 		// is clicked
 		save.addClickListener(e -> 
 				h.onChange());
 		delete.addClickListener(e -> h.onChange());
+		cancel.addClickListener(e -> h.onChange());
 	}
 
 }
