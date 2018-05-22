@@ -32,12 +32,18 @@ import es.uca.iw.Ucapartment.Home;
 import es.uca.iw.Ucapartment.MainScreen;
 import es.uca.iw.Ucapartment.WelcomeView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 
 import com.vaadin.ui.CustomComponent;
 
 
 @SpringView(name = LoginScreen.VIEW_NAME)
 public class LoginScreen extends VerticalLayout implements View {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String VIEW_NAME = "loginScreen";
 	
 	// Campos del formulario de login
@@ -54,6 +60,9 @@ public class LoginScreen extends VerticalLayout implements View {
 	
 	@Autowired
 	AuthenticationManager authenticationManager;
+	
+	@Autowired
+	UsuarioService service;
 	
 	@Autowired
 	public LoginScreen() {
@@ -105,10 +114,15 @@ public class LoginScreen extends VerticalLayout implements View {
         		String pword = password.getValue();
                 password.setValue("");
                 System.out.println(nombreUsuario.getValue()+" "+pword);
-                if (login(nombreUsuario.getValue(), pword)) {
-                    Notification.show("Error en el login. Introduzca de nuevo las credenciales");
-                    nombreUsuario.focus();
-                }
+                
+	            if (!login(nombreUsuario.getValue(), pword)) {
+	            	if(service.loadUserByUsername(nombreUsuario.getValue()).isAccountNonExpired())
+	            		Notification.show("Su cuenta está bloqueada. Contacta con un administrador");
+	            	else {
+	                    Notification.show("Error en el login. Introduzca de nuevo las credenciales");
+	                    nombreUsuario.focus();
+	            	}
+	            }
         	}
         	else
         		Notification.show("Comprueba los datos introducidos");
@@ -141,8 +155,6 @@ public class LoginScreen extends VerticalLayout implements View {
 			
 			// Show the home view
 			getUI().getPage().reload();
-			getUI().getNavigator().navigateTo(Home.VIEW_NAME);
-			//getUI().getPage().reload();
 			
 			return true;
 		} catch (AuthenticationException ex) {

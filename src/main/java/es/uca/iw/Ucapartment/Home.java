@@ -21,8 +21,7 @@ import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.spring.annotation.SpringView;
-
-
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -69,6 +68,7 @@ public class Home extends VerticalLayout implements View {
 	
 	TextField home = new TextField();
 	List<Apartamento> apartamento = new ArrayList<>();//Lista de apartamentos segun los filtros de fechas
+	List<Apartamento> noapartamento = new ArrayList<>();//Lista de apartamentos segun los filtros de fechas
 	List<String> ciudad = new ArrayList<>();
 	List<String> precio = new ArrayList<>();
 	List<Double> precioDouble = new ArrayList<>();
@@ -93,7 +93,8 @@ public class Home extends VerticalLayout implements View {
 	EstadoRepository repoEstado;
 	
 	Estado estado;
-	Grid<Apartamento> filter2 = new Grid<>();
+	
+	HorizontalLayout layout3 = new HorizontalLayout();
 	
 	
 	
@@ -112,7 +113,7 @@ public class Home extends VerticalLayout implements View {
         //Layout principales
 		VerticalLayout layout = new VerticalLayout();
 		HorizontalLayout layout2;
-		HorizontalLayout layout3 = new HorizontalLayout();
+		
 		
 		
 		
@@ -189,6 +190,7 @@ public class Home extends VerticalLayout implements View {
 			
 			apartFinal.clear();//Limpiamos los apartamentos finales para que no se repitan
 			apartamento.clear();
+			noapartamento.clear();
 			
 			//Condiciones para buscar los apartamentos según su Ciudad, Habitacion y Precio
 			if(Ciudad.getValue() == "Todo")
@@ -268,17 +270,96 @@ public class Home extends VerticalLayout implements View {
 			//Apartamentos disponible segun la fecha de entrada y salida seleccionada
 			for(Reserva r : listReserva)
 			{
-				
 				if(!(entrada.compareTo(r.getFechaInicio())>=0 && salida.compareTo(r.getFechaFin()) <= 0))
 				{
 					if(!(entrada.compareTo(r.getFechaInicio())<0 && salida.compareTo(r.getFechaInicio()) > 0))
-					{		
-						if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
-						{	
-							apartamento.add(r.getApartamento());	
-						}	
+					{
+						if(!(entrada.compareTo(r.getFechaInicio())>=0 && entrada.compareTo(r.getFechaFin()) < 0))
+						{
+							
+							if((entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0))
+							{
+								
+								for(Apartamento a : noapartamento)
+								{
+									if(a.getId() != r.getApartamento().getId())
+									{
+										apartamento.add(r.getApartamento());
+									}
+									else
+									{
+										apartamento.remove(r.getApartamento());
+									}
+								}
+								if(noapartamento.isEmpty())
+									apartamento.add(r.getApartamento());
+									
+							}
+							else
+							{
+								noapartamento.add(r.getApartamento());
+								for(Apartamento a : noapartamento)
+								{
+									if(a.getId() != r.getApartamento().getId())
+									{
+										apartamento.add(r.getApartamento());
+									}
+									else
+									{
+										apartamento.remove(r.getApartamento());
+									}
+								}
+							}
+						}
+						else
+						{
+							noapartamento.add(r.getApartamento());
+							for(Apartamento a : noapartamento)
+							{
+								if(a.getId() != r.getApartamento().getId())
+								{
+									apartamento.add(r.getApartamento());
+								}
+								else
+								{
+									apartamento.remove(r.getApartamento());
+								}
+							}
+						}
+							
+					}
+					else
+					{
+						noapartamento.add(r.getApartamento());
+						for(Apartamento a : noapartamento)
+						{
+							if(a.getId() != r.getApartamento().getId())
+							{
+								apartamento.add(r.getApartamento());
+							}
+							else
+							{
+								apartamento.remove(r.getApartamento());
+							}
+						}
 					}
 				}
+				else
+				{
+					noapartamento.add(r.getApartamento());
+					for(Apartamento a : noapartamento)
+					{
+						if(a.getId() != r.getApartamento().getId())
+						{
+							apartamento.add(r.getApartamento());
+						}
+						else
+						{
+							apartamento.remove(r.getApartamento());
+						}
+					}
+				}
+						
 			}
 			
 			apartamento = apartamento.stream().distinct().collect(Collectors.toList());
@@ -316,12 +397,13 @@ public class Home extends VerticalLayout implements View {
 			
 			
 			//Grid de busqueda de apartamento
-			
+			Grid<Apartamento> filter2 = new Grid<>();
+			//filter2.setHeightMode(HeightMode.UNDEFINED);
+			filter2.setBodyRowHeight(200);
 			filter2.setItems(apartFinal);
 			filter2.setWidth("550");
 			//filter2.getSelectionModel().get
 			//Object select = ((SingleSelectionModel) filter2.getSelectionModel()).getSelectedItem();
-			
 			
 			filter2.addColumn(p ->new ExternalResource(p.getFoto1()),new ImageRenderer()).setCaption("Imagen").setWidth(200);
 			filter2.addColumn(Apartamento::getNombre).setCaption("Nombre");
@@ -332,9 +414,10 @@ public class Home extends VerticalLayout implements View {
 				
 				})).setCaption("Información");
 			
+			
 			layout3.removeAllComponents();//Borramos la busqueda anterior
 			layout3.addComponent(filter2);
-			//layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamentoa.getId())));
+			//layout2.addComponent(createNavigationButton("Informacion", ApartamentoView.VIEW_NAME + '/'+String.valueOf(((AbstractComponent) apartamento).getId())));	
 		}
 				});
 		
@@ -374,7 +457,7 @@ public class Home extends VerticalLayout implements View {
 			user = SecurityUtils.LogedUser();
 		}catch(Exception e) {}
 		
-		init();
+		//init();
 		// TODO Auto-generated method stub
 		
 	}

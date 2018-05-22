@@ -24,6 +24,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import es.uca.iw.Ucapartment.Administracion.ApartamentosView;
 import es.uca.iw.Ucapartment.Administracion.UsuariosView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
@@ -80,6 +81,17 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 				
 			}
 		});
+		gestion.addItem("Apartamentos", null, new MenuBar.Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				getUI().getNavigator().navigateTo(ApartamentosView.VIEW_NAME);
+				
+			}
+		});
+		gestion.addItem("Valoraciones", null);
+		gestion.addItem("Reservas", null);
+		gestion.addItem("Ciudades", null);
 		//gestion.addItem("Apartamentos", null, createNavigationButton("ApartamentosView", ApartamentosView.VIEW_NAME));
 		//gestion.addItem("Reservas", null, createNavigationButton("ReservasView", ReservasView.VIEW_NAME));
 		
@@ -106,9 +118,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 			menuSuperior.addComponent(createNavigationButton("Iniciar sesión", LoginScreen.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Registro", RegistroScreen.VIEW_NAME));
 		}
-		//navigationBar.addComponent(createNavigationButton("Welcome", WelcomeView.VIEW_NAME));
-		//navigationBar.addComponent(createNavigationButton("Users", UserView.VIEW_NAME));
-		//navigationBar.addComponent(createNavigationButton("User Management", UserManagementView.VIEW_NAME));
+		
 		root.addComponent(menuSuperior);
 		root.setComponentAlignment(menuSuperior, Alignment.BOTTOM_CENTER);
 
