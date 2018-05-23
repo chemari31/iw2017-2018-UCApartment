@@ -22,7 +22,10 @@ public class Iva {
 	private int porcentaje;
 	
 	//Constructor sin parámetros
-	protected Iva() {}
+	public Iva() {
+		this.pais ="";
+		this.porcentaje = 0;
+	}
 
 	//Constructor con parámetros
 	public Iva(String pais, int porcentaje) {

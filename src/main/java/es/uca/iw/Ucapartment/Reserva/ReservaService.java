@@ -1,16 +1,23 @@
 package es.uca.iw.Ucapartment.Reserva;
 
+
 import java.sql.Date;
 import java.time.LocalDate;
-
 import javax.transaction.Transactional;
+
+import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.Valor;
+
+import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+
 
 @Service
 public class ReservaService {
@@ -26,6 +33,7 @@ public class ReservaService {
 		return repo.save(reserva);
 	}
 	
+
 	@Transactional
 	public void pasarelaDePago(double total, Reserva r, Estado e)
 	{
@@ -41,5 +49,11 @@ public class ReservaService {
 	
 	}
 	
+
+	public List<Reserva> findByApartamento(Apartamento apart){
+		return repo.findByApartamento(apart);
+	}
+
+
 
 }

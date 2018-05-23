@@ -1,5 +1,6 @@
 package es.uca.iw.Ucapartment.Precio;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -12,11 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Iva.Iva;
 
 @Entity//Indica a Hibernate que es una entidad
-@Table(name = "Precios")//Nombre de la tabla en la BD
+@Table(name = "precios")//Nombre de la tabla en la BD
 public class Precio {
 
 	@Id//Clave Primaria
@@ -39,12 +42,34 @@ public class Precio {
 	private Apartamento apartamento;
 	
 	//Contructor sin parámetros
-	protected Precio() {}
+	public Precio() {
+		this.valor = 0;
+		this.fecha_inicio = null;
+		this.fecha_fin = null;
+		this.iva = null;
+		this.apartamento = null;
+	}
 
 	//Constructor con parámetros
 	public Precio(double valor, Iva iva) {
 		this.valor = valor;
 		this.iva = iva;
+	}
+	
+	public Precio(double valor, Apartamento apartamento) {
+		this.valor = valor;
+		this.apartamento = apartamento;
+		this.fecha_inicio = null;
+		this.fecha_fin = null;
+		this.iva = null;
+	}
+	
+	public Precio(double valor, Date date1, Date date2, Iva iva, Apartamento apartamento) {
+		this.valor = valor;
+		this.fecha_inicio = date1;
+		this.fecha_fin = date2;
+		this.iva = iva;
+		this.apartamento = apartamento;
 	}
 
 	//Getters & Setters

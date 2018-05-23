@@ -26,6 +26,8 @@ import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Precio.PrecioService;
+import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.security.AccessDeniedView;
@@ -51,6 +53,12 @@ public class VaadinUI extends UI {
 	
 	@Autowired
     ApartamentoService service;
+	
+	@Autowired
+    ReservaService serviceReserva;
+	
+	@Autowired
+    PrecioService precioService;
 	
 	@Autowired
 	ApartamentoRepository repo;
@@ -111,7 +119,7 @@ public class VaadinUI extends UI {
 	}
 	
 	private void showApartamentosScreen() {
-		setContent(new ApartamentoManagementView(service, new ApartamentoEditor(service)));
+		setContent(new ApartamentoManagementView(service, serviceReserva, new ApartamentoEditor(service), precioService));
 	}
 	
 	

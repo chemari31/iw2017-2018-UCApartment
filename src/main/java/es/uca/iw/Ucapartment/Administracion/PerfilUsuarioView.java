@@ -86,8 +86,8 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		lEmail = new Label("Correo electrónico: ");
 		lRol = new Label("Rol: ");
 		lAct = new Label();
-		if(usuario.isAccountNonLocked()) lAct.setCaption("Cuenta activa");
-		else lAct.setCaption("Cuenta bloqueada");
+		if(usuario.isAccountNonLocked()) lAct.setValue("Cuenta activa");
+		else lAct.setValue("Cuenta bloqueada");
 		
 		vNombre = new Label();
 		vApell = new Label(); 
@@ -97,11 +97,11 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		vRol = new Label();
 		vRol.setCaption(usuario.getRol().toString());
 		
-		vNombre.setCaption(usuario.getNombre());
-		vApell.setCaption(usuario.getApellidos());
-		vDNI.setCaption(usuario.getDni());
-		vUsername.setCaption(usuario.getNombreUsuario());
-		vEmail.setCaption(usuario.getEmail());
+		vNombre.setValue(usuario.getNombre());
+		vApell.setValue(usuario.getApellidos());
+		vDNI.setValue(usuario.getDni());
+		vUsername.setValue(usuario.getNombreUsuario());
+		vEmail.setValue(usuario.getEmail());
 		
 		Button btnCambioRolAnfitrion = new Button("Cambiar a anfitrion");
 		Button btnCambioRolGerente = new Button("Cambiar a gerente");
@@ -273,11 +273,11 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
                 	if(!usuario.getDni().equals(sDNI)) usuario.setDni(sDNI);
                 	
                 	usuarioService.save(usuario);
-                	vNombre.setCaption(usuario.getNombre());
-                	vApell.setCaption(usuario.getApellidos());
-                	vDNI.setCaption(usuario.getDni());
-                	vUsername.setCaption(usuario.getNombreUsuario());
-                	vEmail.setCaption(usuario.getEmail());
+                	vNombre.setValue(usuario.getNombre());
+                	vApell.setValue(usuario.getApellidos());
+                	vDNI.setValue(usuario.getDni());
+                	vUsername.setValue(usuario.getNombreUsuario());
+                	vEmail.setValue(usuario.getEmail());
                 	
         			vNombre.setVisible(true);
         			vApell.setVisible(true);
