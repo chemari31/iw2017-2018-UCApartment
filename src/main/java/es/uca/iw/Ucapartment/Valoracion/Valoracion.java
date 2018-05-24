@@ -63,6 +63,16 @@ public class Valoracion {
 		this.usuario = usuario;
 		this.apartamentoValorado = apartamentoValorado;
 	}
+	
+	public Valoracion(String descripcion, int grado, Date fecha, Usuario usuario,
+			Usuario usuarioValorado, Apartamento apartamentoValorado) {
+			this.descripcion = descripcion;
+			this.grado = grado;
+			this.fecha = fecha;
+			this.usuario = usuario;
+			this.usuarioValorado = usuarioValorado;
+			this.apartamentoValorado = apartamentoValorado;
+		}
 
 	//Getters & Setters
 	public Long getId() {

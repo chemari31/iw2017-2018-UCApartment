@@ -1,7 +1,9 @@
 package es.uca.iw.Ucapartment.Apartamento;
 
+import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +46,9 @@ import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 
@@ -81,12 +86,18 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private static Reserva r = null;
 	private Usuario usuario = null;
 	private Reserva reserva;
+	@Autowired
+	private final UsuarioService usuarioService;
+	@Autowired
+	private final ValoracionService valoracionService;
 	
 	@Autowired
-	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, PrecioService precioService) {
+	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, PrecioService precioService, UsuarioService usuarioService, ValoracionService valoracionService) {
 		this.service = service;
 		this.serviceReserva = serviceReserva;
 		this.precioService = precioService;
+		this.usuarioService = usuarioService;
+		this.valoracionService = valoracionService;
 		this.editor = editor;
 		nuevo = new ApartamentoNuevo(service, precioService);
 		this.grid = new Grid<>(Apartamento.class);
@@ -136,7 +147,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 																		mostrarVentanaConfirmacion(estado);
 																	else {
 																		if(estado.getValor() == Valor.REALIZADA)
-																			mostrarVentanaValoracion();
+																			mostrarVentanaValoracion(selection, selReserva);
 																		}
 																	});
 		// Instantiate and edit new Apartamento the new button is clicked
@@ -176,7 +187,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
     	cancelar.addClickListener(e -> { estado.setValor(Valor.CANCELADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
 	}
 	
-	public void mostrarVentanaValoracion() {
+	public void mostrarVentanaValoracion(SingleSelect<Apartamento> selection, SingleSelect<Reserva> selReserva) {
 		VerticalLayout subContent = new VerticalLayout();
         TextArea descripcionValoracion = new TextArea("Descripcion");
         ComboBox<Integer> valoracion = new ComboBox<>("Valoracion");
@@ -192,7 +203,16 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
     	ventanaValoracion.center();
     	UI.getCurrent().addWindow(ventanaValoracion);
     	cancelar.addClickListener(e -> { ventanaValoracion.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
-
+    	aceptar.addClickListener(e -> {
+						    		String comentario = descripcionValoracion.getValue();
+									int valor = valoracion.getValue();
+									Date hoy = java.sql.Date.valueOf(LocalDate.now());
+									reserva = serviceReserva.findById(selReserva.getValue().getId());
+									Usuario usuarioValorado = usuarioService.findById(reserva.getUsuario().getId());
+									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, selection.getValue());
+									valoracionService.save(v);
+									ventanaValoracion.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();
+    							});
 	}
 	
 	private void addComponents(HorizontalLayout actions, Grid<Apartamento> grid2, ApartamentoEditor editor2) {
