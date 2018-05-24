@@ -399,7 +399,7 @@ public class Home extends VerticalLayout implements View {
 			//Grid de busqueda de apartamento
 			Grid<Apartamento> filter2 = new Grid<>();
 			//filter2.setHeightMode(HeightMode.UNDEFINED);
-			filter2.setBodyRowHeight(200);
+			//filter2.setBodyRowHeight(200);
 			filter2.setItems(apartFinal);
 			filter2.setWidth("550");
 			//filter2.getSelectionModel().get
