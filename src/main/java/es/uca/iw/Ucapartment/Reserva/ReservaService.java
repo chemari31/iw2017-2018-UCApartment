@@ -21,6 +21,10 @@ public class ReservaService {
 	public List<Reserva> findByApartamento(Apartamento apart){
 		return repo.findByApartamento(apart);
 	}
+	
+	public Reserva findById(Long id) {
+		return repo.findById(id);
+	}
 
 
 }

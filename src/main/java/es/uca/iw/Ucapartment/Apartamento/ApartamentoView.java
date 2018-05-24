@@ -215,7 +215,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 			long diasTotales = entrada.getTime() - salida.getTime();
 			diasTotales = TimeUnit.DAYS.convert(diasTotales, TimeUnit.MILLISECONDS) * -1;
 			double precioTotalSinIva = precioService.TotalPrecio(apartamento, entrada, salida);
-			Iva iva = repoIva.findByPais("España");
+			Iva iva = repoIva.findByPais("Espana");
 			double porcentaje = (double)iva.getPorcentaje()/100;
 			porcentaje = porcentaje * precioTotalSinIva;
 			double precioTotal = precioTotalSinIva + porcentaje;
