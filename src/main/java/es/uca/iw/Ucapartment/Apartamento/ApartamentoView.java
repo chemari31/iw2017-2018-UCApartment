@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -36,6 +37,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.renderers.ImageRenderer;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -56,7 +58,10 @@ import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
+
 
 @SpringView(name = ApartamentoView.VIEW_NAME)
 public class ApartamentoView extends VerticalLayout implements View {
@@ -69,6 +74,8 @@ public class ApartamentoView extends VerticalLayout implements View {
 	PrecioRepository repo;
 	@Autowired
 	IvaRespository repoIva;
+	@Autowired
+	ValoracionRepository repoValoracion;
 	
 	
 	private final ApartamentoService service;
@@ -80,6 +87,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 	private Date salida;
 	private PopupPago sub = new PopupPago();
 	private Usuario user;
+	private List<Valoracion> listValoracion = new ArrayList<>();
 	
 
 	@Autowired
@@ -98,10 +106,12 @@ public class ApartamentoView extends VerticalLayout implements View {
 		HorizontalLayout camposApartamento = new HorizontalLayout();
 		VerticalLayout layoutDerecho = new VerticalLayout();
 		VerticalLayout layoutIzquierdo = new VerticalLayout();
+		VerticalLayout layoutComentario = new VerticalLayout();
 		Panel reserva = new Panel("Información de la Reserva");
 		Panel panelApartamento = new Panel("Apartamento "+apartamento.getNombre());
 		Panel panelFoto = new Panel("Foto");
 		Panel panelDuenio = new Panel("Dueño del apartamento");
+		Panel panelComentario = new Panel("Comentarios y valoraciones");
 		Button botonReserva = new Button("Reservar");
 		botonReserva.setVisible(false);
 		if(SecurityUtils.isLoggedIn() && (SecurityUtils.LogedUser().getId() != duenio.getId())) {
@@ -115,17 +125,23 @@ public class ApartamentoView extends VerticalLayout implements View {
 		panelFoto.setWidth("320px");
 		panelFoto.setHeight("350px");
 		panelDuenio.setWidth("320px");
+		panelComentario.setWidth("900px");
 		if(SecurityUtils.isLoggedIn())
 		{
 			layoutIzquierdo.addComponent(reserva);
 		}
 		
 		layoutIzquierdo.addComponent(panelApartamento);
+		
 		layoutDerecho.addComponent(panelFoto);
 		layoutDerecho.addComponent(panelDuenio);
+		
+		layoutComentario.addComponent(panelComentario);
+		
 
 	    camposApartamento.addComponent(layoutIzquierdo);
 	    camposApartamento.addComponent(layoutDerecho);
+	    
 	    
 	    VerticalLayout datosReserva = new VerticalLayout();
 	    VerticalLayout elementosApartamento = new VerticalLayout();
@@ -265,6 +281,19 @@ public class ApartamentoView extends VerticalLayout implements View {
 			});
 		}
 		
+		//Comentarios
+		Grid<Valoracion> gridValoracion = new Grid<>();
+		gridValoracion.setWidth("897px");
+		listValoracion = repoValoracion.findByApartamentoValorado(apartamento);
+		gridValoracion.setItems(listValoracion);
+		gridValoracion.addColumn(usuario ->{
+			
+			return usuario.getUsuario().getUsername();
+		}).setCaption("Usuario");
+		gridValoracion.addColumn(Valoracion::getDescripcion).setCaption("Comentario");
+		gridValoracion.addColumn(p ->new ExternalResource("/valoracion/"+String.valueOf(p.getGrado()+".png")),new ImageRenderer()).setCaption("Valoración");
+		
+		
 		
 		elementosApartamento.addComponent(hlNombre);
 		elementosApartamento.addComponent(hlDesc);
@@ -287,13 +316,17 @@ public class ApartamentoView extends VerticalLayout implements View {
 		datosDuenio.addComponent(hlEmailDuenio);
 		datosDuenio.addComponent(botonPerfil);
 		
+		
 		panelFoto.setContent(image);
 		reserva.setContent(datosReserva);
 		panelApartamento.setContent(elementosApartamento);
 		panelDuenio.setContent(datosDuenio);
+		panelComentario.setContent(gridValoracion);
 		
 		addComponent(camposApartamento);
 	    setComponentAlignment(camposApartamento, Alignment.TOP_CENTER);
+	    addComponent(layoutComentario);
+	    setComponentAlignment(layoutComentario, Alignment.TOP_CENTER);
 		
 	}	
 	

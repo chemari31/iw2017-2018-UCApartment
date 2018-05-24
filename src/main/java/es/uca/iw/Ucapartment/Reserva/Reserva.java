@@ -38,6 +38,12 @@ public class Reserva {
 	@JoinColumn(name = "apartamento_id")//Clave foránea
 	private Apartamento apartamento;
 	
+	@Column(length = 7)
+	private double beneficioEmpresa;
+	
+	@Column(length = 7)
+	private double beneficioAnfitrion;
+	
 	//Constructor sin parámetros
 	protected Reserva() {}
 
@@ -103,5 +109,27 @@ public class Reserva {
 
 	public void setApartamento(Apartamento apartamento) {
 		this.apartamento = apartamento;
-	}	
+	}
+	
+	public double getBeneficioEmpresa()
+	{
+		return beneficioEmpresa;
+	}
+	
+	public void setBenenficioEmpresa(double beneficioEmpresa)
+	{
+		this.beneficioEmpresa = beneficioEmpresa;
+		
+	}
+	
+	public double getBeneficioAnfitrion()
+	{
+		return beneficioAnfitrion;
+	}
+	
+	public void setBenenficioAnfitrion(double beneficioAnfitrion)
+	{
+		this.beneficioAnfitrion = beneficioAnfitrion;
+		
+	}
 }

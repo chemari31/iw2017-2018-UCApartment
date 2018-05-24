@@ -21,6 +21,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.Valor;
@@ -52,20 +53,26 @@ public class MiPerfilView extends VerticalLayout implements View
 	final Image image = new Image();
 	Button pendiente = new Button("Pendiente");
 	Button pago;
-	Button cancelada = new Button("Cancelada");
+	Button editar = new Button("EditarPerfil");
 	Button cancelar = new Button("Cancelar");
 	Button aceptar = new Button("Aceptar");
 	Button incidencias = new Button("Dejar una Incidencia");
 	Button realizada = new Button("Realizada");
-	private int contReserva = 1;
+	
 	VerticalLayout vertical = new VerticalLayout();
 	VerticalLayout popupVertical = new VerticalLayout();
-	Button[] open = new Button[100];//Vector para los botones de los valores Aceptados
+	
+	
 	
 	
 	@PostConstruct
 	void init()
 	{
+		
+		editar.addClickListener(event ->{
+			getUI().getNavigator().navigateTo(editPerfilView.VIEW_NAME);
+			
+		});
 		//Datos Personales de los Usuarios
 		try{
 			image.setSource(new ExternalResource(user.getFoto1()));
@@ -77,7 +84,8 @@ public class MiPerfilView extends VerticalLayout implements View
 		addComponents(new Label("Apellido: "+user.getApellidos()));
 		addComponents(new Label("Nombre: "+user.getNombre()));
 		addComponents(new Label("DNI: " +user.getDni()));
-		addComponents(new Label("Email: "+user.getEmail()));	
+		addComponents(new Label("Email: "+user.getEmail()));
+		addComponents(editar);
 	}
 
 	@Override
