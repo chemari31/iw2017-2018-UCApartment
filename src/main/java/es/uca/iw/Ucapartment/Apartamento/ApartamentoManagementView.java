@@ -114,6 +114,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		VerticalLayout layout = new VerticalLayout();
 		// build layout
 		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn, editarBtn, editarPrecioBtn);
+		layout.removeAllComponents();
+		
 		layout.addComponents(nuevo, editor, actions, grid, gridReservas);
 		actions.setVisible(true);
 		grid.setVisible(true);
@@ -169,7 +171,6 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 
 		// Initialize listing
 		listApartamentos(null);
-		
 		addComponent(layout);
 	
 	}
@@ -235,14 +236,13 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		gridReservas.setVisible(true);
 		gridReservas.removeAllColumns();
 		listaReservas = serviceReserva.findByApartamento(apartamento);
-		gridReservas.setItems(listaReservas);
-		for(Reserva reserva : listaReservas) { 
+		gridReservas.setItems(listaReservas); 
 			gridReservas.addColumn(Reserva::getId).setHidden(true).setCaption("Id");
 			gridReservas.addColumn (Reserva::getFechaInicio).setCaption("Fecha Inicio"); 
 			gridReservas.addColumn(Reserva::getFechaFin).setCaption("Fecha Fin");
 			gridReservas.addColumn(Reserva::getPrecio).setCaption("Precio");
 			gridReservas.addColumn(e -> {
-				  apar = reserva.getApartamento();
+				  apar = e.getApartamento();
 				  return apar.getNombre();
 				}).setCaption("Apartamento");
 			gridReservas.addColumn(e -> {
@@ -250,10 +250,9 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 				return estado.getValor();
 			}).setCaption("Estado");
 			gridReservas.addColumn(e -> "Perfil del Solicitante"
-			, new ButtonRenderer(ClickEvent ->  { usuario = reserva.getUsuario();
+			, new ButtonRenderer(ClickEvent ->  { usuario = ((Reserva) ClickEvent.getItem()).getUsuario();
 			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(usuario.getId()));
 			})).setCaption("Perfil");
-		}
 	}
 	
 	@Override
