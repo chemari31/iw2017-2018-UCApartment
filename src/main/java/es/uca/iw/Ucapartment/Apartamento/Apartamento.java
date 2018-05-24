@@ -61,24 +61,9 @@ public class Apartamento {
 	@Column(length = 256)//La longitud es provisional
 	private String Foto2; //falta añadirlo al constructor
 	
-	public String getFoto2() {
-		return Foto2;
-	}
-
-	public void setFoto2(String foto2) {
-		Foto2 = foto2;
-	}
 
 	@Column(length = 256)//La longitud es provisional
 	private String Foto3; //falta añadirlo al constructor
-	
-	public String getFoto3() {
-		return Foto3;
-	}
-
-	public void setFoto3(String foto3) {
-		Foto3 = foto3;
-	}
 
 	//Constructor sin parámetros
 	protected Apartamento() {}
@@ -225,6 +210,22 @@ public class Apartamento {
 	
 	public String getFoto1() {
 		return Foto1;
+	}
+	
+	public String getFoto2() {
+		return Foto2;
+	}
+
+	public void setFoto2(String cadena) {
+		this.Foto2 = cadena;
+	}
+	
+	public String getFoto3() {
+		return Foto3;
+	}
+
+	public void setFoto3(String cadena) {
+		this.Foto3 = cadena;
 	}
 
 

@@ -130,9 +130,9 @@ public class ApartamentoEditor extends VerticalLayout{
 		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
 		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 2)
-		        	apartamento.setFoto2(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 3)
-		        	apartamento.setFoto3(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() + filename);
 		        return fos; // Return the output stream to write to
 		        
 		    }
