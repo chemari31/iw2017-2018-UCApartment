@@ -54,6 +54,10 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	{
         	return true;
         } 
+    	else if(beanName.equals("perfilUsuarioView"))
+    	{
+    		return true;
+    	}
     	else 
     	{
         	return false;

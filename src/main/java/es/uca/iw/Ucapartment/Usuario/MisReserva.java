@@ -89,6 +89,7 @@ public class MisReserva extends VerticalLayout implements View
 	private VerticalLayout popupLayout = new VerticalLayout();
 	private HorizontalLayout horizontal;
 	private PopupPago sub = new PopupPago();
+	private Button factura = new Button("Generar Factura");
 	private Button aceptar = new Button("Aceptar");
 	private Button pagar = new Button("Pagar");
 	private Button incidencia = new Button("Enviar Incidencia");
@@ -354,7 +355,12 @@ public class MisReserva extends VerticalLayout implements View
 				cancelarIncidencia.addClickListener(event ->{
 					sub.close();
 				});
+				factura.addClickListener(event ->{
+					serviceReserva.generarfactura(r);
+				});
+				
 				horizontal.addComponent(cancelarIncidencia);
+				horizontal.addComponent(factura);
 				popupLayout.addComponent(horizontal);
 				sub.setWidth("600px");
 				sub.setHeight("400px");

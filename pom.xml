@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<vaadin.version>8.0.7</vaadin.version>
+		<vaadin.version>8.2.0</vaadin.version>
 	</properties>
 
 	<dependencies>
@@ -61,6 +61,33 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
+		
+		
+		  <dependency>
+		  <groupId>com.itextpdf</groupId>
+		  <artifactId>itextpdf</artifactId>
+		  <version>5.5.11</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>com.itextpdf</groupId>
+		  <artifactId>itext-pdfa</artifactId>
+		  <version>5.5.11</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>com.itextpdf</groupId>
+		  <artifactId>itext-xtra</artifactId>
+		  <version>5.5.11</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>com.itextpdf.tool</groupId>
+		  <artifactId>xmlworker</artifactId>
+		  <version>5.5.11</version>
+		</dependency>
+		
+		
 	</dependencies>
 
 	<dependencyManagement>
