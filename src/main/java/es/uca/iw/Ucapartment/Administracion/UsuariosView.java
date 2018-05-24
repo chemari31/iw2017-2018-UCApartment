@@ -12,13 +12,16 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Usuario.Rol;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
@@ -43,17 +46,44 @@ public class UsuariosView extends VerticalLayout implements View {
 		
 		VerticalLayout layout = new VerticalLayout();
 		Panel listaUsuariosPanel = new Panel("Lista de usuarios");
+		VerticalLayout contenidoPanel = new VerticalLayout();
+		HorizontalLayout hlBotonesFiltro = new HorizontalLayout();
+		Button btnTodos = new Button("Todos");
+		Button btnRolAnf = new Button("Rol anfitrión");
+		Button btnRolGer = new Button("Rol gerente");
+		Button btnRolAdm = new Button("Rol administrador");
 		
-		listaUsuariosPanel.setWidth("620px");
+		listaUsuariosPanel.setWidth("640px");
 		listaUsuariosPanel.setHeight("580px");
+		
+		hlBotonesFiltro.addComponents(btnTodos, btnRolAnf, btnRolGer, btnRolAdm);
 		
 		layout.addComponent(listaUsuariosPanel);
 		layout.setComponentAlignment(listaUsuariosPanel, Alignment.TOP_CENTER);
-
-		lista_usuarios = usuarioService.findAll();
 		
-		//grid.setColumns("nombreUsuario", "email");
+		lista_usuarios = usuarioService.findAll();
 		grid.setItems(lista_usuarios);
+		
+		btnTodos.addClickListener(event -> {
+			lista_usuarios = usuarioService.findAll();
+			grid.setItems(lista_usuarios);
+		});
+		
+		btnRolAnf.addClickListener(event -> {
+			lista_usuarios = usuarioService.findByRol(Rol.ANFITRION);
+			grid.setItems(lista_usuarios);
+		});
+		
+		btnRolGer.addClickListener(event -> {
+			lista_usuarios = usuarioService.findByRol(Rol.GERENTE);
+			grid.setItems(lista_usuarios);
+		});
+		
+		btnRolAdm.addClickListener(event -> {
+			lista_usuarios = usuarioService.findByRol(Rol.ADMINISTRADOR);
+			grid.setItems(lista_usuarios);
+		});
+
 		grid.addColumn(Usuario::getUsername).setCaption("Nombre de usuario").setWidth(200)
 	      .setResizable(false);
 		grid.addColumn(Usuario::getEmail).setCaption("Email").setWidth(200)
@@ -67,7 +97,10 @@ public class UsuariosView extends VerticalLayout implements View {
 		
 		grid.setWidth("600px");
 		grid.setHeight("570px");
-		listaUsuariosPanel.setContent(grid);
+		
+		contenidoPanel.addComponent(hlBotonesFiltro);
+		contenidoPanel.addComponent(grid);
+		listaUsuariosPanel.setContent(contenidoPanel);
 		addComponent(layout);
 	}
 	
