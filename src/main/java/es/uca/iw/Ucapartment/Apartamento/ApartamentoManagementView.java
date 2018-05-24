@@ -137,7 +137,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		filter.addValueChangeListener(e -> listApartamentos(e.getValue()));
 
 		// Connect selected User to editor or hide if none is selected
-		grid.asSingleSelect().addValueChangeListener(e -> listReservas(e.getValue()));
+		grid.asSingleSelect().addValueChangeListener(e -> {listReservas(e.getValue());});
 		
 		SingleSelect<Apartamento> selection = grid.asSingleSelect();
 		SingleSelect<Reserva> selReserva = gridReservas.asSingleSelect();
@@ -146,9 +146,12 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 																	if(estado.getValor() == Valor.PENDIENTE)
 																		mostrarVentanaConfirmacion(estado);
 																	else {
-																		if(estado.getValor() == Valor.REALIZADA)
-																			mostrarVentanaValoracion(selection, selReserva);
+																		if(estado.getValor() == Valor.REALIZADA) {
+																			Apartamento apartam = selection.getValue();
+																			Reserva res = serviceReserva.findById(selReserva.getValue().getId());
+																			mostrarVentanaValoracion(apartam, res);
 																		}
+																	}
 																	});
 		// Instantiate and edit new Apartamento the new button is clicked
 		addNewBtn.addClickListener(e -> { nuevo.setVisible(true); } );
@@ -187,7 +190,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
     	cancelar.addClickListener(e -> { estado.setValor(Valor.CANCELADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
 	}
 	
-	public void mostrarVentanaValoracion(SingleSelect<Apartamento> selection, SingleSelect<Reserva> selReserva) {
+	public void mostrarVentanaValoracion(Apartamento apartam, Reserva res) {
 		VerticalLayout subContent = new VerticalLayout();
         TextArea descripcionValoracion = new TextArea("Descripcion");
         ComboBox<Integer> valoracion = new ComboBox<>("Valoracion");
@@ -207,11 +210,10 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 						    		String comentario = descripcionValoracion.getValue();
 									int valor = valoracion.getValue();
 									Date hoy = java.sql.Date.valueOf(LocalDate.now());
-									reserva = serviceReserva.findById(selReserva.getValue().getId());
-									Usuario usuarioValorado = usuarioService.findById(reserva.getUsuario().getId());
-									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, selection.getValue());
+									Usuario usuarioValorado = usuarioService.findById(res.getUsuario().getId());
+									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, apartam);
 									valoracionService.save(v);
-									ventanaValoracion.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();
+									ventanaValoracion.close(); 
     							});
 	}
 	
@@ -231,6 +233,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private void listReservas(Apartamento apartamento) {
 		List<Reserva> listaReservas = null;
 		gridReservas.setVisible(true);
+		gridReservas.removeAllColumns();
 		listaReservas = serviceReserva.findByApartamento(apartamento);
 		gridReservas.setItems(listaReservas);
 		for(Reserva reserva : listaReservas) { 
