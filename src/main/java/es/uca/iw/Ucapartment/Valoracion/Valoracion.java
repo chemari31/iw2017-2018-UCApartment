@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 
 @Entity//Indica a Hibernate que es una entidad
@@ -40,6 +41,10 @@ public class Valoracion {
 	@ManyToOne
 	@JoinColumn(name = "apartamento_valorado_id")//Apartamento valorado
 	private Apartamento apartamentoValorado;
+	
+	@ManyToOne
+	@JoinColumn(name = "reserva_id")
+	private Reserva reserva;
 	
 	//Constructor sin parámetros
 	protected Valoracion() {}

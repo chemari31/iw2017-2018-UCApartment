@@ -84,20 +84,26 @@ public class ReservaService {
 	{	
 		try {
 			Document doc = new Document();
-			FileOutputStream fichero = new FileOutputStream("factura.pdf");
+			FileOutputStream fichero = new FileOutputStream("facturas/"+reserva.getId()+"factura.pdf");
 			
 			PdfWriter.getInstance(doc, fichero).setInitialLeading(40);
 			doc.open();
-			doc.add(new Paragraph("UcaApartament-Factura"));
-			doc.add(new Paragraph(": " + reserva.getFecha()));
-			doc.add(new Paragraph(": " + reserva.getPrecio()));
-			doc.add(new Paragraph(": " + reserva.getFechaInicio()));
-			doc.add(new Paragraph(": " + reserva.getFechaFin()));
-			doc.add(new Paragraph(": " + reserva.getUsuario().getNombre()));
-			doc.add(new Paragraph(": " + reserva.getApartamento().getUsuario().getNombre()));
-
-				
 			
+			doc.add(new Paragraph("UcaApartament-Factura"));
+			doc.add(new Paragraph("_____________________"));
+			doc.add(new Paragraph("Nombre de apartamento: " + reserva.getApartamento().getNombre()));
+			doc.add(new Paragraph("Dirección: " + reserva.getApartamento().getCalle() + " " + reserva.getApartamento().getNumero()));
+			doc.add(new Paragraph("Ciudad: " + reserva.getApartamento().getCiudad()));
+			doc.add(new Paragraph("Propietario: " + reserva.getApartamento().getUsuario().getNombre() + " " + reserva.getApartamento().getUsuario().getApellidos()));
+			doc.add(new Paragraph("DNI: " + reserva.getApartamento().getUsuario().getDni()));
+			doc.add(new Paragraph("_____________________"));
+			doc.add(new Paragraph("Arrendatario: " + reserva.getUsuario().getNombre() + " " + reserva.getUsuario().getApellidos()));
+			doc.add(new Paragraph("DNI: " + reserva.getUsuario().getDni()));
+			doc.add(new Paragraph("_____________________"));
+			doc.add(new Paragraph("Fecha inicio de reserva: " + reserva.getFechaInicio()));
+			doc.add(new Paragraph("Fecha fin de la reserva: " + reserva.getFechaFin()));
+			doc.add(new Paragraph("La reserva se ha realizado a fecha de: " + reserva.getFecha() + " con un precio total de " + reserva.getPrecio() + " euros."));
+
 			doc.close();
 			Notification.show("Factura generada.");
 			
