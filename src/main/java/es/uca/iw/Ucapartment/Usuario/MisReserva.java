@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Grid;
@@ -68,19 +69,16 @@ public class MisReserva extends VerticalLayout implements View
 	private EstadoRepository repoEstado;
 	@Autowired
 	private EstadoService serviceEstado;
-	
 	@Autowired
 	private IvaRespository repoIva;
-	
 	@Autowired
 	private ValoracionRepository repoValoracion;
-	
 	@Autowired
 	private ValoracionService serviceValoracion;
-	
-	
 	@Autowired
 	private ReservaService serviceReserva;
+	
+	private List<Valoracion> valoraciones;
 	private Apartamento apart = null;
 	private static Reserva r = null;
 	private Estado estado = null;
@@ -134,7 +132,7 @@ public class MisReserva extends VerticalLayout implements View
 		
 		
 		grid.setItems(listReserva);
-		grid.setWidth("650px");
+		grid.setWidth("755px");
 		grid.addColumn(Reserva::getFecha).setCaption("Fecha");
 		grid.addColumn(reserva -> {
 			  apart = reserva.getApartamento();
@@ -372,7 +370,46 @@ public class MisReserva extends VerticalLayout implements View
 
 				})).setCaption("Estado");
 		
-		
+		//Columna boton valoraciones
+		grid.addColumn(reserva -> "Valoraciones", new ButtonRenderer(clickEvent -> {
+			r = ((Reserva) clickEvent.getItem());
+			valoraciones = serviceValoracion.findByReserva(r);
+			if(valoraciones.size() == 0) {
+				popupLayout.removeAllComponents();
+				popupLayout.addComponent(new Label("No se han realizado valoraciones sobre"
+					+ " esta reserva"));
+				popupLayout.addComponent(aceptar);
+				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
+				sub.setWidth("500px");
+				sub.setHeight("150px");
+				sub.setPosition(550, 200);
+				sub.setContent(popupLayout);
+				sub.center();
+				UI.getCurrent().addWindow(sub);
+			}
+			else {
+				valoraciones.sort((o1,o2) -> o1.getFecha().compareTo(o2.getFecha()));
+				Grid<Valoracion> valGrid = new Grid();
+				valGrid.setItems(valoraciones);
+				valGrid.setWidth("900px");
+				valGrid.setHeight("250px");
+				valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150);
+				valGrid.addColumn(Valoracion->Valoracion.getUsuario().getNombreUsuario())
+					.setCaption("Usuario").setWidth(200);
+				valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800);
+				popupLayout.removeAllComponents();
+				popupLayout.addComponent(new Label("Valoraciones realizadas sobre la reserva"));
+				popupLayout.addComponent(valGrid);
+				popupLayout.addComponent(aceptar);
+				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
+				sub.setWidth("1000px");
+				sub.setHeight("400px");
+				sub.setPosition(550, 200);
+				sub.setContent(popupLayout);
+				sub.center();
+				UI.getCurrent().addWindow(sub);
+			}
+		})).setCaption("Valoraciones");		
 				
 				
 		
