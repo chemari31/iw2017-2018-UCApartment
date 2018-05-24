@@ -1,5 +1,6 @@
 package es.uca.iw.Ucapartment.Apartamento;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +58,9 @@ public class ApartamentoService {
 	
 	public void delete(Apartamento arg0) {
 		repo.delete(arg0);
+	}
+
+	public List<Apartamento> findByHabitacion(String filtro) {
+		return repo.findByHabitacion(Integer.parseInt(filtro));
 	}
 }
