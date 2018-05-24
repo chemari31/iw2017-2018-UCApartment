@@ -33,9 +33,15 @@ import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
+import es.uca.iw.Ucapartment.Iva.Iva;
+import es.uca.iw.Ucapartment.Iva.IvaRespository;
+import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = MisReserva.VIEW_NAME)
@@ -53,12 +59,25 @@ public class MisReserva extends VerticalLayout implements View
 	private List<Reserva> listReserva = new ArrayList<Reserva>();
 	private List<Reserva> listReserva2 = new ArrayList<Reserva>();
 	private List<Reserva> listReservaFinal = new ArrayList<Reserva>();
+	
+	@Autowired
+	private PrecioService precioService;
 	@Autowired
 	private ReservaRepository repoReserva;
 	@Autowired
 	private EstadoRepository repoEstado;
 	@Autowired
 	private EstadoService serviceEstado;
+	
+	@Autowired
+	private IvaRespository repoIva;
+	
+	@Autowired
+	private ValoracionRepository repoValoracion;
+	
+	@Autowired
+	private ValoracionService serviceValoracion;
+	
 	
 	@Autowired
 	private ReservaService serviceReserva;
@@ -72,6 +91,7 @@ public class MisReserva extends VerticalLayout implements View
 	private PopupPago sub = new PopupPago();
 	private Button factura = new Button("Generar Factura");
 	private Button aceptar = new Button("Aceptar");
+	private Button pagar = new Button("Pagar");
 	private Button incidencia = new Button("Enviar Incidencia");
 	private Button cancelar = new Button("Cancelar Reserva");
 	private Button cancelarIncidencia = new Button("Cancelar");
@@ -102,6 +122,8 @@ public class MisReserva extends VerticalLayout implements View
 		aceptar.addClickListener(event -> {
 			sub.close();
 		});
+		
+		
 		
 		
 		
@@ -137,7 +159,7 @@ public class MisReserva extends VerticalLayout implements View
 				popupLayout.removeAllComponents();
 				popupLayout.addComponent(new TextField("Introduzca su numero de cuenta","xxx-xxx-xxx-xxx"));
 				horizontal = new HorizontalLayout();
-				horizontal.addComponent(aceptar);
+				
 				cancelar.addClickListener(event ->{
 					estado.setValor(Valor.CANCELADA);
 					serviceEstado.save(estado);
@@ -147,6 +169,16 @@ public class MisReserva extends VerticalLayout implements View
 				});
 
 				horizontal.addComponent(cancelar);
+				
+				pagar.addClickListener(event -> {
+
+					serviceReserva.pasarelaDePago(r.getPrecio(), r,estado);
+					sub.close();
+					layout.removeAllComponents();
+					init();
+	
+				});
+				horizontal.addComponent(pagar);
 				popupLayout.addComponent(horizontal);
 				sub.setWidth("400px");
 				sub.setHeight("300px");
@@ -226,11 +258,23 @@ public class MisReserva extends VerticalLayout implements View
 					
 					if(correcto == listReservaFinal.size() && (entrada.compareTo(hoy)>=0 && salida.compareTo(entrada) > 0) )
 					{
+						System.out.println("empieza "+r.getPrecio());
+						double precioTotalSinIva = precioService.TotalPrecio(apart, entrada, salida);
+						System.out.println(precioTotalSinIva);
+						double totalCancelacion = 0.10 * r.getPrecio();
+						System.out.println(totalCancelacion);
+						Iva iva = repoIva.findByPais("España");
+						double porcentaje = (double)iva.getPorcentaje()/100;
+						porcentaje = porcentaje * precioTotalSinIva;
+						System.out.println(porcentaje);
+						double precioTotal = precioTotalSinIva + porcentaje + totalCancelacion;
+						System.out.println(precioTotal);
 						System.out.println("Entro en si");
 						System.out.println(r.getId());
 						r.setFechaInicio(entrada);
 						r.setFechaFin(salida);
 						r.setFecha(hoy);
+						r.setPrecio(precioTotal);
 						serviceReserva.save(r);
 						sub.close();
 						layout.removeAllComponents();
@@ -256,6 +300,8 @@ public class MisReserva extends VerticalLayout implements View
 				horizontal.addComponent(cancelar);
 				horizontal.addComponent(ModificarReserva);
 				popupLayout.addComponent(horizontal);
+				popupLayout.addComponent(new Label("Cualquier modificación de la reserva se le penalizara"
+						+ " con un coste del 10% del actual precio"));
 				sub.setWidth("900px");
 				sub.setHeight("300px");
 				sub.setPosition(550, 200);
@@ -293,7 +339,18 @@ public class MisReserva extends VerticalLayout implements View
 				horizontal = new HorizontalLayout();
 				horizontal.addComponent(incidencia);
 				incidencia.addClickListener(event ->{
+					
+					
+					
+					String comentario = area.getValue();
+					int valor = Integer.parseInt(nivel.getValue());
+					Date hoy = java.sql.Date.valueOf(LocalDate.now());
+					Valoracion v = new Valoracion(comentario, valor,hoy,user,apart);
+					serviceValoracion.save(v);
+					Notification.show("Su comentario se ha realizado satisfactoriamente", Notification.Type.HUMANIZED_MESSAGE );	
 					sub.close();
+					layout.removeAllComponents();
+					init();
 				});
 				cancelarIncidencia.addClickListener(event ->{
 					sub.close();

@@ -67,5 +67,9 @@ public class UsuarioService implements UserDetailsService {
 		
 		return existe;
 	}
+	
+	public List<Usuario> findByRol(Rol rol) {
+		return repo.findByRol(rol);
+	}
 
 }

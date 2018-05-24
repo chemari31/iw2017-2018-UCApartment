@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationException;
+import com.vaadin.data.converter.StringToDoubleConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
@@ -70,6 +71,7 @@ public class ApartamentoEditor extends VerticalLayout{
 	TextField calle = new TextField("Calle");
 	TextField numero = new TextField("Numero");
 	TextField cp = new TextField("Código Postal");
+	TextField precio = new TextField("precio");
 	// Show uploaded file in this placeholder
 	final Image image = new Image("Foto");
 	final Image image2 = new Image("Foto 2");
@@ -128,9 +130,9 @@ public class ApartamentoEditor extends VerticalLayout{
 		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
 		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 2)
-		        	apartamento.setFoto2(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() + filename);
 		        else if(tipo == 3)
-		        	apartamento.setFoto3(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() + filename);
 		        return fos; // Return the output stream to write to
 		        
 		    }
@@ -181,7 +183,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		foto_btn3.setImmediateMode(true);
 		foto_btn3.setButtonCaption("Subir Ahora");
 		
-		HorizontalLayout form = new HorizontalLayout(nombre, descripcion, contacto);
+		HorizontalLayout form = new HorizontalLayout(nombre, descripcion, contacto, precio);
 		HorizontalLayout form2 = new HorizontalLayout(habitaciones, camas, ac);
 		HorizontalLayout form3 = new HorizontalLayout(ciudad, calle, numero, cp);
 		HorizontalLayout form4 = new HorizontalLayout(image, foto_btn, image2, foto_btn2, image3, foto_btn3);
@@ -199,6 +201,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		calle.setRequiredIndicatorVisible(true);
 		numero.setRequiredIndicatorVisible(true);
 		cp.setRequiredIndicatorVisible(true);
+		precio.setRequiredIndicatorVisible(true);
 		
 		nombre.setMaxLength(128);
 		descripcion.setMaxLength(256);
@@ -207,6 +210,7 @@ public class ApartamentoEditor extends VerticalLayout{
 		calle.setMaxLength(128);
 		numero.setMaxLength(16);
 		cp.setMaxLength(5);
+		precio.setMaxLength(10);
 		
 		binder.forField(cp)
 		  .withConverter(new StringToIntegerConverter("Por favor introduzca un número"))
@@ -214,6 +218,10 @@ public class ApartamentoEditor extends VerticalLayout{
 		binder.forField(numero)
 		  .withConverter(new StringToIntegerConverter("Por favor introduzca un número"))
 		  .bind(Apartamento::getNumero, Apartamento::setNumero);
+		
+		binder.forField(precio)
+			.withConverter(new StringToDoubleConverter("Por favor introduzca un número"))
+			.bind(Apartamento::getPrecio, Apartamento::setPrecio);
 		// asigna los campos del formulario al objeto apartamento
 		binder.bindInstanceFields(this);
 
@@ -277,6 +285,11 @@ public class ApartamentoEditor extends VerticalLayout{
 		.asRequired("El campo Número del Apartamento es obligatorio")
 		  .withConverter(new StringToIntegerConverter("Por favor introduzca un número"))
 		  .bind(Apartamento::getNumero, Apartamento::setNumero);
+		
+		binder.forField(precio)
+		.asRequired("El campo Precio del Apartamento es obligatorio")
+		  .withConverter(new StringToDoubleConverter("Por favor introduzca un número"))
+		  .bind(Apartamento::getPrecio, Apartamento::setPrecio);
 
 		// Bind user properties to similarly named fields
 		// Could also use annotation or "manual binding" or programmatically

@@ -1,5 +1,11 @@
 package es.uca.iw.Ucapartment.Apartamento;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,21 +21,34 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.SingleSelect;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.components.grid.SingleSelectionModel;
+import com.vaadin.ui.renderers.ButtonRenderer;
 
 import es.uca.iw.Ucapartment.Home;
+import es.uca.iw.Ucapartment.Administracion.PerfilUsuarioView;
+import es.uca.iw.Ucapartment.Estado.Estado;
+import es.uca.iw.Ucapartment.Estado.EstadoRepository;
+import es.uca.iw.Ucapartment.Estado.EstadoService;
+import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Precio.EstablecerPrecioEspeciales;
 import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
+import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Usuario.UsuarioService;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 
@@ -45,7 +64,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private Button editarPrecioBtn;
 	Usuario user = SecurityUtils.LogedUser();
 	private Grid<Reserva> gridReservas;
-	Window subWindow = new Window("Datos del Apartamento");
+	Window confirmarReserva = new Window("Confirmación o Denegación Reserva");
+	Window ventanaValoracion = new Window("Introducir una Valoración");
 	
 
 	private ApartamentoEditor editor;
@@ -57,12 +77,27 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private final ReservaService serviceReserva;
 	@Autowired
 	private final PrecioService precioService;
+	@Autowired
+	private final EstadoService estadoService;
+	private Apartamento apar = null;
+	@Autowired
+	private EstadoRepository repoEstado;
+	private Estado estado = null;
+	private static Reserva r = null;
+	private Usuario usuario = null;
+	private Reserva reserva;
+	@Autowired
+	private final UsuarioService usuarioService;
+	@Autowired
+	private final ValoracionService valoracionService;
 	
 	@Autowired
-	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, PrecioService precioService) {
+	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, PrecioService precioService, UsuarioService usuarioService, ValoracionService valoracionService) {
 		this.service = service;
 		this.serviceReserva = serviceReserva;
 		this.precioService = precioService;
+		this.usuarioService = usuarioService;
+		this.valoracionService = valoracionService;
 		this.editor = editor;
 		nuevo = new ApartamentoNuevo(service, precioService);
 		this.grid = new Grid<>(Apartamento.class);
@@ -70,7 +105,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		this.addNewBtn = new Button("Nuevo Apartamento", FontAwesome.PLUS);
 		this.editarBtn = new Button("Editar Apartamento");
 		this.editarPrecioBtn = new Button("Establecer Precio por Fecha");
-		this.gridReservas = new Grid<>(Reserva.class);
+		this.gridReservas = new Grid<>();
+		this.estadoService = new EstadoService();
 	}
 	
 	@PostConstruct
@@ -89,7 +125,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		
 		gridReservas.setHeight(300, Unit.PIXELS);
 		gridReservas.setWidth(1000, Unit.PIXELS);
-		gridReservas.setColumns("fechaInicio", "fechaFin", "precio", "apartamento");
+		//gridReservas.setColumns("fechaInicio", "fechaFin", "precio", "apartamento");
 		gridReservas.setVisible(false);
 		
 		filter.setPlaceholder("Filtrar por nombre");
@@ -104,6 +140,16 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		grid.asSingleSelect().addValueChangeListener(e -> listReservas(e.getValue()));
 		
 		SingleSelect<Apartamento> selection = grid.asSingleSelect();
+		SingleSelect<Reserva> selReserva = gridReservas.asSingleSelect();
+		gridReservas.asSingleSelect().addValueChangeListener(e -> { reserva = serviceReserva.findById(selReserva.getValue().getId());
+																	estado = repoEstado.findByReserva(reserva); 
+																	if(estado.getValor() == Valor.PENDIENTE)
+																		mostrarVentanaConfirmacion(estado);
+																	else {
+																		if(estado.getValor() == Valor.REALIZADA)
+																			mostrarVentanaValoracion(selection, selReserva);
+																		}
+																	});
 		// Instantiate and edit new Apartamento the new button is clicked
 		addNewBtn.addClickListener(e -> { nuevo.setVisible(true); } );
 		editarBtn.addClickListener(clickEvent -> { editor.editApartamento(selection.getValue()); });
@@ -125,6 +171,50 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	
 	}
 	
+	public void mostrarVentanaConfirmacion(Estado estado) {
+		VerticalLayout subContent = new VerticalLayout();
+        Label titulo = new Label("¿Confirmar Reserva?");
+        /* Action buttons */
+    	Button aceptar = new Button("Aceptar");
+    	Button cancelar = new Button("Cancel");
+    	subContent.addComponent(titulo);
+    	HorizontalLayout botones = new HorizontalLayout(aceptar, cancelar);
+    	subContent.addComponent(botones);
+    	confirmarReserva.setContent(subContent);
+    	confirmarReserva.center();
+    	UI.getCurrent().addWindow(confirmarReserva);
+    	aceptar.addClickListener(e -> { estado.setValor(Valor.ACEPTADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
+    	cancelar.addClickListener(e -> { estado.setValor(Valor.CANCELADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
+	}
+	
+	public void mostrarVentanaValoracion(SingleSelect<Apartamento> selection, SingleSelect<Reserva> selReserva) {
+		VerticalLayout subContent = new VerticalLayout();
+        TextArea descripcionValoracion = new TextArea("Descripcion");
+        ComboBox<Integer> valoracion = new ComboBox<>("Valoracion");
+        valoracion.setItems(1, 2, 3, 4, 5);
+        /* Action buttons */
+    	Button aceptar = new Button("Aceptar");
+    	Button cancelar = new Button("Cancel");
+    	subContent.addComponent(descripcionValoracion);
+    	subContent.addComponent(valoracion);
+    	HorizontalLayout botones = new HorizontalLayout(aceptar, cancelar);
+    	subContent.addComponent(botones);
+    	ventanaValoracion.setContent(subContent);
+    	ventanaValoracion.center();
+    	UI.getCurrent().addWindow(ventanaValoracion);
+    	cancelar.addClickListener(e -> { ventanaValoracion.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
+    	aceptar.addClickListener(e -> {
+						    		String comentario = descripcionValoracion.getValue();
+									int valor = valoracion.getValue();
+									Date hoy = java.sql.Date.valueOf(LocalDate.now());
+									reserva = serviceReserva.findById(selReserva.getValue().getId());
+									Usuario usuarioValorado = usuarioService.findById(reserva.getUsuario().getId());
+									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, selection.getValue());
+									valoracionService.save(v);
+									ventanaValoracion.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();
+    							});
+	}
+	
 	private void addComponents(HorizontalLayout actions, Grid<Apartamento> grid2, ApartamentoEditor editor2) {
 		// TODO Auto-generated method stub
 		
@@ -139,8 +229,28 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	}
 	
 	private void listReservas(Apartamento apartamento) {
+		List<Reserva> listaReservas = null;
 		gridReservas.setVisible(true);
-		gridReservas.setItems(serviceReserva.findByApartamento(apartamento));
+		listaReservas = serviceReserva.findByApartamento(apartamento);
+		gridReservas.setItems(listaReservas);
+		for(Reserva reserva : listaReservas) { 
+			gridReservas.addColumn(Reserva::getId).setHidden(true).setCaption("Id");
+			gridReservas.addColumn (Reserva::getFechaInicio).setCaption("Fecha Inicio"); 
+			gridReservas.addColumn(Reserva::getFechaFin).setCaption("Fecha Fin");
+			gridReservas.addColumn(Reserva::getPrecio).setCaption("Precio");
+			gridReservas.addColumn(e -> {
+				  apar = reserva.getApartamento();
+				  return apar.getNombre();
+				}).setCaption("Apartamento");
+			gridReservas.addColumn(e -> {
+				estado = repoEstado.findByReserva(e);
+				return estado.getValor();
+			}).setCaption("Estado");
+			gridReservas.addColumn(e -> "Perfil del Solicitante"
+			, new ButtonRenderer(ClickEvent ->  { usuario = reserva.getUsuario();
+			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(usuario.getId()));
+			})).setCaption("Perfil");
+		}
 	}
 	
 	@Override
