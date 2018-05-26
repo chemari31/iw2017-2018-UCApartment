@@ -31,6 +31,7 @@ import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Transaccion.Transaccion;
 import es.uca.iw.Ucapartment.Transaccion.TransaccionService;
+import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 
 
@@ -86,7 +87,14 @@ public class ReservaService {
 	public Reserva findById(Long id) {
 		return repo.findById(id);
 	}
-
+	
+	public List<Reserva> findAll() {
+		return repo.findAll();
+	}
+	
+	public List<Reserva> findByUsuario(Usuario usuario) {
+		return repo.findByUsuario(usuario);
+	}
 
 	public void generarfactura(Reserva reserva)
 	{	

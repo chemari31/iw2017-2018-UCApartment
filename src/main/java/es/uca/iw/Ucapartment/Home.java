@@ -136,7 +136,7 @@ public class Home extends VerticalLayout implements View {
 		vuelta.setValue(LocalDate.now().plusDays(1));
 
 		final FormLayout loginLayout = new FormLayout();
-		loginLayout.setWidth(1300, Unit.PIXELS);
+		loginLayout.setWidth(1020, Unit.PIXELS);
 	
 		layout2 = new HorizontalLayout();
 		
@@ -401,18 +401,18 @@ public class Home extends VerticalLayout implements View {
 			//filter2.setHeightMode(HeightMode.UNDEFINED);
 			//filter2.setBodyRowHeight(200);
 			filter2.setItems(apartFinal);
-			filter2.setWidth("550");
+			filter2.setWidth("900");
 			//filter2.getSelectionModel().get
 			//Object select = ((SingleSelectionModel) filter2.getSelectionModel()).getSelectedItem();
 			
-			filter2.addColumn(p ->new ExternalResource(p.getFoto1()),new ImageRenderer()).setCaption("Imagen").setWidth(200);
-			filter2.addColumn(Apartamento::getNombre).setCaption("Nombre");
-			filter2.addColumn(Apartamento::getCiudad).setCaption("Ciudad");
+			filter2.addColumn(p ->new ExternalResource(p.getFoto1()),new ImageRenderer()).setCaption("Imagen").setWidth(200).setResizable(false);
+			filter2.addColumn(Apartamento::getNombre).setCaption("Nombre").setResizable(false);
+			filter2.addColumn(Apartamento::getCiudad).setCaption("Ciudad").setResizable(false);
 			filter2.addColumn(e -> "Informacion", new ButtonRenderer(clickEvent-> { 
 				Apartamento a = ((Apartamento) clickEvent.getItem());
 				getUI().getNavigator().navigateTo(ApartamentoView.VIEW_NAME + '/'+String.valueOf(a.getId()) + '/'+ entrada + '/'+ salida);
 				
-				})).setCaption("Información");
+				})).setCaption("Información").setResizable(false);
 			
 			
 			layout3.removeAllComponents();//Borramos la busqueda anterior
