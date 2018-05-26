@@ -29,7 +29,8 @@ import org.springframework.stereotype.Service;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.Valor;
-
+import es.uca.iw.Ucapartment.Transaccion.Transaccion;
+import es.uca.iw.Ucapartment.Transaccion.TransaccionService;
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 
 
@@ -42,6 +43,9 @@ public class ReservaService {
 	@Autowired
 	private EstadoRepository repoEstado;
 	
+	@Autowired
+	private TransaccionService transaccionService;
+	
 	public Reserva save(Reserva reserva)
 	{
 		return repo.save(reserva);
@@ -49,13 +53,24 @@ public class ReservaService {
 	
 
 	@Transactional
-	public void pasarelaDePago(double total, Reserva r, Estado e)
+	public void pasarelaDePago(double total, Reserva r, Estado e, Long cuentaOrigen)
 	{
-		double beneficioEmpresa = total * 0.10;
-		double beneficioAnfitrion = total * 0.90;
+		Long cuentaEmpresa = 0000000000000000L;
+		Long cuentaAnfitrion = 0000000000000002L + (long) (Math.random() * (9999999999999999L - 0000000000000003L));;
+		Long cuentaSS = 0000000000000001L;
+		double beneficioEmpresa = total * 0.05;
+		double beneficioAnfitrion = total * 0.74;
+		double beneficioMontoro = total * 0.21;
 		
-		r.setBenenficioEmpresa(beneficioEmpresa);
-		r.setBenenficioAnfitrion(beneficioAnfitrion);
+		Transaccion transaccionEmpresa = new Transaccion(beneficioEmpresa, cuentaOrigen, cuentaEmpresa, r);
+		Transaccion transaccionAnfitrion = new Transaccion(beneficioAnfitrion, cuentaOrigen, cuentaAnfitrion, r);
+		Transaccion transaccionIva = new Transaccion(beneficioMontoro, cuentaOrigen, cuentaSS, r);
+		
+		transaccionService.save(transaccionEmpresa);
+		transaccionService.save(transaccionAnfitrion);
+		transaccionService.save(transaccionIva);
+		/*r.setBenenficioEmpresa(beneficioEmpresa);
+		r.setBenenficioAnfitrion(beneficioAnfitrion);*/
 		e.setValor(Valor.REALIZADA);
 		repoEstado.save(e);
 		repo.save(r);

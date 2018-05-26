@@ -237,22 +237,22 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		gridReservas.removeAllColumns();
 		listaReservas = serviceReserva.findByApartamento(apartamento);
 		gridReservas.setItems(listaReservas); 
-			gridReservas.addColumn(Reserva::getId).setHidden(true).setCaption("Id");
-			gridReservas.addColumn (Reserva::getFechaInicio).setCaption("Fecha Inicio"); 
-			gridReservas.addColumn(Reserva::getFechaFin).setCaption("Fecha Fin");
-			gridReservas.addColumn(Reserva::getPrecio).setCaption("Precio");
-			gridReservas.addColumn(e -> {
-				  apar = e.getApartamento();
-				  return apar.getNombre();
-				}).setCaption("Apartamento");
-			gridReservas.addColumn(e -> {
-				estado = repoEstado.findByReserva(e);
-				return estado.getValor();
-			}).setCaption("Estado");
-			gridReservas.addColumn(e -> "Perfil del Solicitante"
-			, new ButtonRenderer(ClickEvent ->  { usuario = ((Reserva) ClickEvent.getItem()).getUsuario();
-			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(usuario.getId()));
-			})).setCaption("Perfil");
+		gridReservas.addColumn(Reserva::getId).setHidden(true).setCaption("Id");
+		gridReservas.addColumn (Reserva::getFechaInicio).setCaption("Fecha Inicio"); 
+		gridReservas.addColumn(Reserva::getFechaFin).setCaption("Fecha Fin");
+		gridReservas.addColumn(Reserva::getPrecio).setCaption("Precio");
+		gridReservas.addColumn(e -> {
+			  apar = e.getApartamento();
+			  return apar.getNombre();
+			}).setCaption("Apartamento");
+		gridReservas.addColumn(e -> {
+			estado = repoEstado.findByReserva(e);
+			return estado.getValor();
+		}).setCaption("Estado");
+		gridReservas.addColumn(e -> "Perfil del Solicitante"
+		, new ButtonRenderer(ClickEvent ->  { usuario = ((Reserva) ClickEvent.getItem()).getUsuario();
+		getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(usuario.getId()));
+		})).setCaption("Perfil");
 	}
 	
 	@Override

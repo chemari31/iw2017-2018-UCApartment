@@ -10,6 +10,11 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.converter.StringToIntegerConverter;
+import com.vaadin.data.converter.StringToLongConverter;
+import com.vaadin.data.validator.LongRangeValidator;
+import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
@@ -39,6 +44,8 @@ import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
+import es.uca.iw.Ucapartment.Transaccion.Transaccion;
+import es.uca.iw.Ucapartment.Transaccion.TransaccionRepository;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
@@ -157,9 +164,17 @@ public class MisReserva extends VerticalLayout implements View
 			if(estado.getValor() == Valor.ACEPTADA)
 			{
 				popupLayout.removeAllComponents();
-				popupLayout.addComponent(new TextField("Introduzca su numero de cuenta","xxx-xxx-xxx-xxx"));
+				TextField cuenta = new TextField("Introduzca su numero de cuenta (16 dígitos)","xxxx-xxxx-xxxx-xxxx");
+				cuenta.setRequiredIndicatorVisible(true);
+				cuenta.setMaxLength(16);
+				popupLayout.addComponent(cuenta);
+				Binder<Transaccion> bind = new Binder<>(Transaccion.class);
+				bind.forField(cuenta)
+				 .asRequired("El campo Cuenta es obligatorio")
+				 .withConverter(new StringToLongConverter("Por favor introduzca un número"))
+				 .withValidator(new LongRangeValidator("El número de cuenta debe tener 16 dígitos", 0000000000000005L, 9999999999999999L))
+				 .bind(Transaccion::getCuentaOrigen, Transaccion::setCuentaOrigen);
 				horizontal = new HorizontalLayout();
-				
 				cancelar.addClickListener(event ->{
 					estado.setValor(Valor.CANCELADA);
 					serviceEstado.save(estado);
@@ -171,12 +186,14 @@ public class MisReserva extends VerticalLayout implements View
 				horizontal.addComponent(cancelar);
 				
 				pagar.addClickListener(event -> {
-
-					serviceReserva.pasarelaDePago(r.getPrecio(), r,estado);
-					sub.close();
-					layout.removeAllComponents();
-					init();
-	
+					if(bind.isValid()) {
+						Long lg = null;
+						serviceReserva.pasarelaDePago(r.getPrecio(), r,estado, lg.valueOf(cuenta.getValue()));
+						sub.close();
+						layout.removeAllComponents();
+						init();
+					} else
+						Notification.show("Comprueba el número de cuenta");
 				});
 				horizontal.addComponent(pagar);
 				popupLayout.addComponent(horizontal);
