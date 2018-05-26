@@ -43,6 +43,7 @@ import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
+import es.uca.iw.Ucapartment.email.EmailServiceImpl;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = MisReserva.VIEW_NAME)
@@ -97,6 +98,8 @@ public class MisReserva extends VerticalLayout implements View
 	DateField ida = new DateField("Entrada");
 	DateField vuelta = new DateField("Salida");
 	Date hoy = java.sql.Date.valueOf(LocalDate.now());
+	private EmailServiceImpl correo = new EmailServiceImpl();
+
 	
 	
 	@Autowired
@@ -171,6 +174,10 @@ public class MisReserva extends VerticalLayout implements View
 				pagar.addClickListener(event -> {
 
 					serviceReserva.pasarelaDePago(r.getPrecio(), r,estado);
+					
+					correo.enviaremailpropietario2(r);
+					correo.enviaremailcliente2(r);
+
 					sub.close();
 					layout.removeAllComponents();
 					init();
@@ -204,6 +211,9 @@ public class MisReserva extends VerticalLayout implements View
 				cancelar.addClickListener(event ->{
 					estado.setValor(Valor.CANCELADA);
 					serviceEstado.save(estado);
+					
+					correo.enviaremailpropietario3(r);
+					
 					sub.close();
 					layout.removeAllComponents();
 					init();

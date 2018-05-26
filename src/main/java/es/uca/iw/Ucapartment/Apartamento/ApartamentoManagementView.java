@@ -49,6 +49,7 @@ import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
+import es.uca.iw.Ucapartment.email.EmailServiceImpl;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 
@@ -90,6 +91,9 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	private final UsuarioService usuarioService;
 	@Autowired
 	private final ValoracionService valoracionService;
+	
+	private EmailServiceImpl correo = new EmailServiceImpl();
+
 	
 	@Autowired
 	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, PrecioService precioService, UsuarioService usuarioService, ValoracionService valoracionService) {
@@ -187,8 +191,26 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
     	confirmarReserva.setContent(subContent);
     	confirmarReserva.center();
     	UI.getCurrent().addWindow(confirmarReserva);
-    	aceptar.addClickListener(e -> { estado.setValor(Valor.ACEPTADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
-    	cancelar.addClickListener(e -> { estado.setValor(Valor.CANCELADA); estadoService.save(estado); confirmarReserva.close(); gridReservas.clearSortOrder(); gridReservas.deselectAll();});
+    	aceptar.addClickListener(e -> { 
+    								estado.setValor(Valor.ACEPTADA);
+    								estadoService.save(estado);
+    								
+    								correo.enviaremailcliente(estado.getReserva());
+
+    								confirmarReserva.close();
+    								gridReservas.clearSortOrder();
+    								gridReservas.deselectAll();});
+    	
+    	cancelar.addClickListener(e -> { 
+    								estado.setValor(Valor.CANCELADA);
+    								estadoService.save(estado);
+    								
+    								correo.enviaremailcliente(estado.getReserva());
+
+    								confirmarReserva.close();
+    								gridReservas.clearSortOrder();
+    								gridReservas.deselectAll();});
+    	
 	}
 	
 	public void mostrarVentanaValoracion(Apartamento apartam, Reserva res) {
