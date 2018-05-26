@@ -1,5 +1,7 @@
 package es.uca.iw.Ucapartment.Administracion;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +15,19 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ButtonRenderer;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
@@ -29,8 +37,12 @@ import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
+import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
+import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = ReservasView.VIEW_NAME)
 public class ReservasView extends VerticalLayout implements View{
@@ -39,36 +51,46 @@ public class ReservasView extends VerticalLayout implements View{
 	
 	private Grid<Reserva> grid = new Grid<>();
 	private List<Reserva> lista_reservas;
+	private List<Valoracion> lista_valoraciones;
 	
 	private final ReservaService reservaService;
 	private final ApartamentoService apartamentoService;
 	private final UsuarioService usuarioService;
 	private final EstadoService estadoService;
+	private final ValoracionService valoracionService;
+	private Estado estado = null;
+	private Reserva reservaRow = null;
+	private Window confirmarReserva = new Window("Confirmación o Denegación Reserva");
 	
 	@Autowired
 	public ReservasView(ReservaService rService, ApartamentoService aService, UsuarioService uService,
-			EstadoService eService) {
+			EstadoService eService, ValoracionService vService) {
 		this.reservaService = rService;
 		this.apartamentoService = aService;
 		this.usuarioService = uService;
 		this.estadoService = eService;
+		this.valoracionService = vService;
 	}
 	
 	@PostConstruct
 	void init () {
 		VerticalLayout layout = new VerticalLayout();
+		VerticalLayout popupLayout = new VerticalLayout();
 		Panel listaReservasPanel = new Panel("Lista de reservas");
 		VerticalLayout contenidoPanel = new VerticalLayout();
 		HorizontalLayout hlFiltro = new HorizontalLayout();
 		TextField tfFiltro = new TextField();
 		ComboBox<String> cbFiltroUsuario = new ComboBox<>();
 		ComboBox<String> cbFiltroApart = new ComboBox<>();
+		ComboBox<String> cbFiltros = new ComboBox<>();
 		List<String> lista_nom_apart = new ArrayList<String>();
 		List<String> lista_nom_usuario = new ArrayList<String>();
 		List<Apartamento> lista_apartamentos;
 		List<Usuario> lista_usuarios;
 		Label lFiltrar = new Label("Filtrar por ");
-		ComboBox<String> cbFiltros = new ComboBox<>();
+		PopupPago popupValoraciones = new PopupPago();
+		PopupPago popupReservas = new PopupPago();
+
 		
 		cbFiltros.setItems("Apartamento","Usuario");
 		
@@ -129,10 +151,159 @@ public class ReservasView extends VerticalLayout implements View{
 		//tfFiltro.addValueChangeListener(e -> listaApartamentos(e.getValue(), cbFiltro.getValue()));
 		
 		//grid.setColumns("nombreUsuario", "email");
+		
+
+		
 		grid.addColumn(e -> {
-			Estado estado = estadoService.findByReserva(e); 
+			estado = estadoService.findByReserva(e);
 			return estado.getValor();
-		}).setCaption("Estado").setWidth(125);
+			}, new ButtonRenderer(clickEvent -> {
+				reservaRow = ((Reserva)clickEvent.getItem());
+				estado = estadoService.findByReserva((Reserva) clickEvent.getItem());
+				if(estado.getValor() == Valor.PENDIENTE) {
+					Button btn_aceptar_res = new Button("Aceptar");
+					Button btn_cancelar_res = new Button("Cancelar");
+					HorizontalLayout hlBotones = new HorizontalLayout();
+					hlBotones.addComponents(btn_aceptar_res, btn_cancelar_res);
+					popupLayout.removeAllComponents();
+					popupLayout.addComponent(new Label("¿Confirmar reserva?"));
+					popupLayout.addComponent(hlBotones);
+					popupReservas.setPosition(550, 200);
+					popupReservas.setContent(popupLayout);
+					popupReservas.center();
+					popupReservas.setDraggable(false);
+					btn_aceptar_res.addClickListener(event -> {
+						estado.setValor(Valor.ACEPTADA);
+						estadoService.save(estado);
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+					btn_cancelar_res.addClickListener(event -> {
+						estado.setValor(Valor.CANCELADA);
+						estadoService.save(estado);
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+					UI.getCurrent().addWindow(popupReservas);
+				}
+				if(estado.getValor() == Valor.CANCELADA) {
+					Button btn_aceptar = new Button("Aceptar");
+					popupLayout.removeAllComponents();
+					popupLayout.addComponent(new Label("La reserva fue cancelada el día "
+							+reservaRow.getFecha()));
+					popupLayout.addComponent(btn_aceptar);
+					btn_aceptar.addClickListener(event ->{
+						popupReservas.close();
+					});
+					popupReservas.setWidth("600px");
+					popupReservas.setHeight("300px");
+					popupReservas.setPosition(550, 200);
+					popupReservas.setContent(popupLayout);
+					popupReservas.center();
+					UI.getCurrent().addWindow(popupReservas);
+				}
+				if(estado.getValor() == Valor.ACEPTADA)
+				{
+					popupLayout.removeAllComponents();
+					popupLayout.addComponent(new TextField("Introduzca su numero de cuenta","xxx-xxx-xxx-xxx"));
+					HorizontalLayout hlInfo = new HorizontalLayout();
+					Button btn_cancelar = new Button("Cancelar reserva");
+					Button btn_pagar = new Button("Pagar reserva");
+					
+					hlInfo.addComponents(btn_cancelar,btn_pagar);
+					
+					btn_cancelar.addClickListener(event ->{
+						estado.setValor(Valor.CANCELADA);
+						estadoService.save(estado);
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+					
+					btn_pagar.addClickListener(event -> {
+
+						reservaService.pasarelaDePago(reservaRow.getPrecio(), reservaRow,estado);
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+
+					popupLayout.addComponent(hlInfo);
+					popupReservas.setWidth("400px");
+					popupReservas.setHeight("300px");
+					popupReservas.setPosition(550, 200);
+					popupReservas.setContent(popupLayout);
+					popupReservas.center();
+					UI.getCurrent().addWindow(popupReservas);
+					
+				}
+				if(estado.getValor() == Valor.REALIZADA) {
+					HorizontalLayout hlInfo = new HorizontalLayout();
+					Button btn_incid_prop = new Button("Incidencia a propietario");
+					Button btn_incid_huesp = new Button("Incidencia a huesped");
+					Button btn_cancelar = new Button("Cancelar");
+					Button btn_factura = new Button("Generar factura");
+					popupLayout.removeAllComponents();
+					popupLayout.addComponent(new Label("La reserva con fecha "+reservaRow.getFecha() 
+						+ "Ya fue realizada"));
+					
+					TextArea area = new TextArea();
+					area.setValue("Escriba aquí su incidencia");
+					area.setSizeFull();
+				
+					NativeSelect<String> nivel = new NativeSelect<>("Grado");
+					nivel.setItems("1", "2","3","4","5");
+					nivel.setValue("1");
+					
+					popupLayout.addComponents(area,nivel);
+					
+					hlInfo.addComponents(btn_incid_prop,btn_incid_huesp,btn_cancelar, btn_factura);
+					
+					btn_incid_prop.addClickListener(event ->{
+						String comentario = area.getValue();
+						int valor = Integer.parseInt(nivel.getValue());
+						Date hoy = java.sql.Date.valueOf(LocalDate.now());
+						Valoracion v = new Valoracion(comentario, valor,hoy,SecurityUtils.LogedUser(),
+								reservaRow.getApartamento());
+						valoracionService.save(v);
+						Notification.show("Su comentario se ha realizado satisfactoriamente", Notification.Type.HUMANIZED_MESSAGE );	
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+					btn_incid_huesp.addClickListener(event ->{
+						String comentario = area.getValue();
+						int valor = Integer.parseInt(nivel.getValue());
+						Date hoy = java.sql.Date.valueOf(LocalDate.now());
+						Usuario usuarioValorado = usuarioService.findById(reservaRow.getUsuario().getId());
+						Valoracion v = new Valoracion(comentario, valor,hoy,SecurityUtils.LogedUser(),usuarioValorado,
+								reservaRow.getApartamento());
+						valoracionService.save(v);
+						Notification.show("Su comentario se ha realizado satisfactoriamente", Notification.Type.HUMANIZED_MESSAGE );	
+						popupReservas.close();
+						removeAllComponents();
+						init();
+					});
+					btn_cancelar.addClickListener(event ->{
+						popupReservas.close();
+					});
+					btn_factura.addClickListener(event ->{
+						reservaService.generarfactura(reservaRow);
+					});
+					
+					popupLayout.addComponent(hlInfo);
+					popupReservas.setWidth("800px");
+					popupReservas.setHeight("400px");
+					popupReservas.setPosition(550, 200);
+					popupReservas.setContent(popupLayout);
+					popupReservas.center();
+					popupReservas.setDraggable(false);
+					UI.getCurrent().addWindow(popupReservas);
+				}
+				
+		})).setCaption("Estado").setWidth(140).setResizable(false);
 		grid.addColumn(Reserva::getFecha).setCaption("Fecha").setWidth(150)
 	      .setResizable(false);
 		grid.addColumn(Reserva::getFechaInicio).setCaption("Fecha inicio").setWidth(150)
@@ -141,15 +312,56 @@ public class ReservasView extends VerticalLayout implements View{
 	      .setResizable(false);
 		grid.addColumn(Reserva::getPrecio).setCaption("Precio (€)").setWidth(120)
 	      .setResizable(false);
-		grid.addColumn(Reserva->Reserva.getApartamento().getNombre()).setCaption("Apartamento").setWidth(150)
-	      .setResizable(false);
+		grid.addColumn(Reserva->Reserva.getApartamento().getNombre()).setCaption("Apartamento")
+		  .setWidth(140).setResizable(false);
 		grid.addColumn(Reserva->Reserva.getUsuario().getUsername()).setCaption("Usuario").setWidth(90)
 	      .setResizable(false);
-		grid.addColumn(e -> "Incidencias", new ButtonRenderer(clickEvent-> { 
-			Reserva reserva = ((Reserva) clickEvent.getItem());
-			/*getUI().getNavigator().navigateTo(DatosReserva.VIEW_NAME + '/'+String.valueOf(reserva.getId()));
-			
-			*/})).setCaption("Ver incidencias").setWidth(150)
+		//Columna boton valoraciones
+		grid.addColumn(reserva -> "Valoraciones", new ButtonRenderer(clickEvent -> {
+					Reserva r = ((Reserva) clickEvent.getItem());
+					lista_valoraciones = valoracionService.findByReserva(r);
+					Button btn_aceptar = new Button("Aceptar");
+					if(lista_valoraciones.size() == 0) {
+						popupLayout.removeAllComponents();
+						popupLayout.addComponent(new Label("No se han realizado valoraciones sobre"
+							+ " esta reserva"));
+						popupLayout.addComponent(btn_aceptar);
+						popupLayout.setComponentAlignment(btn_aceptar, Alignment.BOTTOM_RIGHT);
+						btn_aceptar.addClickListener(event ->{
+							popupValoraciones.close();
+						});
+						popupValoraciones.setWidth("500px");
+						popupValoraciones.setHeight("150px");
+						popupValoraciones.setPosition(550, 200);
+						popupValoraciones.setContent(popupLayout);
+						popupValoraciones.center();
+						popupValoraciones.setDraggable(false);
+						UI.getCurrent().addWindow(popupValoraciones);
+					}
+					else {
+						lista_valoraciones.sort((o1,o2) -> o1.getFecha().compareTo(o2.getFecha()));
+						Grid<Valoracion> valGrid = new Grid();
+						valGrid.setItems(lista_valoraciones);
+						valGrid.setWidth("900px");
+						valGrid.setHeight("250px");
+						valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150);
+						valGrid.addColumn(Valoracion->Valoracion.getUsuario().getNombreUsuario())
+							.setCaption("Usuario").setWidth(200);
+						valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800);
+						popupLayout.removeAllComponents();
+						popupLayout.addComponent(new Label("Valoraciones realizadas sobre la reserva"));
+						popupLayout.addComponent(valGrid);
+						popupLayout.addComponent(btn_aceptar);
+						popupLayout.setComponentAlignment(btn_aceptar, Alignment.BOTTOM_RIGHT);
+						popupValoraciones.setWidth("1000px");
+						popupValoraciones.setHeight("400px");
+						popupValoraciones.setPosition(550, 200);
+						popupValoraciones.setContent(popupLayout);
+						popupValoraciones.center(); 
+						popupValoraciones.setDraggable(false);
+						UI.getCurrent().addWindow(popupValoraciones);
+					}
+				})).setCaption("Valoraciones").setWidth(150)
 	      .setResizable(false);
 		
 		grid.setWidth("1090px");

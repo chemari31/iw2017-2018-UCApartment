@@ -25,6 +25,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import es.uca.iw.Ucapartment.Administracion.ApartamentosView;
+import es.uca.iw.Ucapartment.Administracion.FacturacionView;
 import es.uca.iw.Ucapartment.Administracion.ReservasView;
 import es.uca.iw.Ucapartment.Administracion.UsuariosView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
@@ -95,6 +96,14 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
 				getUI().getNavigator().navigateTo(ReservasView.VIEW_NAME);
+				
+			}
+		});
+		gestion.addItem("Facturación", null, new MenuBar.Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				getUI().getNavigator().navigateTo(FacturacionView.VIEW_NAME);
 				
 			}
 		});
