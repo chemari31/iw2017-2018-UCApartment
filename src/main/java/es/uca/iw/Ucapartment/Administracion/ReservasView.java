@@ -46,6 +46,7 @@ import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
+import es.uca.iw.Ucapartment.email.EmailServiceImpl;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = ReservasView.VIEW_NAME)
@@ -65,6 +66,8 @@ public class ReservasView extends VerticalLayout implements View{
 	private Estado estado = null;
 	private Reserva reservaRow = null;
 	private Window confirmarReserva = new Window("Confirmación o Denegación Reserva");
+	private EmailServiceImpl correo = new EmailServiceImpl();
+
 	
 	@Autowired
 	public ReservasView(ReservaService rService, ApartamentoService aService, UsuarioService uService,
@@ -179,6 +182,9 @@ public class ReservasView extends VerticalLayout implements View{
 					btn_aceptar_res.addClickListener(event -> {
 						estado.setValor(Valor.ACEPTADA);
 						estadoService.save(estado);
+						
+						correo.enviaremailcliente(reservaRow);
+						
 						popupReservas.close();
 						removeAllComponents();
 						init();
@@ -186,6 +192,9 @@ public class ReservasView extends VerticalLayout implements View{
 					btn_cancelar_res.addClickListener(event -> {
 						estado.setValor(Valor.CANCELADA);
 						estadoService.save(estado);
+						
+						correo.enviaremailcliente(reservaRow);
+
 						popupReservas.close();
 						removeAllComponents();
 						init();
@@ -238,6 +247,10 @@ public class ReservasView extends VerticalLayout implements View{
 							Long lg = null;
 							reservaService.pasarelaDePago(reservaRow.getPrecio(), reservaRow,estado, 
 									lg.valueOf(cuenta.getValue()));
+							
+							correo.enviaremailpropietario2(reservaRow);
+							correo.enviaremailcliente2(reservaRow);
+							
 							popupReservas.close();
 							removeAllComponents();
 							init();
