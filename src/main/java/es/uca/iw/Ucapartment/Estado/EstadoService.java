@@ -1,5 +1,7 @@
 package es.uca.iw.Ucapartment.Estado;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,5 +22,8 @@ public class EstadoService {
 		// TODO Auto-generated method stub
 		return repo.findByReserva(reserva);
 	}
-
+	
+	public List<Reserva> findReservaByEstado(Valor valor) {
+		return repo.findReservaByEstado(valor);
+	}
 }

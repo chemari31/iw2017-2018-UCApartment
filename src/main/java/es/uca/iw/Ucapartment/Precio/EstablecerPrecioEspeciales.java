@@ -58,7 +58,7 @@ public class EstablecerPrecioEspeciales extends Window{
     	
     	save.addClickListener(e -> { if (binder.isValid()) { Precio pre = new Precio(Double.parseDouble(precio.getValue().replace(',', '.')), 
     			java.sql.Date.valueOf(fechaInicio.getValue()), java.sql.Date.valueOf(fechaFin.getValue()), null, apartamento);
-    			if(pre.getFecha_fin().compareTo(pre.getFecha_inicio()) >= 0) {
+    			if(pre.getFecha_fin().compareTo(pre.getFecha_inicio()) > 0) {
     				precioService.save(pre); subWindow.close();}
     			else
     				Notification.show("La fecha de fin no puede ser anterior a la fecha de inicio"); 
