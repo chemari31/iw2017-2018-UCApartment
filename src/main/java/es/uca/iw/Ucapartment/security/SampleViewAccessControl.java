@@ -58,6 +58,12 @@ public class SampleViewAccessControl implements ViewAccessControl {
     	{
     		return true;
     	}
+    	else if(beanName.equals("editPerfilView")) {
+    		if(SecurityUtils.isLoggedIn())
+    			return true;
+    		else 
+    			return false;
+    	}
     	else 
     	{
         	return false;

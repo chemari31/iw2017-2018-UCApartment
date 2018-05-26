@@ -116,7 +116,7 @@ public class LoginScreen extends VerticalLayout implements View {
                 System.out.println(nombreUsuario.getValue()+" "+pword);
                 
 	            if (!login(nombreUsuario.getValue(), pword)) {
-	            	if(service.loadUserByUsername(nombreUsuario.getValue()).isAccountNonExpired())
+	            	if(!service.loadUserByUsername(nombreUsuario.getValue()).isAccountNonExpired())
 	            		Notification.show("Su cuenta está bloqueada. Contacta con un administrador");
 	            	else {
 	                    Notification.show("Error en el login. Introduzca de nuevo las credenciales");

@@ -65,7 +65,6 @@ public class ReservasView extends VerticalLayout implements View{
 	private final ValoracionService valoracionService;
 	private Estado estado = null;
 	private Reserva reservaRow = null;
-	private Window confirmarReserva = new Window("Confirmación o Denegación Reserva");
 	private EmailServiceImpl correo = new EmailServiceImpl();
 
 	

@@ -1,5 +1,8 @@
 package es.uca.iw.Ucapartment.Administracion;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +16,9 @@ import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.Page;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
@@ -24,7 +30,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.renderers.ImageRenderer;
 
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
@@ -44,12 +54,17 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 	private ValoracionService valoracionService;
 	private Usuario usuario;
 	
+	private final Image image = new Image("foto");
+	
 	// Mediante el objeto binder validamos los campos
 	Binder<Usuario> binder = new Binder<>(Usuario.class);
 	
+	// Directorio base de la aplicación. Lo utilizamos para guardar las imágenes
+	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath(); 
+	
 	@Autowired
-	public PerfilUsuarioView (UsuarioService uServicio, ValoracionService vService) {
-		this.usuarioService = uServicio;
+	public PerfilUsuarioView (UsuarioService uService, ValoracionService vService) {
+		this.usuarioService = uService;
 		this.valoracionService = vService;
 	}
 	
@@ -88,6 +103,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		HorizontalLayout hlEmail = new HorizontalLayout();
 		HorizontalLayout hlRol = new HorizontalLayout();
 		HorizontalLayout hlCuentaActiva = new HorizontalLayout();
+		HorizontalLayout hlBtnCambioImagen = new HorizontalLayout();
 		HorizontalLayout hlBtnCambiosRol = new HorizontalLayout();
 		HorizontalLayout hlBtnCambiosActivo = new HorizontalLayout();
 		HorizontalLayout hlBtnModificarDatos = new HorizontalLayout();
@@ -159,6 +175,44 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 			btnCambioRolGerente.setEnabled(true);
 			btnCambioRolAdmin.setEnabled(false);
 		});
+		
+		 // Lo siguiente se utiliza para guardar imagenes. Creamos el directorio si no existe
+ 		File uploads = new File(basepath +"/usuarios/");
+         if (!uploads.exists() && !uploads.mkdir())
+             System.out.println(new Label("ERROR: No podemos crear el directorio."));
+
+ 		// Clase para almacenar imágenes
+ 		class ImageUploader implements Receiver, SucceededListener {
+ 			
+ 			public File file;
+ 		    
+ 			public OutputStream receiveUpload(String filename,
+                     String mimeType) {
+ 		    	FileOutputStream fos = null; // Stream to write to
+ 		        try {
+ 		            // Open the file for writing.
+ 		            file = new File(basepath +"/usuarios/" + usuario.getId() + filename);
+ 		            fos = new FileOutputStream(file);
+ 		        } catch (final java.io.FileNotFoundException e) {
+ 		            new Notification("No se ha podido abrir el archivo",
+ 		                             e.getMessage(),
+ 		                             Notification.Type.ERROR_MESSAGE)
+ 		                .show(Page.getCurrent());
+ 		            return null;
+ 		        }
+ 		        usuario.setFoto1("/usuarios/" + usuario.getId() + filename);
+ 		        return fos; // Return the output stream to write to 
+ 		    }
+
+ 		    public void uploadSucceeded(SucceededEvent event) {
+ 		    	usuarioService.save(usuario);
+ 		    	image.setSource(new FileResource(file));
+ 		    	image.setWidth(300, Unit.PIXELS);
+ 		    	image.setHeight(300, Unit.PIXELS);
+ 		    	if(usuario.getUsername().equals(SecurityUtils.LogedUser().getUsername()))
+ 	 				getUI().getPage().reload();
+ 		    }
+ 		};
 		
 		Button btnBloquear = new Button("Bloquear cuenta");
 		Button btnDesbloquear = new Button("Desbloquear cuenta");
@@ -319,14 +373,20 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		});
 		
 		
-		Image img = new Image("foto");
-		img.setWidth(300, Unit.PIXELS);
-		img.setHeight(300, Unit.PIXELS);
+		image.setWidth(300, Unit.PIXELS);
+		image.setHeight(300, Unit.PIXELS);
 		
-		img.setVisible(true);
+		image.setVisible(true);
 		try{
-			img.setSource(new ExternalResource(usuario.getFoto1()));
-		}catch(Exception e) {img.setSource(new ExternalResource("/perfiluser/null.png"));}
+			image.setSource(new ExternalResource(usuario.getFoto1()));
+		}catch(Exception e) { image.setSource(new ExternalResource("/perfiluser/null.png")); }
+		
+		ImageUploader receiver = new ImageUploader();
+		Upload btnFoto = new Upload("Adjunta la foto de perfil", receiver);
+
+		btnFoto.addSucceededListener(receiver);
+		btnFoto.setImmediateMode(true);
+		btnFoto.setButtonCaption("Cambiar imagen");
     	
     	hlNombre.addComponents(lNombre, vNombre, tfNombre);
     	hlApellidos.addComponents(lApell, vApell, tfApell);
@@ -334,12 +394,13 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
     	hlUsername.addComponents(lUsername, vUsername, tfUsername);
     	hlEmail.addComponents(lEmail, vEmail,tfEmail);
     	hlRol.addComponents(lRol, vRol);
+    	hlBtnCambioImagen.addComponent(btnFoto);
     	hlCuentaActiva.addComponent(lAct);
     	hlBtnCambiosRol.addComponents(btnCambioRolAnfitrion, btnCambioRolGerente, btnCambioRolAdmin);
     	hlBtnCambiosActivo.addComponents(btnBloquear, btnDesbloquear);
     	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar);
     	
-    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol);
+    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol, hlBtnCambioImagen);
     	
     	if(SecurityUtils.isLoggedIn() && (SecurityUtils.hasRole("ADMINISTRADOR") || 
     			SecurityUtils.LogedUser().getUsername().equals(usuario.getUsername())))
@@ -370,7 +431,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		gridValoracion.addColumn(p ->new ExternalResource("/valoracion/"
 		+String.valueOf(p.getGrado()+".png")),new ImageRenderer()).setCaption("Valoración").setResizable(false);
 		
-		panelFoto.setContent(img);
+		panelFoto.setContent(image);
 		panelUsuario.setContent(elementosUsuario);
 		panelComentario.setContent(gridValoracion);
 		
