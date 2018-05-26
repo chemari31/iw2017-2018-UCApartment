@@ -61,6 +61,7 @@ import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
+import es.uca.iw.Ucapartment.email.EmailServiceImpl;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 
@@ -89,6 +90,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 	private PopupPago sub = new PopupPago();
 	private Usuario user;
 	private List<Valoracion> listValoracion = new ArrayList<>();
+	private EmailServiceImpl correo = new EmailServiceImpl();
 	
 
 	@Autowired
@@ -266,6 +268,9 @@ public class ApartamentoView extends VerticalLayout implements View {
 				Estado e = new Estado(hoy,Valor.PENDIENTE,r);
 				serviceEstado.save(e);
 				Notification.show("Gracias por confiar en UCApartment.\nSu reserva se ha realizado correctamente.", Notification.Type.HUMANIZED_MESSAGE );
+				
+				correo.enviaremailpropietario(r);
+				
 				sub.close();
 				getUI().getNavigator().navigateTo(Home.VIEW_NAME);
 			});
