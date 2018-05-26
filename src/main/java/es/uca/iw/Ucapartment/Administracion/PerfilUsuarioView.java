@@ -1,7 +1,10 @@
 package es.uca.iw.Ucapartment.Administracion;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
+import org.apache.catalina.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
@@ -14,6 +17,7 @@ import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
@@ -21,11 +25,14 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ImageRenderer;
 
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
 import es.uca.iw.Ucapartment.Usuario.Rol;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
 import es.uca.iw.Ucapartment.security.SecurityUtils;
 
 @SpringView(name = PerfilUsuarioView.VIEW_NAME)
@@ -34,23 +41,28 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 	public static final String VIEW_NAME = "perfilUsuarioView";
 	
 	private UsuarioService usuarioService;
+	private ValoracionService valoracionService;
 	private Usuario usuario;
 	
 	// Mediante el objeto binder validamos los campos
 	Binder<Usuario> binder = new Binder<>(Usuario.class);
 	
 	@Autowired
-	public PerfilUsuarioView (UsuarioService servicio) {
-		this.usuarioService = servicio;
+	public PerfilUsuarioView (UsuarioService uServicio, ValoracionService vService) {
+		this.usuarioService = uServicio;
+		this.valoracionService = vService;
 	}
 	
 	void init() {
 		HorizontalLayout datosUsuario = new HorizontalLayout();
 		VerticalLayout layoutDerecho = new VerticalLayout();
 		VerticalLayout layoutIzquierdo = new VerticalLayout();
+		VerticalLayout layoutElementos = new VerticalLayout();
 		
 		Panel panelUsuario = new Panel("Usuario "+usuario.getUsername());
 		Panel panelFoto = new Panel("Foto");
+		Panel panelComentario = new Panel("Comentarios y valoraciones");
+		panelComentario.setWidth("900px");
 		
 		panelUsuario.setWidth("630px");
 		panelUsuario.setHeight("570px");
@@ -62,6 +74,10 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		datosUsuario.addComponent(layoutIzquierdo);
 		datosUsuario.addComponent(layoutDerecho);
+		
+		layoutElementos.addComponents(datosUsuario, panelComentario);
+		layoutElementos.setComponentAlignment(datosUsuario, Alignment.TOP_CENTER);
+		layoutElementos.setComponentAlignment(panelComentario, Alignment.TOP_CENTER);
 		
 		VerticalLayout elementosUsuario = new VerticalLayout();
 		
@@ -159,7 +175,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		btnBloquear.addClickListener(event -> {
 			usuario.setDesbloqueo(false);
 			usuarioService.save(usuario);
-			lAct.setCaption("Cuenta bloqueada");
+			lAct.setValue("Cuenta bloqueada");
 			Notification.show("La cuenta del usuario "+usuario.getUsername() + " ha sido bloqueada.");
 			btnBloquear.setEnabled(false);
 			btnDesbloquear.setEnabled(true);
@@ -168,7 +184,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		btnDesbloquear.addClickListener(event -> {
 			usuario.setDesbloqueo(true);
 			usuarioService.save(usuario);
-			lAct.setCaption("Cuenta activa");
+			lAct.setValue("Cuenta activa");
 			Notification.show("La cuenta del usuario "+usuario.getUsername() + " ha sido desbloqueada.");
 			btnBloquear.setEnabled(true);
 			btnDesbloquear.setEnabled(false);
@@ -323,21 +339,43 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
     	hlBtnCambiosActivo.addComponents(btnBloquear, btnDesbloquear);
     	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar);
     	
-    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol,
-    			hlBtnModificarDatos, hlCuentaActiva, hlBtnCambiosRol, hlBtnCambiosActivo);
-
-    	if(usuario.getUsername().equals(SecurityUtils.LogedUser().getUsername())
+    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol);
+    	
+    	if(SecurityUtils.isLoggedIn() && (SecurityUtils.hasRole("ADMINISTRADOR") || 
+    			SecurityUtils.LogedUser().getUsername().equals(usuario.getUsername())))
+    		elementosUsuario.addComponent(hlBtnModificarDatos);
+    	
+    	if(SecurityUtils.hasRole("ADMINISTRADOR")) 
+    		elementosUsuario.addComponents(hlCuentaActiva, hlBtnCambiosRol, hlBtnCambiosActivo);
+    	
+    	if(SecurityUtils.isLoggedIn())
+    		if(usuario.getUsername().equals(SecurityUtils.LogedUser().getUsername())
     			|| !SecurityUtils.LogedUser().getRol().equals(Rol.ADMINISTRADOR)) {
     		hlBtnCambiosRol.setVisible(false);
     		hlBtnCambiosActivo.setVisible(false);
     		hlBtnModificarDatos.setVisible(false);
     	}
     	
+		//Comentarios
+		Grid<Valoracion> gridValoracion = new Grid<>();
+		List<Valoracion> lista_valoraciones;
+		gridValoracion.setWidth("897px");
+		lista_valoraciones = valoracionService.findByUsuarioValorado(usuario);
+		gridValoracion.setItems(lista_valoraciones);
+		gridValoracion.addColumn(usuario ->{
+			
+			return usuario.getUsuario().getUsername();
+		}).setCaption("Usuario").setResizable(false);
+		gridValoracion.addColumn(Valoracion::getDescripcion).setCaption("Comentario").setResizable(false);
+		gridValoracion.addColumn(p ->new ExternalResource("/valoracion/"
+		+String.valueOf(p.getGrado()+".png")),new ImageRenderer()).setCaption("Valoración").setResizable(false);
+		
 		panelFoto.setContent(img);
 		panelUsuario.setContent(elementosUsuario);
+		panelComentario.setContent(gridValoracion);
 		
-		addComponent(datosUsuario);
-	    setComponentAlignment(datosUsuario, Alignment.TOP_CENTER);
+		addComponent(layoutElementos);
+	    setComponentAlignment(layoutElementos, Alignment.TOP_CENTER);
 	}
 	
 	@Override

@@ -4,6 +4,7 @@ package es.uca.iw.Ucapartment.Administracion;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +25,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
@@ -37,17 +39,21 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+import com.vaadin.ui.renderers.ImageRenderer;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Valoracion.Valoracion;
+import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
 
 @SpringView(name = DatosApartamentoView.VIEW_NAME)
 public class DatosApartamentoView extends VerticalLayout implements View{
 	public static final String VIEW_NAME = "datosApartamentoView";
 	
 	private final ApartamentoService apartamentoService;
+	private final ValoracionService valoracionService;
 	
 	private Apartamento apartamento;
 	
@@ -62,9 +68,9 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath(); 
 	
 	@Autowired
-	public DatosApartamentoView(ApartamentoService service) {
-		this.apartamentoService = service;
-
+	public DatosApartamentoView(ApartamentoService aService, ValoracionService vService) {
+		this.apartamentoService = aService;
+		this.valoracionService = vService;
 	}
 	
 	void init() {
@@ -73,12 +79,14 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		Button btnPerfil = new Button("Ver perfil");
 		
 		HorizontalLayout camposApartamento = new HorizontalLayout();
+		VerticalLayout vlElementos = new VerticalLayout();
 		VerticalLayout layoutDerecho = new VerticalLayout();
 		VerticalLayout layoutIzquierdo = new VerticalLayout();
 		
 		Panel panelApartamento = new Panel();
 		Panel panelFoto = new Panel("Foto");
 		Panel panelDuenio = new Panel("Dueño del apartamento");
+		Panel panelComentario = new Panel("Comentarios y valoraciones");
 		
 		PopupPago imagenes = new PopupPago();
 		
@@ -89,6 +97,7 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		panelFoto.setWidth("320px");
 		panelFoto.setHeight("350px");
 		panelDuenio.setWidth("320px");
+		panelComentario.setWidth("900px");
 		
 		layoutIzquierdo.addComponent(panelApartamento);
 		layoutDerecho.addComponent(panelFoto);
@@ -96,6 +105,9 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 
 	    camposApartamento.addComponent(layoutIzquierdo);
 	    camposApartamento.addComponent(layoutDerecho);
+	    
+		vlElementos.addComponents(camposApartamento, panelComentario);
+		vlElementos.setComponentAlignment(panelComentario, Alignment.TOP_CENTER);
 	    
 		// Lo siguiente se utiliza para guardar imagenes. Creamos el directorio si no existe
 		File uploads = new File(basepath +"/apartamentos/");
@@ -591,6 +603,21 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		
 		hlBtnModificarDatos.addComponents(btnModificarDatos,btnGuardar);
 		
+		//Comentarios
+		Grid<Valoracion> gridValoracion = new Grid<>();
+		List<Valoracion> lista_valoraciones;
+		gridValoracion.setWidth("897px");
+		lista_valoraciones = valoracionService.findByApartamentoValorado(apartamento);
+		gridValoracion.setItems(lista_valoraciones);
+		gridValoracion.addColumn(usuario ->{
+			
+			return usuario.getUsuario().getUsername();
+		}).setCaption("Usuario").setResizable(false);
+		gridValoracion.addColumn(Valoracion::getDescripcion).setCaption("Comentario").setResizable(false);
+		gridValoracion.addColumn(p ->new ExternalResource("/valoracion/"
+		+String.valueOf(p.getGrado()+".png")),new ImageRenderer()).setCaption("Valoración").setResizable(false);
+		
+		
 		elementosApartamento.addComponent(hlNombre);
 		elementosApartamento.addComponent(hlDesc);
 		elementosApartamento.addComponent(hlContacto);
@@ -617,9 +644,10 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		panelFoto.setContent(image);
 		panelApartamento.setContent(elementosApartamento);
 		panelDuenio.setContent(datosDuenio);
+		panelComentario.setContent(gridValoracion);
 		
-		addComponent(camposApartamento);
-	    setComponentAlignment(camposApartamento, Alignment.TOP_CENTER);
+		addComponent(vlElementos);
+	    setComponentAlignment(vlElementos, Alignment.TOP_CENTER);
 		
 	}	
 	

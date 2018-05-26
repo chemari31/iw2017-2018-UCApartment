@@ -1,5 +1,8 @@
 package es.uca.iw.Ucapartment.Transaccion;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +26,8 @@ public class Transaccion {
 	
 	private Long cuentaDestino;
 	
+	private Date fecha;
+	
 	@ManyToOne
 	@JoinColumn(name = "reserva")
 	private Reserva reserva;
@@ -34,6 +39,7 @@ public class Transaccion {
 		this.cuentaOrigen = cuentaOrigen;
 		this.cuentaDestino = cuentaDestino;
 		this.reserva = reserva;
+		this.fecha = java.sql.Date.valueOf(LocalDate.now());
 	}
 	
 	public Transaccion() {}
@@ -76,6 +82,14 @@ public class Transaccion {
 
 	public void setReserva(Reserva reserva) {
 		this.reserva = reserva;
+	}
+	
+	public Date getFecha() {
+		return this.fecha;
+	}
+	
+	public void setFecha() {
+		this.fecha = this.fecha = java.sql.Date.valueOf(LocalDate.now());
 	}
 	
 	

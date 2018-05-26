@@ -10,6 +10,9 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.converter.StringToLongConverter;
+import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ValueChangeMode;
@@ -37,6 +40,7 @@ import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
+import es.uca.iw.Ucapartment.Transaccion.Transaccion;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
@@ -204,14 +208,21 @@ public class ReservasView extends VerticalLayout implements View{
 					popupReservas.center();
 					UI.getCurrent().addWindow(popupReservas);
 				}
-				if(estado.getValor() == Valor.ACEPTADA)
-				{
+				if(estado.getValor() == Valor.ACEPTADA) {
 					popupLayout.removeAllComponents();
-					popupLayout.addComponent(new TextField("Introduzca su numero de cuenta","xxx-xxx-xxx-xxx"));
+					TextField cuenta = new TextField("Introduzca su numero de cuenta","xxx-xxx-xxx-xxx");
+					cuenta.setRequiredIndicatorVisible(true);
+					cuenta.setMaxLength(16);
+					popupLayout.addComponent(cuenta);
+					Binder<Transaccion> bind = new Binder<>(Transaccion.class);
 					HorizontalLayout hlInfo = new HorizontalLayout();
 					Button btn_cancelar = new Button("Cancelar reserva");
 					Button btn_pagar = new Button("Pagar reserva");
-					
+					bind.forField(cuenta)
+					 .asRequired("El campo Cuenta es obligatorio")
+					 .withConverter(new StringToLongConverter("Por favor introduzca un número"))
+					 .withValidator(new LongRangeValidator("El número de cuenta debe tener 16 dígitos", 0000000000000005L, 9999999999999999L))
+					 .bind(Transaccion::getCuentaOrigen, Transaccion::setCuentaOrigen);
 					hlInfo.addComponents(btn_cancelar,btn_pagar);
 					
 					btn_cancelar.addClickListener(event ->{
@@ -223,11 +234,15 @@ public class ReservasView extends VerticalLayout implements View{
 					});
 					
 					btn_pagar.addClickListener(event -> {
-
-						reservaService.pasarelaDePago(reservaRow.getPrecio(), reservaRow,estado);
-						popupReservas.close();
-						removeAllComponents();
-						init();
+						if(bind.isValid()) {
+							Long lg = null;
+							reservaService.pasarelaDePago(reservaRow.getPrecio(), reservaRow,estado, 
+									lg.valueOf(cuenta.getValue()));
+							popupReservas.close();
+							removeAllComponents();
+							init();
+						} else
+							Notification.show("Comprueba el número de cuenta");
 					});
 
 					popupLayout.addComponent(hlInfo);
