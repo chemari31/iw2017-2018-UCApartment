@@ -63,6 +63,7 @@ public class Usuario implements UserDetails{
 		this.password = password;
 		this.rol = Rol.ANFITRION;
 		this.cuentaNoBloqueada = true;
+		this.Foto1 = "/perfiluser/null.png";
 	}
 	
 	public Usuario(String nombre, String apellidos, String dni) {

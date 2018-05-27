@@ -68,6 +68,14 @@ public class UsuarioService implements UserDetailsService {
 		return existe;
 	}
 	
+	public boolean dniExistente(String dni) {
+		Usuario usuario = repo.findByDni(dni);
+		boolean existe = false;
+		if(usuario != null) existe = true;
+		
+		return existe;
+	}
+	
 	public List<Usuario> findByRol(Rol rol) {
 		return repo.findByRol(rol);
 	}

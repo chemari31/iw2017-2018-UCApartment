@@ -88,6 +88,7 @@ public class ReservasView extends VerticalLayout implements View{
 		TextField tfFiltro = new TextField();
 		ComboBox<String> cbFiltroUsuario = new ComboBox<>();
 		ComboBox<String> cbFiltroApart = new ComboBox<>();
+		ComboBox<String> cbFiltroEstado = new ComboBox<>();
 		ComboBox<String> cbFiltros = new ComboBox<>();
 		List<String> lista_nom_apart = new ArrayList<String>();
 		List<String> lista_nom_usuario = new ArrayList<String>();
@@ -97,10 +98,9 @@ public class ReservasView extends VerticalLayout implements View{
 		PopupPago popupValoraciones = new PopupPago();
 		PopupPago popupReservas = new PopupPago();
 
+		cbFiltros.setItems("Apartamento","Usuario", "Estado"); 
 		
-		cbFiltros.setItems("Apartamento","Usuario");
-		
-		lista_apartamentos = apartamentoService.findAll();
+		lista_apartamentos = apartamentoService.findAll(); 
 		lista_usuarios = usuarioService.findAll();
 
 		for(int i = 0; i < lista_apartamentos.size(); i++)
@@ -111,20 +111,25 @@ public class ReservasView extends VerticalLayout implements View{
 			
 		cbFiltroApart.setItems(lista_nom_apart);
 		cbFiltroUsuario.setItems(lista_nom_usuario);
+		cbFiltroEstado.setItems("Todos","Pendiente","Aceptada","Cancelada","Realizada");
 		cbFiltroApart.setVisible(false);
 		cbFiltroUsuario.setVisible(false);
+		cbFiltroEstado.setVisible(false);
 		cbFiltroUsuario.setEmptySelectionAllowed(false);
 		cbFiltroApart.setEmptySelectionAllowed(false);
+		cbFiltroEstado.setEmptySelectionAllowed(false);
+		cbFiltroEstado.setSelectedItem("Todos");
 		
 		listaReservasPanel.setWidth("1110px"); 
 		listaReservasPanel.setHeight("580px");
 		
-		hlFiltro.addComponents(lFiltrar,cbFiltros,cbFiltroApart,cbFiltroUsuario);
+		hlFiltro.addComponents(lFiltrar,cbFiltros,cbFiltroApart,cbFiltroUsuario,cbFiltroEstado);
 		
 		cbFiltros.addValueChangeListener(event -> {
 			if(cbFiltros.isSelected("Usuario")) {
 				cbFiltroApart.setVisible(false);
 				cbFiltroUsuario.setVisible(true);
+				cbFiltroEstado.setVisible(false);
 				cbFiltroUsuario.addValueChangeListener(eventUser -> {
 					String username = cbFiltroUsuario.getSelectedItem().toString();
 					listaReservas(username.substring(9,username.length()-1),"Usuario");
@@ -135,15 +140,30 @@ public class ReservasView extends VerticalLayout implements View{
 			if(cbFiltros.isSelected("Apartamento")) {
 				cbFiltroApart.setVisible(true);
 				cbFiltroUsuario.setVisible(false);
+				cbFiltroEstado.setVisible(false);
 				cbFiltroApart.addValueChangeListener(eventApart -> {
 					String apartamento_nom = cbFiltroApart.getSelectedItem().toString();
 					listaReservas(apartamento_nom.substring(9,apartamento_nom.length()-1),"Apartamento");
+				});
+			}
+			
+			if(cbFiltros.isSelected("Estado")) {
+				cbFiltroApart.setVisible(false);
+				cbFiltroUsuario.setVisible(false);
+				cbFiltroEstado.setVisible(true);
+				cbFiltroEstado.addValueChangeListener(eventEstado -> {
+					String estado = cbFiltroEstado.getSelectedItem().toString();
+					if(estado.substring(9,estado.length()-1).equals("Todos"))
+						listaReservas(null,null);
+					else
+						listaReservas(estado.substring(9,estado.length()-1),"Estado");
 				});
 			}
 
 			if(cbFiltros.isEmpty()) {
 				cbFiltroApart.setVisible(false);
 				cbFiltroUsuario.setVisible(false);
+				cbFiltroEstado.setVisible(false); 
 				listaReservas(null,null);
 			}
 		});
@@ -371,10 +391,10 @@ public class ReservasView extends VerticalLayout implements View{
 						valGrid.setItems(lista_valoraciones);
 						valGrid.setWidth("900px");
 						valGrid.setHeight("250px");
-						valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150);
+						valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150).setResizable(false);
 						valGrid.addColumn(Valoracion->Valoracion.getUsuario().getNombreUsuario())
-							.setCaption("Usuario").setWidth(200);
-						valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800);
+							.setCaption("Usuario").setWidth(200).setResizable(false);
+						valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800).setResizable(false);
 						popupLayout.removeAllComponents();
 						popupLayout.addComponent(new Label("Valoraciones realizadas sobre la reserva"));
 						popupLayout.addComponent(valGrid);
@@ -408,6 +428,8 @@ public class ReservasView extends VerticalLayout implements View{
 				grid.setItems(reservaService.findByUsuario(usuarioService.loadUserByUsername(filtro)));
 			if(filtrarPor.equals("Apartamento"))
 				grid.setItems(reservaService.findByApartamento(apartamentoService.loadApartamentoByApartamentoname(filtro)));
+			if(filtrarPor.equals("Estado"))
+				grid.setItems(reservaService.findByEstadoValor(Valor.valueOf(filtro.toUpperCase())));
 		}
 	}
 

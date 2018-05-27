@@ -49,7 +49,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
         super.attach();
         this.getUI().getNavigator().navigateTo(Home.VIEW_NAME);
     }
-	
+	 
 	@PostConstruct
 	void init() {
 		
@@ -75,22 +75,24 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		menuSuperior.addComponent(createNavigationButton("Inicio", Home.VIEW_NAME));
 		
 		MenuItem gestion = menuDesplegable.addItem("Gestión", null, null);
-		gestion.addItem("Usuarios", null, new MenuBar.Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				getUI().getNavigator().navigateTo(UsuariosView.VIEW_NAME);
+		if(SecurityUtils.hasRole("ADMINISTRADOR")) {
+			gestion.addItem("Usuarios", null, new MenuBar.Command() {
 				
-			}
-		});
-		gestion.addItem("Apartamentos", null, new MenuBar.Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				getUI().getNavigator().navigateTo(ApartamentosView.VIEW_NAME);
+				@Override
+				public void menuSelected(MenuItem selectedItem) {
+					getUI().getNavigator().navigateTo(UsuariosView.VIEW_NAME);
+					
+				}
+			});
+			gestion.addItem("Apartamentos", null, new MenuBar.Command() {
 				
-			}
-		});
+				@Override
+				public void menuSelected(MenuItem selectedItem) {
+					getUI().getNavigator().navigateTo(ApartamentosView.VIEW_NAME);
+					
+				}
+			});
+		}
 		gestion.addItem("Reservas", null, new MenuBar.Command() {
 			
 			@Override
@@ -115,7 +117,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 			menuSuperior.addComponent(createNavigationButton("Mi perfil", MiPerfilView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", ApartamentoManagementView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis Reserva", MisReserva.VIEW_NAME));
-			if(SecurityUtils.hasRole("ADMINISTRADOR"))
+			if(SecurityUtils.hasRole("ADMINISTRADOR") || SecurityUtils.hasRole("GERENTE"))
 				menuSuperior.addComponent(menuDesplegable);
 			Usuario user = SecurityUtils.LogedUser();
 

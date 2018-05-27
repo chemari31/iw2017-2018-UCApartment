@@ -149,7 +149,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 		vEmail.setValue(usuario.getEmail());
 		
 		 // Lo siguiente se utiliza para guardar imagenes. Creamos el directorio si no existe
- 		File uploads = new File(basepath +"/usuarios/");
+ 		File uploads = new File(basepath +"/usuarios/"+usuario.getId());
          if (!uploads.exists() && !uploads.mkdir())
              System.out.println(new Label("ERROR: No podemos crear el directorio."));
 
@@ -163,7 +163,7 @@ public class MiPerfilView extends VerticalLayout implements View {
  		    	FileOutputStream fos = null; // Stream to write to
  		        try {
  		            // Open the file for writing.
- 		            file = new File(basepath +"/usuarios/" + usuario.getId() + filename);
+ 		            file = new File(basepath +"/usuarios/" + usuario.getId() +"/"+ filename);
  		            fos = new FileOutputStream(file);
  		        } catch (final java.io.FileNotFoundException e) {
  		            new Notification("No se ha podido abrir el archivo",
@@ -172,7 +172,7 @@ public class MiPerfilView extends VerticalLayout implements View {
  		                .show(Page.getCurrent());
  		            return null;
  		        }
- 		        usuario.setFoto1("/usuarios/" + usuario.getId() + filename);
+ 		        usuario.setFoto1("/usuarios/" + usuario.getId()+"/"+ filename);
  		        return fos; // Return the output stream to write to 
  		    }
 
@@ -219,7 +219,9 @@ public class MiPerfilView extends VerticalLayout implements View {
 		
 		Button btnModificarDatos = new Button("Modificar datos");
 		Button btnGuardar = new Button("Guardar");
+		Button btnCancelar = new Button("Cancelar");
 		btnGuardar.setVisible(false);
+		btnCancelar.setVisible(false);
 		
 		TextField tfNombre = new TextField();
 		TextField tfApell = new TextField();
@@ -230,7 +232,6 @@ public class MiPerfilView extends VerticalLayout implements View {
 		
 		// Con esto se muestra un * rojo en los campos deseados indicando que es obligatorio
 		tfUsername.setRequiredIndicatorVisible(true);
-		tfPassword.setRequiredIndicatorVisible(true);
 		tfEmail.setRequiredIndicatorVisible(true);
 		tfDNI.setRequiredIndicatorVisible(true);
 		
@@ -238,12 +239,6 @@ public class MiPerfilView extends VerticalLayout implements View {
 		binder.forField(tfUsername)
 		.asRequired("El campo Nombre de usuario es obligatorio")
 		.bind(Usuario::getNombreUsuario,Usuario::setNombreUsuario);
-		
-		binder.forField(tfPassword)
-		.asRequired("El campo Contraseña es obligatorio")
-		.withValidator(new StringLengthValidator("El campo Contraseña ha de tener una longitud "
-				+" mínima de 6 caracteres y máximo 12",6,12))
-		.bind(Usuario::getPassword, Usuario::setPassword);
 		
 		binder.forField(tfDNI)
 		.asRequired("El campo DNI es obligatorio")
@@ -266,6 +261,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 		btnModificarDatos.addClickListener(event -> {
 			btnModificarDatos.setVisible(false);
 			btnGuardar.setVisible(true);
+			btnCancelar.setVisible(true);
 			vNombre.setVisible(false);
 			vApell.setVisible(false);
 			vDNI.setVisible(false);
@@ -288,7 +284,11 @@ public class MiPerfilView extends VerticalLayout implements View {
 		});
 		
 		btnGuardar.addClickListener(event -> {
-			
+			if(!tfPassword.isEmpty())
+				binder.forField(tfPassword)
+				.withValidator(new StringLengthValidator("El campo Contraseña ha de tener una longitud "
+						+" mínima de 6 caracteres y máximo 12",6,12))
+				.bind(Usuario::getPassword, Usuario::setPassword);
 			if(binder.isValid()) { // Si todas las validaciones se han pasado
 				String sUsername, sPassword, sNombre, sApell, sDNI, sEmail;
 				String notificacion = "";
@@ -350,6 +350,8 @@ public class MiPerfilView extends VerticalLayout implements View {
         			
         			btnModificarDatos.setVisible(true);
         			btnGuardar.setVisible(false);
+        			btnCancelar.setVisible(false);
+        			tfPassword.setValue("");
                 }
                 else
                 	Notification.show(notificacion);
@@ -359,13 +361,31 @@ public class MiPerfilView extends VerticalLayout implements View {
 
 		});
 		
+		btnCancelar.addClickListener(event -> {
+			vNombre.setVisible(true);
+			vApell.setVisible(true);
+			vDNI.setVisible(true);
+			vUsername.setVisible(true);
+			lPassword.setVisible(false);
+			vEmail.setVisible(true);
+
+			tfNombre.setVisible(false);
+			tfApell.setVisible(false);
+			tfDNI.setVisible(false);
+			tfUsername.setVisible(false);
+			tfPassword.setVisible(false);
+			tfEmail.setVisible(false);
+			
+			btnModificarDatos.setVisible(true);
+			btnGuardar.setVisible(false);
+			btnCancelar.setVisible(false);
+		});
+		
 		image.setWidth(300, Unit.PIXELS);
 		image.setHeight(300, Unit.PIXELS);
 		
 		image.setVisible(true);
-		try{
-			image.setSource(new ExternalResource(usuario.getFoto1()));
-		}catch(Exception e) { image.setSource(new ExternalResource("/perfiluser/null.png")); }
+		image.setSource(new ExternalResource(usuario.getFoto1()));
 		
 		ImageUploader receiver = new ImageUploader();
 		Upload btnFoto = new Upload("Adjunta la foto de perfil", receiver);
@@ -383,7 +403,7 @@ public class MiPerfilView extends VerticalLayout implements View {
     	hlRol.addComponents(lRol, vRol);
     	hlBtnCambioImagen.addComponent(btnFoto);
     	hlBtnCambiosActivo.addComponents(btnBloquear);
-    	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar);
+    	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar,btnCancelar);
     	
     	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername,
     			hlEmail,hlPassword, hlRol, hlBtnCambioImagen, hlBtnModificarDatos, hlBtnCambiosActivo); 

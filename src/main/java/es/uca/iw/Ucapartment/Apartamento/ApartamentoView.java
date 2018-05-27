@@ -50,7 +50,7 @@ import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Iva.Iva;
-import es.uca.iw.Ucapartment.Iva.IvaRespository;
+import es.uca.iw.Ucapartment.Iva.IvaRepository;
 import es.uca.iw.Ucapartment.Precio.Precio;
 import es.uca.iw.Ucapartment.Precio.PrecioRepository;
 import es.uca.iw.Ucapartment.Precio.PrecioService;
@@ -75,7 +75,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 	@Autowired
 	PrecioRepository repo;
 	@Autowired
-	IvaRespository repoIva;
+	IvaRepository repoIva;
 	@Autowired
 	ValoracionRepository repoValoracion;
 	
@@ -115,11 +115,6 @@ public class ApartamentoView extends VerticalLayout implements View {
 		Panel panelFoto = new Panel("Foto");
 		Panel panelDuenio = new Panel("Dueño del apartamento");
 		Panel panelComentario = new Panel("Comentarios y valoraciones");
-		Button botonReserva = new Button("Reservar");
-		botonReserva.setVisible(false);
-		if(SecurityUtils.isLoggedIn() && (SecurityUtils.LogedUser().getId() != duenio.getId())) {
-			botonReserva.setVisible(true);
-		}
 		
 		reserva.setWidth("600px");
 		reserva.setHeight("250px");
@@ -315,7 +310,6 @@ public class ApartamentoView extends VerticalLayout implements View {
 		elementosApartamento.addComponent(hlHabit);
 		elementosApartamento.addComponent(hlCamas);
 		elementosApartamento.addComponent(hlAcond);
-		elementosApartamento.addComponent(botonReserva);
 		
 		botonPerfil.addClickListener(event -> {
 			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(duenio.getId()));

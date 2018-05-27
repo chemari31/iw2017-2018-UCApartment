@@ -110,7 +110,7 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		vlElementos.setComponentAlignment(panelComentario, Alignment.TOP_CENTER);
 	    
 		// Lo siguiente se utiliza para guardar imagenes. Creamos el directorio si no existe
-		File uploads = new File(basepath +"/apartamentos/");
+		File uploads = new File(basepath +"/apartamentos/"+apartamento.getId());
         if (!uploads.exists() && !uploads.mkdir())
             System.out.println(new Label("ERROR: No podemos crear el directorio."));
 
@@ -129,7 +129,7 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		    	FileOutputStream fos = null; // Stream to write to
 		        try {
 		            // Open the file for writing.
-		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		            file = new File(basepath +"/apartamentos/" + apartamento.getId() +"/"+ filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
 		            new Notification("No se ha podido abrir el archivo",
@@ -139,11 +139,11 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		            return null;
 		        }
 		        if(tipo == 1) // Asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        else if(tipo == 2)
-		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        else if(tipo == 3)
-		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        return fos; // Return the output stream to write to 
 		    }
 
@@ -313,13 +313,15 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 			btnFoto3.setButtonCaption("Insertar imagen");
 			
 			btnDeleteFoto1.addClickListener(eventFoto1 -> {
-				if(apartamento.getFoto1() != null) {
-					apartamento.setFoto1(null);
-					image1.setSource(null);
-					image.setSource(null);
+				if(apartamento.getFoto1() != null && !apartamento.getFoto1().equals("/apartamentos/null.png")) {
+					apartamento.setFoto1("/apartamentos/null.png");
+					image1.setSource(new ExternalResource(apartamento.getFoto1()));
+					image.setSource(new ExternalResource(apartamento.getFoto1()));
 					apartamentoService.save(apartamento);
 					Notification.show("Se ha eliminado la Foto 1 del apartamento");
 				}
+				else
+					Notification.show("No se puede eliminar la foto por defecto");
 			});
 			
 			btnDeleteFoto2.addClickListener(eventFoto2 -> {
@@ -329,6 +331,8 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 					apartamentoService.save(apartamento);
 					Notification.show("Se ha eliminado la Foto 2 del apartamento");
 				}
+				else
+					Notification.show("La imagen 2 no está definida");
 			});
 			
 			btnDeleteFoto3.addClickListener(eventFoto3 -> {
@@ -338,6 +342,8 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 					apartamentoService.save(apartamento);
 					Notification.show("Se ha eliminado la Foto 3 del apartamento");
 				}
+				else
+					Notification.show("La imagen 3 no está definida");
 			});
 			
 			hlImagenes.addComponents(image1, image2, image3);
@@ -631,10 +637,9 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		elementosApartamento.addComponent(hlPrecio);
 		elementosApartamento.addComponent(hlBtnModificarDatos);
 		
-		
-		/*botonPerfil.addClickListener(event -> {
-			getUI().getNavigator().navigateTo(MiPerfilView.VIEW_NAME + '/'+String.valueOf(duenio.getId()));
-		});*/
+		btnPerfil.addClickListener(event -> {
+			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(apartamento.getUsuario().getId()));
+		});
 		
 		datosDuenio.addComponent(hlNomDuenio);
 		datosDuenio.addComponent(hlApellDuenio);

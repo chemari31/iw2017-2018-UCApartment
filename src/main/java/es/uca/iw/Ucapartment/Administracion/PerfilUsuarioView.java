@@ -177,7 +177,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		});
 		
 		 // Lo siguiente se utiliza para guardar imagenes. Creamos el directorio si no existe
- 		File uploads = new File(basepath +"/usuarios/");
+ 		File uploads = new File(basepath +"/usuarios/" + usuario.getId());
          if (!uploads.exists() && !uploads.mkdir())
              System.out.println(new Label("ERROR: No podemos crear el directorio."));
 
@@ -191,7 +191,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
  		    	FileOutputStream fos = null; // Stream to write to
  		        try {
  		            // Open the file for writing.
- 		            file = new File(basepath +"/usuarios/" + usuario.getId() + filename);
+ 		            file = new File(basepath +"/usuarios/" + usuario.getId() +"/"+ filename);
  		            fos = new FileOutputStream(file);
  		        } catch (final java.io.FileNotFoundException e) {
  		            new Notification("No se ha podido abrir el archivo",
@@ -200,7 +200,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
  		                .show(Page.getCurrent());
  		            return null;
  		        }
- 		        usuario.setFoto1("/usuarios/" + usuario.getId() + filename);
+ 		        usuario.setFoto1("/usuarios/" + usuario.getId() +"/"+ filename);
  		        return fos; // Return the output stream to write to 
  		    }
 

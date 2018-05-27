@@ -133,5 +133,9 @@ public class ReservaService {
 			Notification.show("Se produjo un error generando la factura.");
 		}
 	}
+	
+	public List<Reserva> findByEstadoValor(Valor v) {
+		return repo.findByEstadoValor(v);
+	}
 
 }

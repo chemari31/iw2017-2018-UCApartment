@@ -96,11 +96,6 @@ public class ApartamentoEditor extends VerticalLayout{
 	    ac.setItemCaptionGenerator(bool -> {return bool?"Si":"No";});
 		habitaciones.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		camas.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-		
-		//creamos el directorio si no existe.
-		File uploads = new File(basepath +"/apartamentos/");
-        if (!uploads.exists() && !uploads.mkdir())
-            System.out.println(new Label("ERROR: Could not create upload dir"));
 
 		// Implement both receiver that saves upload in a file and
 		// listener for successful upload
@@ -118,7 +113,12 @@ public class ApartamentoEditor extends VerticalLayout{
 		    	FileOutputStream fos = null; // Stream to write to
 		        try {
 		            // Open the file for writing.
-		            file = new File(basepath +"/apartamentos/" + apartamento.getId() + filename);
+		    		//creamos el directorio si no existe.
+		    		File uploads = new File(basepath +"/apartamentos/"+ apartamento.getId());
+		            if (!uploads.exists() && !uploads.mkdir())
+		                System.out.println(new Label("ERROR: Could not create upload dir"));
+		            
+		            file = new File(basepath +"/apartamentos/" + apartamento.getId() +"/"+ filename);
 		            fos = new FileOutputStream(file);
 		        } catch (final java.io.FileNotFoundException e) {
 		            new Notification("Could not open file<br/>",
@@ -128,11 +128,11 @@ public class ApartamentoEditor extends VerticalLayout{
 		            return null;
 		        }
 		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        else if(tipo == 2)
-		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        else if(tipo == 3)
-		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() + filename);
+		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
 		        return fos; // Return the output stream to write to
 		        
 		    }

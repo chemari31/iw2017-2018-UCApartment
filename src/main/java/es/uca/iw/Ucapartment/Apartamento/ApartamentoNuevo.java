@@ -125,6 +125,7 @@ public class ApartamentoNuevo extends VerticalLayout{
 			apartamento.setCiudad(ciudad.getValue());
 			apartamento.setHabitaciones(Integer.valueOf(habitaciones.getValue()));
 			apartamento.setPrecio(Double.parseDouble(precio.getValue().replace(',', '.')));
+			apartamento.setFoto1("/apartamentos/null.png");
 			service.save(apartamento);
 			limpiar();
 			setVisible(false);}

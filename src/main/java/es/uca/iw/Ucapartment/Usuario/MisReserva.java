@@ -40,7 +40,7 @@ import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.EstadoService;
 import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Iva.Iva;
-import es.uca.iw.Ucapartment.Iva.IvaRespository;
+import es.uca.iw.Ucapartment.Iva.IvaRepository;
 import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
@@ -78,7 +78,7 @@ public class MisReserva extends VerticalLayout implements View
 	@Autowired
 	private EstadoService serviceEstado;
 	@Autowired
-	private IvaRespository repoIva;
+	private IvaRepository repoIva;
 	@Autowired
 	private ValoracionRepository repoValoracion;
 	@Autowired

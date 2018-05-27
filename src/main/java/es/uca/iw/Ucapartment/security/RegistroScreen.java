@@ -125,7 +125,7 @@ public class RegistroScreen extends VerticalLayout implements View{
                 // la cual comprueba que el usuario con ese username y email no existe en la BD ya
                if(!registro(usuario)) {
                 	Notification.show("Nombre de usuario "+usuario.getNombreUsuario()
-                	+ " o Correo electrónico "+usuario.getEmail()+" ya existentes");
+                	+ ", Correo electrónico "+usuario.getEmail()+" o DNI "+usuario.getDni()+" ya existentes");
                     nombreUsuario.focus(); // Esto lo que hace es que el cursor para introducir texto
                     						// aparezca al fallar directamente en el campo de username
                 }
@@ -136,6 +136,7 @@ public class RegistroScreen extends VerticalLayout implements View{
         
         // Creamos un layout horizontal para añadir los botones de registro y atras
         HorizontalLayout botones = new HorizontalLayout();
+        registro.setClickShortcut(ShortcutAction.KeyCode.ENTER);
         botones.addComponent(registro);
         registerLayout.addComponent(botones); // Con esto añadimos el layout creado a la ventana
 
@@ -146,10 +147,12 @@ public class RegistroScreen extends VerticalLayout implements View{
 	private boolean registro(Usuario usuario) {
 		boolean valido = false;
 		if(!usuarioService.nombreUsuarioExistente(usuario.getNombreUsuario())
-				&& !usuarioService.emailExistente(usuario.getEmail())) {
+				&& !usuarioService.emailExistente(usuario.getEmail()) 
+				&& !usuarioService.dniExistente(usuario.getDni())) {
 			usuarioService.save(usuario); // Se guarda el usuario en la BD
 			//springViewDisplay.setContent((Component) view);
 				valido = true;
+
 				getUI().getNavigator().navigateTo(LoginScreen.VIEW_NAME);
 		}
 		return valido;

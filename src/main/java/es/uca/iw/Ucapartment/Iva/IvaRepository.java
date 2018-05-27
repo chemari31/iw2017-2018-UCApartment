@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 
-public interface IvaRespository extends JpaRepository<Iva,Long> 
+public interface IvaRepository extends JpaRepository<Iva,Long> 
 {
 	
 	public Iva findByPais(String pais);

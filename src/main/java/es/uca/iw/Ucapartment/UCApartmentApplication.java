@@ -21,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.uca.iw.Ucapartment.security.VaadinSessionSecurityContextHolderStrategy;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
+import es.uca.iw.Ucapartment.Iva.Iva;
+import es.uca.iw.Ucapartment.Iva.IvaRepository;
 import es.uca.iw.Ucapartment.Usuario.Rol;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 
@@ -28,13 +30,13 @@ import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 public class UCApartmentApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(UCApartmentApplication.class);
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(UCApartmentApplication.class, args);
 	}
 
 	@Bean
-	public CommandLineRunner loadData(UsuarioService service) {
+	public CommandLineRunner loadData(UsuarioService service, IvaRepository ivaRepository) {
 		return (args) -> {
 
 			if (service.findAll().size() == 0) {
@@ -50,6 +52,7 @@ public class UCApartmentApplication {
 				root.setRol(Rol.ADMINISTRADOR);
 				service.save(root);
 
+				ivaRepository.save(new Iva("es",21));
 				// fetch all users
 				log.info("Users found with findAll():");
 				log.info("-------------------------------");
