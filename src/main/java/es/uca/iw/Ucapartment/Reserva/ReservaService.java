@@ -137,5 +137,14 @@ public class ReservaService {
 	public List<Reserva> findByEstadoValor(Valor v) {
 		return repo.findByEstadoValor(v);
 	}
+	
+	public boolean intervaloDisponible(Date fechaInicio, Date fechaFin) {
+		List<Reserva> aceptadas =  repo.findByEstadoIntervalo(Valor.ACEPTADA, fechaInicio, fechaFin);
+		List<Reserva> realizadas = repo.findByEstadoIntervalo(Valor.REALIZADA, fechaInicio, fechaFin);
+		if(aceptadas.size() > 0 || realizadas.size() > 0)
+			return false;
+		else
+			return true;
+	}
 
 }

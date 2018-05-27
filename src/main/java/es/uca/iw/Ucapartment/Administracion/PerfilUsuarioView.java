@@ -400,11 +400,11 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
     	hlBtnCambiosActivo.addComponents(btnBloquear, btnDesbloquear);
     	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar);
     	
-    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol, hlBtnCambioImagen);
+    	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername, hlEmail, hlRol);
     	
     	if(SecurityUtils.isLoggedIn() && (SecurityUtils.hasRole("ADMINISTRADOR") || 
-    			SecurityUtils.LogedUser().getUsername().equals(usuario.getUsername())))
-    		elementosUsuario.addComponent(hlBtnModificarDatos);
+    			SecurityUtils.LogedUser().getUsername().equals(usuario.getUsername()))) 
+    		elementosUsuario.addComponents(hlBtnModificarDatos,hlBtnCambioImagen);
     	
     	if(SecurityUtils.hasRole("ADMINISTRADOR")) 
     		elementosUsuario.addComponents(hlCuentaActiva, hlBtnCambiosRol, hlBtnCambiosActivo);
