@@ -401,6 +401,9 @@ public class ApartamentoView extends VerticalLayout implements View {
 		String args[] = event.getParameters().split("/");
 	    String value1 = args[0];
 	    
+	    long id_apart = Long.parseLong(value1); // Como es un String lo convertimos a Long
+	    apartamento = service.findById(id_apart); // Obtenemos el apartamento en cuestión de la BD
+	    
 	    if(args.length==3) {
 	    	String dateString = args[1];
 		    try {
@@ -412,7 +415,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 	            		entrada = null;
 	            		salida = null;
 	            	}
-	            	else if(!serviceReserva.intervaloDisponible(entrada, salida)) {
+	            	else if(!serviceReserva.intervaloDisponible(entrada, salida, id_apart)) {
 	            		entrada = null;
 	            		salida = null;
 	            	}
@@ -427,9 +430,6 @@ public class ApartamentoView extends VerticalLayout implements View {
 	    try {
 	    	user = SecurityUtils.LogedUser();
 	    }catch(Exception e) {}
-
-	    long id_apart = Long.parseLong(value1); // Como es un String lo convertimos a Long
-	    apartamento = service.findById(id_apart); // Obtenemos el apartamento en cuestión de la BD
 	    init(); // Y llamamos al metodo init que genera la vista
 	}
 	
