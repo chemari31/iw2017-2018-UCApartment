@@ -69,6 +69,17 @@ public class Valoracion {
 		this.apartamentoValorado = apartamentoValorado;
 	}
 	
+	//Constructor con parametros, valoracion a apartamento
+		public Valoracion(String descripcion, int grado, Date fecha, Usuario usuario,
+			Apartamento apartamentoValorado, Reserva reserva) {
+			this.descripcion = descripcion;
+			this.grado = grado;
+			this.fecha = fecha;
+			this.usuario = usuario;
+			this.apartamentoValorado = apartamentoValorado;
+			this.reserva = reserva;
+		}
+	
 	public Valoracion(String descripcion, int grado, Date fecha, Usuario usuario,
 			Usuario usuarioValorado, Apartamento apartamentoValorado) {
 			this.descripcion = descripcion;
@@ -77,6 +88,17 @@ public class Valoracion {
 			this.usuario = usuario;
 			this.usuarioValorado = usuarioValorado;
 			this.apartamentoValorado = apartamentoValorado;
+		}
+	
+	public Valoracion(String descripcion, int grado, Date fecha, Usuario usuario,
+			Usuario usuarioValorado, Apartamento apartamentoValorado, Reserva reserva) {
+			this.descripcion = descripcion;
+			this.grado = grado;
+			this.fecha = fecha;
+			this.usuario = usuario;
+			this.usuarioValorado = usuarioValorado;
+			this.apartamentoValorado = apartamentoValorado;
+			this.reserva = reserva;
 		}
 
 	//Getters & Setters

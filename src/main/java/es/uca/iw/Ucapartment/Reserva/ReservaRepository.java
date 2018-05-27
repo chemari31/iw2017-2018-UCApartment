@@ -1,5 +1,6 @@
 package es.uca.iw.Ucapartment.Reserva;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long>
 	public List<Reserva> findByUsuario(Usuario user);
 	public List<Reserva> findAll();
 	public List<Reserva> findByApartamento(Apartamento apart);
+	public List<Reserva> findByFechaInicioAndFechaFin(Date inicio, Date fin);
 	
 	@Query("Select e.reserva from Estado e Where e.valor = :valor")
 	public List<Reserva> findByEstadoValor(@Param("valor")Valor valor);

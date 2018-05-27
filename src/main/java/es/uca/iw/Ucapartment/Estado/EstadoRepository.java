@@ -14,4 +14,9 @@ public interface EstadoRepository extends JpaRepository<Estado, Long>
 	
 	@Query("SELECT e.reserva FROM Estado e WHERE e.valor = :valor")
 	public List<Reserva> findReservaByEstado(@Param("valor") Valor valor);
+	
+	@Query("SELECT e.reserva FROM Estado e WHERE e.valor != :valor")
+	public List<Reserva> findReservaByValor(@Param("valor") Valor valor);
+	
+	
 }

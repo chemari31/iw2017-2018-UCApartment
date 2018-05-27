@@ -234,7 +234,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 									int valor = valoracion.getValue();
 									Date hoy = java.sql.Date.valueOf(LocalDate.now());
 									Usuario usuarioValorado = usuarioService.findById(res.getUsuario().getId());
-									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, apartam);
+									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, apartam,res);
 									valoracionService.save(v);
 									ventanaValoracion.close(); 
     							});
