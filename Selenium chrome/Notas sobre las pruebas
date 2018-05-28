@@ -1,0 +1,3 @@
+- En las nuevas versiones de Selenium IDE hay problemas dectetados sobre los
+componentes Drop and down, por esta razón hay pruebas que se detienen en
+su ejecución.
