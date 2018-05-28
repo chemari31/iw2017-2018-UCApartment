@@ -153,17 +153,18 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		
 		SingleSelect<Apartamento> selection = grid.asSingleSelect();
 		SingleSelect<Reserva> selReserva = gridReservas.asSingleSelect();
-		gridReservas.asSingleSelect().addValueChangeListener(e -> { reserva = serviceReserva.findById(selReserva.getValue().getId());
-																	estado = repoEstado.findByReserva(reserva); 
-																	if(estado.getValor() == Valor.PENDIENTE)
-																		mostrarVentanaConfirmacion(estado);
-																	else {
-																		if(estado.getValor() == Valor.REALIZADA) {
-																			Apartamento apartam = selection.getValue();
-																			Reserva res = serviceReserva.findById(selReserva.getValue().getId());
-																			mostrarVentanaValoracion(apartam, res);
-																		}
-																	}
+		gridReservas.asSingleSelect().addValueChangeListener(e -> { if(e.getValue()!= null) {
+																		reserva = serviceReserva.findById(selReserva.getValue().getId());
+																		estado = repoEstado.findByReserva(reserva); 
+																		if(estado.getValor() == Valor.PENDIENTE)
+																			mostrarVentanaConfirmacion(estado);
+																		else {
+																			if(estado.getValor() == Valor.REALIZADA) {
+																				Apartamento apartam = selection.getValue();
+																				Reserva res = serviceReserva.findById(selReserva.getValue().getId());
+																				mostrarVentanaValoracion(apartam, res);
+																			}
+																		}}
 																	});
 		// Instantiate and edit new Apartamento the new button is clicked
 		addNewBtn.addClickListener(e -> { nuevo.setVisible(true); } );
