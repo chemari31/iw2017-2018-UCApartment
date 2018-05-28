@@ -1,6 +1,4 @@
 #!/bin/bash
-printf "# Se procede con la eliminación de la batería de test\n"
-rm -r /src/test
 
 # Se crea la base de datos y el usuario de esta
 printf "# Introduzca su clave de mysql para importar la base de datos\n"
