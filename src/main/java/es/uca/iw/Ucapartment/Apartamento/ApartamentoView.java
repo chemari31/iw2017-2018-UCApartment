@@ -289,7 +289,14 @@ public class ApartamentoView extends VerticalLayout implements View {
 		//Comentarios
 		Grid<Valoracion> gridValoracion = new Grid<>();
 		gridValoracion.setWidth("897px");
-		listValoracion = repoValoracion.findByApartamentoValorado(apartamento);
+		//listValoracion = repoValoracion.findByApartamentoValorado(apartamento);
+		for(Valoracion v : repoValoracion.findByApartamentoValorado(apartamento))
+		{
+			if(v.getUsuarioValorado() == null)
+			{
+				listValoracion.add(v);
+			}
+		}
 		gridValoracion.setItems(listValoracion);
 		gridValoracion.addColumn(usuario ->{
 			
