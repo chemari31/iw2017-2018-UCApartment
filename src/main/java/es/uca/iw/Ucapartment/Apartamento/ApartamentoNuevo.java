@@ -89,6 +89,7 @@ public class ApartamentoNuevo extends VerticalLayout{
 		nombre.setRequiredIndicatorVisible(true);
 		ciudad.setRequiredIndicatorVisible(true);
 		habitaciones.setRequiredIndicatorVisible(true);
+		precio.setRequiredIndicatorVisible(true);
 		nombre.setMaxLength(128);
 		ciudad.setMaxLength(32);
 		
@@ -104,8 +105,11 @@ public class ApartamentoNuevo extends VerticalLayout{
 				+" máxima de 32 caracteres",1,32))
 		.bind(Apartamento::getCiudad, Apartamento::setCiudad);
 		
+		binder.forField(habitaciones)
+		.asRequired("El campo Habitaciones del Apartamento es obligatorio")
+		.bind(Apartamento::getHabitaciones, Apartamento::setHabitaciones);
+		
 		binder.forField(precio)
-		  .withNullRepresentation("")
 		  .asRequired("No puede estar vacío")
 		  .withConverter(
 		    new StringToDoubleConverter("Por favor introduce un número decimal"))
@@ -120,15 +124,21 @@ public class ApartamentoNuevo extends VerticalLayout{
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
 		// wire action buttons to save, delete and reset
-		save.addClickListener(e -> { if ((binder.isValid())) {
-			apartamento.setNombre(nombre.getValue());
-			apartamento.setCiudad(ciudad.getValue());
-			apartamento.setHabitaciones(Integer.valueOf(habitaciones.getValue()));
-			apartamento.setPrecio(Double.parseDouble(precio.getValue().replace(',', '.')));
-			apartamento.setFoto1("/apartamentos/null.png");
-			service.save(apartamento);
-			limpiar();
-			setVisible(false);}
+		save.addClickListener(e -> { 
+			if (binder.isValid()) {
+				apartamento.setNombre(nombre.getValue());
+				apartamento.setCiudad(ciudad.getValue());
+				apartamento.setHabitaciones(Integer.valueOf(habitaciones.getValue()));
+				apartamento.setPrecio(Double.parseDouble(precio.getValue().replace(',', '.')));
+				apartamento.setFoto1("/apartamentos/null.png");
+				service.save(apartamento);
+				limpiar();
+				setVisible(false);
+			}
+			else {
+				Notification.show("Por favor, comprueba los datos introducidos");
+				setVisible(true);
+			}
 		});
 		cancel.addClickListener(e -> {return;});
 		

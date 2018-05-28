@@ -88,6 +88,7 @@ public class MisReserva extends VerticalLayout implements View
 	
 	private List<Valoracion> valoraciones;
 	private Apartamento apart = null;
+	private Reserva rese = null;
 	private static Reserva r = null;
 	private Estado estado = null;
 	private String i;
@@ -247,9 +248,7 @@ public class MisReserva extends VerticalLayout implements View
 						{
 							System.out.println(idReserva);
 							listReservaFinal.add(res);
-						}
-							
-							
+						}	
 					}
 					Date entrada = java.sql.Date.valueOf(ida.getValue());
 					Date salida = java.sql.Date.valueOf(vuelta.getValue());
@@ -288,7 +287,7 @@ public class MisReserva extends VerticalLayout implements View
 						System.out.println(precioTotalSinIva);
 						double totalCancelacion = 0.10 * r.getPrecio();
 						System.out.println(totalCancelacion);
-						Iva iva = repoIva.findByPais("España");
+						Iva iva = repoIva.findByPais("es");
 						double porcentaje = (double)iva.getPorcentaje()/100;
 						porcentaje = porcentaje * precioTotalSinIva;
 						System.out.println(porcentaje);
@@ -350,6 +349,7 @@ public class MisReserva extends VerticalLayout implements View
 			}
 			if(estado.getValor() == Valor.REALIZADA)
 			{
+				
 				popupLayout.removeAllComponents();
 				popupLayout.addComponent(new Label("La reserva con fecha "+r.getFecha() + "Ya fue realizada"));
 				TextArea area = new TextArea("Incidencia");
@@ -363,19 +363,20 @@ public class MisReserva extends VerticalLayout implements View
 				popupLayout.addComponent(nivel);
 				horizontal = new HorizontalLayout();
 				horizontal.addComponent(incidencia);
-				incidencia.addClickListener(event ->{
-					
-					
-					
+				incidencia.addClickListener(event ->
+				{
+					System.out.println("entro en grid");
+					rese = ((Reserva) clickEvent.getItem());
+					apart = ((Reserva) clickEvent.getItem()).getApartamento();
 					String comentario = area.getValue();
 					int valor = Integer.parseInt(nivel.getValue());
 					Date hoy = java.sql.Date.valueOf(LocalDate.now());
-					Valoracion v = new Valoracion(comentario, valor,hoy,user,apart);
+					Valoracion v = new Valoracion(comentario, valor,hoy,user,apart,rese);
 					serviceValoracion.save(v);
 					Notification.show("Su comentario se ha realizado satisfactoriamente", Notification.Type.HUMANIZED_MESSAGE );	
 					sub.close();
 					layout.removeAllComponents();
-					init();
+					getUI().getNavigator().navigateTo(MisReserva.VIEW_NAME);
 				});
 				cancelarIncidencia.addClickListener(event ->{
 					sub.close();

@@ -128,7 +128,13 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		grid.setHeight(300, Unit.PIXELS);
 		grid.setWidth(1000, Unit.PIXELS);
 		grid.setColumns("nombre", "ciudad", "habitaciones", "precio");
-		
+		grid.addColumn(e -> "Información", new ButtonRenderer(clickEvent-> { 
+			Apartamento apartamento = ((Apartamento) clickEvent.getItem());
+			getUI().getNavigator().navigateTo(ApartamentoView.VIEW_NAME + '/'+String.valueOf(apartamento.getId()));
+			
+			})).setCaption("Ver detalles").setWidth(200)
+	      .setResizable(false);
+
 		gridReservas.setHeight(300, Unit.PIXELS);
 		gridReservas.setWidth(1000, Unit.PIXELS);
 		//gridReservas.setColumns("fechaInicio", "fechaFin", "precio", "apartamento");
@@ -234,7 +240,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 									int valor = valoracion.getValue();
 									Date hoy = java.sql.Date.valueOf(LocalDate.now());
 									Usuario usuarioValorado = usuarioService.findById(res.getUsuario().getId());
-									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, apartam);
+									Valoracion v = new Valoracion(comentario, valor, hoy, user, usuarioValorado, apartam,res);
 									valoracionService.save(v);
 									ventanaValoracion.close(); 
     							});

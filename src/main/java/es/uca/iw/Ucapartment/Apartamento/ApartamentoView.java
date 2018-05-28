@@ -1,6 +1,8 @@
 package es.uca.iw.Ucapartment.Apartamento;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,6 +24,7 @@ import com.vaadin.sass.internal.parser.ParseException;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.ValueChangeMode;
@@ -37,10 +40,14 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.renderers.ImageRenderer;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -79,6 +86,8 @@ public class ApartamentoView extends VerticalLayout implements View {
 	@Autowired
 	ValoracionRepository repoValoracion;
 	
+	// Directorio base de la aplicación. Lo utilizamos para guardar las imágenes
+	String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath(); 
 	
 	private final ApartamentoService service;
 	private final ReservaService serviceReserva;
@@ -116,6 +125,8 @@ public class ApartamentoView extends VerticalLayout implements View {
 		Panel panelDuenio = new Panel("Dueño del apartamento");
 		Panel panelComentario = new Panel("Comentarios y valoraciones");
 		
+		PopupPago imagenes = new PopupPago();
+		
 		reserva.setWidth("600px");
 		reserva.setHeight("250px");
 		panelApartamento.setWidth("600px");
@@ -124,9 +135,10 @@ public class ApartamentoView extends VerticalLayout implements View {
 		panelFoto.setHeight("350px");
 		panelDuenio.setWidth("320px");
 		panelComentario.setWidth("900px");
-		if(SecurityUtils.isLoggedIn())
+		if(SecurityUtils.isLoggedIn() && !apartamento.getUsuario().getUsername().equals(user.getUsername()))
 		{
-			layoutIzquierdo.addComponent(reserva);
+			if(entrada != null && salida != null)
+				layoutIzquierdo.addComponent(reserva);
 		}
 		
 		layoutIzquierdo.addComponent(panelApartamento);
@@ -139,7 +151,6 @@ public class ApartamentoView extends VerticalLayout implements View {
 
 	    camposApartamento.addComponent(layoutIzquierdo);
 	    camposApartamento.addComponent(layoutDerecho);
-	    
 	    
 	    VerticalLayout datosReserva = new VerticalLayout();
 	    VerticalLayout elementosApartamento = new VerticalLayout();
@@ -158,9 +169,10 @@ public class ApartamentoView extends VerticalLayout implements View {
 		HorizontalLayout hlNomDuenio = new HorizontalLayout();
 		HorizontalLayout hlApellDuenio = new HorizontalLayout();
 		HorizontalLayout hlEmailDuenio = new HorizontalLayout();
+		HorizontalLayout hlPrecio = new HorizontalLayout();
 		
 		Label vNombre, vDesc, vContacto, vCiudad, vCalle, vNumero, vCp, vHabit, vCamas, vAcond,
-			vNombreDuenio, vApellidosDuenio, vEmailDuenio;
+			vNombreDuenio, vApellidosDuenio, vEmailDuenio, vPrecio;
 		Label nombre = new Label("Nombre: ");
 		Label desc = new Label("Descripción: ");
 		Label contacto = new Label("Contacto: ");
@@ -174,6 +186,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		Label nombreDuenio = new Label("Nombre: ");
 		Label apellidosDuenio = new Label("Apellidos: ");
 		Label emailDuenio = new Label("Correo electrónico: ");
+		Label precio = new Label("Precio: ");
 		
 		vNombre = new Label(apartamento.getNombre());
 		vDesc = new Label(apartamento.getDescripcion());
@@ -188,18 +201,67 @@ public class ApartamentoView extends VerticalLayout implements View {
 			vAcond = new Label("Sí");
 		else
 			vAcond = new Label("No");
+		vPrecio = new Label(String.valueOf(apartamento.getPrecio()));
 		
 		vNombreDuenio = new Label(duenio.getNombre());
 		vApellidosDuenio = new Label(duenio.getApellidos());
 		vEmailDuenio = new Label(duenio.getEmail());
 		
 		Image image = new Image("foto");
+		Image image1 = new Image("Imagen 1");
+		Image image2 = new Image("Imagen 2");
+		Image image3 = new Image("Imagen 3");
+		
 		image.setWidth(300, Unit.PIXELS);
 		image.setHeight(300, Unit.PIXELS);
 		
     	image.setVisible(true);
-    	if(apartamento.getFoto1() != null)
+    	image1.setVisible(true);
+    	image2.setVisible(true);
+    	image3.setVisible(true);
+    	
+    	image.setDescription("Pulsa para más información");
+    	
+    	if(apartamento.getFoto1() != null) {
     		image.setSource(new ExternalResource(apartamento.getFoto1()));
+    		image.setWidth(300, Unit.PIXELS);
+    		image.setHeight(300, Unit.PIXELS);
+    		image1.setSource(new ExternalResource(apartamento.getFoto1()));
+    		image1.setWidth(400, Unit.PIXELS);
+    		image1.setHeight(400, Unit.PIXELS);
+    	}
+    	
+    	if(apartamento.getFoto2() != null) {
+    		image2.setSource(new ExternalResource(apartamento.getFoto2()));
+    		image2.setWidth(400, Unit.PIXELS);
+    		image2.setHeight(400, Unit.PIXELS);
+    	}
+    	
+    	if(apartamento.getFoto3() != null) {
+    		image3.setSource(new ExternalResource(apartamento.getFoto3()));
+    		image3.setWidth(400, Unit.PIXELS);
+    		image3.setHeight(400, Unit.PIXELS);
+    	}
+    	
+    	VerticalLayout popupLayoutFotos = new VerticalLayout();
+    	image.addClickListener(event -> { 
+    		popupLayoutFotos.removeAllComponents();
+			HorizontalLayout hlImagenes = new HorizontalLayout();
+			
+			hlImagenes.addComponents(image1, image2, image3);
+			
+			popupLayoutFotos.addComponent(hlImagenes);
+			popupLayoutFotos.setComponentAlignment(hlImagenes, Alignment.TOP_CENTER);
+			
+			imagenes.setWidth("1250px");
+			imagenes.setHeight("650px");
+			imagenes.setPosition(550, 200);
+			imagenes.setContent(popupLayoutFotos);
+			imagenes.center();
+			imagenes.setDraggable(false);
+			UI.getCurrent().addWindow(imagenes);
+			
+    	});
 		
 		hlNombre.addComponents(nombre, vNombre);
 		hlDesc.addComponents(desc, vDesc);
@@ -211,16 +273,15 @@ public class ApartamentoView extends VerticalLayout implements View {
 		hlHabit.addComponents(habit, vHabit);
 		hlCamas.addComponents(camas, vCamas);
 		hlAcond.addComponents(acond, vAcond);
+		hlPrecio.addComponents(precio, vPrecio, new Label(" €"));
 		
 		hlNomDuenio.addComponents(nombreDuenio, vNombreDuenio);
 		hlApellDuenio.addComponents(apellidosDuenio, vApellidosDuenio);
 		hlEmailDuenio.addComponents(emailDuenio, vEmailDuenio);
-		
-		
-		
 			
 		//Para el Panel Reserva
-		if(SecurityUtils.isLoggedIn())
+		if(SecurityUtils.isLoggedIn() && !apartamento.getUsuario().getUsername().equals(user.getUsername())
+				&& (entrada != null && salida != null))
 		{
 			datosReserva.addComponent(new Label("Ustedes ha elegido el apartamento "+apartamento.getNombre() +
 					" de "+ apartamento.getHabitaciones() + " habitaciones  y con "+apartamento.getCamas()+" camas"));
@@ -289,7 +350,14 @@ public class ApartamentoView extends VerticalLayout implements View {
 		//Comentarios
 		Grid<Valoracion> gridValoracion = new Grid<>();
 		gridValoracion.setWidth("897px");
-		listValoracion = repoValoracion.findByApartamentoValorado(apartamento);
+		//listValoracion = repoValoracion.findByApartamentoValorado(apartamento);
+		for(Valoracion v : repoValoracion.findByApartamentoValorado(apartamento))
+		{
+			if(v.getUsuarioValorado() == null)
+			{
+				listValoracion.add(v);
+			}
+		}
 		gridValoracion.setItems(listValoracion);
 		gridValoracion.addColumn(usuario ->{
 			
@@ -310,6 +378,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		elementosApartamento.addComponent(hlHabit);
 		elementosApartamento.addComponent(hlCamas);
 		elementosApartamento.addComponent(hlAcond);
+		elementosApartamento.addComponent(hlPrecio);
 		
 		botonPerfil.addClickListener(event -> {
 			getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(duenio.getId()));
@@ -319,7 +388,6 @@ public class ApartamentoView extends VerticalLayout implements View {
 		datosDuenio.addComponent(hlApellDuenio);
 		datosDuenio.addComponent(hlEmailDuenio);
 		datosDuenio.addComponent(botonPerfil);
-		
 		
 		panelFoto.setContent(image);
 		reserva.setContent(datosReserva);
@@ -339,23 +407,49 @@ public class ApartamentoView extends VerticalLayout implements View {
 		// Obtenemos el id del apartamento de la URI
 		String args[] = event.getParameters().split("/");
 	    String value1 = args[0];
-	    String dateString = args[1];
 	    
-	    try {
-           
-            entrada = java.sql.Date.valueOf(dateString);
-            salida = java.sql.Date.valueOf(args[2]);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+	    long id_apart = Long.parseLong(value1); // Como es un String lo convertimos a Long
+	    apartamento = service.findById(id_apart); // Obtenemos el apartamento en cuestión de la BD
 	    
+	    if(args.length==3) {
+	    	String dateString = args[1];
+		    try {
+		    	
+	            if(validarFecha(dateString) && validarFecha(args[2])) {
+	            	entrada = java.sql.Date.valueOf(dateString);
+	            	salida = java.sql.Date.valueOf(args[2]);
+	            	if(entrada.after(salida)) {
+	            		entrada = null;
+	            		salida = null;
+	            	}
+	            	else if(!serviceReserva.intervaloDisponible(entrada, salida, id_apart)) {
+	            		entrada = null;
+	            		salida = null;
+	            	}
+	            }
+	        } catch (ParseException e) {
+	            e.printStackTrace();
+	        } catch (java.text.ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
 	    try {
 	    	user = SecurityUtils.LogedUser();
 	    }catch(Exception e) {}
-
-	    long id_apart = Long.parseLong(value1); // Como es un String lo convertimos a Long
-	    apartamento = service.findById(id_apart); // Obtenemos el apartamento en cuestión de la BD
 	    init(); // Y llamamos al metodo init que genera la vista
 	}
+	
+	public static boolean validarFecha(String fecha) throws java.text.ParseException {
+
+        try {
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+            formatoFecha.setLenient(false);
+            formatoFecha.parse(fecha);
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
+    }
 
 }

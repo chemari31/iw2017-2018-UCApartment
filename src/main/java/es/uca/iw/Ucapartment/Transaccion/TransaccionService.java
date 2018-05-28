@@ -29,7 +29,11 @@ public class TransaccionService {
 	}
 	
 	public double SumaImporteCuenta(Long cuenta) {
-		return repo.SumaImporteCuenta(cuenta);
+		List<Transaccion> transacciones = repo.findByCuentaDestino(cuenta);
+		if(transacciones.size() > 0)
+			return repo.SumaImporteCuenta(cuenta);
+		else
+			return 0;
 	}
 	
 	public double beneficioCuentaIntervalo(Long cuenta, Date fechaInicio, Date fechaFin) {

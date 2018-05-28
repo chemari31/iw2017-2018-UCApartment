@@ -52,6 +52,7 @@ import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
+import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaRepository;
 import es.uca.iw.Ucapartment.Usuario.PopupPago;
@@ -246,6 +247,9 @@ public class Home extends VerticalLayout implements View {
 			}
 			
 			//Quitamos los apartamentos repetidos
+			
+			
+			
 			listApart = listApart.stream().distinct().collect(Collectors.toList());
 			
 			Date entrada = java.sql.Date.valueOf(ida.getValue());
@@ -267,12 +271,14 @@ public class Home extends VerticalLayout implements View {
 			}
 			
 			
+			
+			
 			//Apartamentos disponible segun la fecha de entrada y salida seleccionada
 			for(Reserva r : listReserva)
 			{
 				if(!(entrada.compareTo(r.getFechaInicio())>=0 && salida.compareTo(r.getFechaFin()) <= 0))
 				{
-					if(!(entrada.compareTo(r.getFechaInicio())<0 && salida.compareTo(r.getFechaInicio()) > 0))
+					if(!(entrada.compareTo(r.getFechaInicio())<=0 && salida.compareTo(r.getFechaInicio()) > 0))
 					{
 						if(!(entrada.compareTo(r.getFechaInicio())>=0 && entrada.compareTo(r.getFechaFin()) < 0))
 						{
@@ -288,12 +294,13 @@ public class Home extends VerticalLayout implements View {
 									}
 									else
 									{
+										apartamento = apartamento.stream().distinct().collect(Collectors.toList());
 										apartamento.remove(r.getApartamento());
 									}
 								}
 								if(noapartamento.isEmpty())
 									apartamento.add(r.getApartamento());
-									
+										
 							}
 							else
 							{
@@ -306,6 +313,7 @@ public class Home extends VerticalLayout implements View {
 									}
 									else
 									{
+										apartamento = apartamento.stream().distinct().collect(Collectors.toList());
 										apartamento.remove(r.getApartamento());
 									}
 								}
@@ -322,7 +330,15 @@ public class Home extends VerticalLayout implements View {
 								}
 								else
 								{
+									apartamento = apartamento.stream().distinct().collect(Collectors.toList());
 									apartamento.remove(r.getApartamento());
+								}
+								for(Reserva rr : repoEstado.findReservaByEstado(Valor.CANCELADA))
+								{
+									if(r.getId() == rr.getId())
+									{
+										apartamento.add(r.getApartamento());
+									}
 								}
 							}
 						}
@@ -339,7 +355,15 @@ public class Home extends VerticalLayout implements View {
 							}
 							else
 							{
+								apartamento = apartamento.stream().distinct().collect(Collectors.toList());
 								apartamento.remove(r.getApartamento());
+							}
+							for(Reserva rr : repoEstado.findReservaByEstado(Valor.CANCELADA))
+							{
+								if(r.getId() == rr.getId())
+								{
+									apartamento.add(r.getApartamento());
+								}
 							}
 						}
 					}
@@ -355,11 +379,30 @@ public class Home extends VerticalLayout implements View {
 						}
 						else
 						{
+							apartamento = apartamento.stream().distinct().collect(Collectors.toList());
 							apartamento.remove(r.getApartamento());
+						}
+						for(Reserva rr : repoEstado.findReservaByEstado(Valor.CANCELADA))
+						{
+							if(r.getId() == rr.getId())
+							{
+								apartamento.add(r.getApartamento());
+							}
 						}
 					}
 				}
 						
+			}
+			
+			for( Reserva r : repoReserva.findByFechaInicioAndFechaFin(entrada, salida))
+			{
+				for(Reserva rr : repoEstado.findReservaByEstado(Valor.CANCELADA))
+				{
+					if(r.getId() == rr.getId())
+					{
+						apartamento.add(r.getApartamento());
+					}
+				}
 			}
 			
 			apartamento = apartamento.stream().distinct().collect(Collectors.toList());
@@ -398,10 +441,11 @@ public class Home extends VerticalLayout implements View {
 			
 			//Grid de busqueda de apartamento
 			Grid<Apartamento> filter2 = new Grid<>();
-			//filter2.setHeightMode(HeightMode.UNDEFINED);
-			//filter2.setBodyRowHeight(200);
+			filter2.setHeightMode(HeightMode.UNDEFINED);
+			filter2.setBodyRowHeight(200);
 			filter2.setItems(apartFinal);
 			filter2.setWidth("900");
+			filter2.setHeight("600px");
 			//filter2.getSelectionModel().get
 			//Object select = ((SingleSelectionModel) filter2.getSelectionModel()).getSelectedItem();
 			
