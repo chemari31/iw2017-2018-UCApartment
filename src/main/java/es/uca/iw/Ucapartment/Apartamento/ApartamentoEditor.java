@@ -102,9 +102,11 @@ public class ApartamentoEditor extends VerticalLayout{
 			
 			public File file;
 			public int tipo; //para saber que imagen se va a subir
+			public boolean subida;
 			
-			public ImageUploader(int i) {
+			public ImageUploader(int i, boolean subida) {
 				this.tipo = i;
+				this.subida = false;
 			}
 		    
 			public OutputStream receiveUpload(String filename,
@@ -126,31 +128,38 @@ public class ApartamentoEditor extends VerticalLayout{
 		                .show(Page.getCurrent());
 		            return null;
 		        }
-		        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        else if(tipo == 2)
-		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        else if(tipo == 3)
-		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        return fos; // Return the output stream to write to
-		        
+		        if(mimeType.equals("image/jpeg") || (mimeType.equals("image/png"))){
+		        	subida = true;
+			        if(tipo == 1)//asignamos la ruta de la foto al atributo de la clase
+			        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        else if(tipo == 2)
+			        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        else if(tipo == 3)
+			        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        return fos; // Return the output stream to write to
+				}
+				else {
+					subida = false;
+					Notification.show("Archivo inaceptable");
+					return fos;
+				}
 		    }
 
 		    public void uploadSucceeded(SucceededEvent event) {
 		        // Show the uploaded file in the image viewer
-		    	if(tipo == 1) {
+		    	if(tipo == 1 && subida) {
 			    	image.setVisible(true);
 			        image.setSource(new FileResource(file));
 			        image.setWidth(200, Unit.PIXELS);
 					image.setHeight(200, Unit.PIXELS);
 		    	}
-		    	else if(tipo == 2) {
+		    	else if(tipo == 2 && subida) {
 		    		image2.setVisible(true);
 			        image2.setSource(new FileResource(file));
 			        image2.setWidth(200, Unit.PIXELS);
 					image2.setHeight(200, Unit.PIXELS);
 		    	}
-		    	else if(tipo == 3) {
+		    	else if(tipo == 3 && subida) {
 		    		image3.setVisible(true);
 			        image3.setSource(new FileResource(file));
 			        image3.setWidth(200, Unit.PIXELS);
@@ -159,13 +168,13 @@ public class ApartamentoEditor extends VerticalLayout{
 		    }
 		};
 		
-		ImageUploader receiver = new ImageUploader(1);
+		ImageUploader receiver = new ImageUploader(1, false);
 		//Campo para subir la foto
 		Upload foto_btn = new Upload("Adjunta la foto", receiver);
-		ImageUploader receiver2 = new ImageUploader(2);
+		ImageUploader receiver2 = new ImageUploader(2, false);
 		//Campo para subir la foto
 		Upload foto_btn2 = new Upload("Adjunta la foto", receiver2);
-		ImageUploader receiver3 = new ImageUploader(3);
+		ImageUploader receiver3 = new ImageUploader(3, false);
 		//Campo para subir la foto
 		Upload foto_btn3 = new Upload("Adjunta la foto", receiver3);
 		
