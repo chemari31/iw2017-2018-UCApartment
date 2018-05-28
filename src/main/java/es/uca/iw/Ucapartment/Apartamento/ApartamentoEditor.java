@@ -83,10 +83,9 @@ public class ApartamentoEditor extends VerticalLayout{
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
 	Button cancel = new Button("Cancel");
-	Button delete = new Button("Delete", FontAwesome.TRASH_O);
 	
 	/* Layout for buttons */
-	CssLayout actions = new CssLayout(save, cancel, delete);
+	CssLayout actions = new CssLayout(save, cancel);
 	
 	@Autowired
 	public ApartamentoEditor(ApartamentoService service) {
@@ -169,6 +168,10 @@ public class ApartamentoEditor extends VerticalLayout{
 		ImageUploader receiver3 = new ImageUploader(3);
 		//Campo para subir la foto
 		Upload foto_btn3 = new Upload("Adjunta la foto", receiver3);
+		
+		Button btnDeleteFoto1 = new Button("Borrar foto 1", FontAwesome.MINUS_CIRCLE);
+		Button btnDeleteFoto2 = new Button("Borrar foto 2", FontAwesome.MINUS_CIRCLE);
+		Button btnDeleteFoto3 = new Button("Borrar foto 3", FontAwesome.MINUS_CIRCLE);
 
 		foto_btn.addSucceededListener(receiver);
 		//código para procesar la foto
@@ -187,8 +190,42 @@ public class ApartamentoEditor extends VerticalLayout{
 		HorizontalLayout form2 = new HorizontalLayout(habitaciones, camas, ac);
 		HorizontalLayout form3 = new HorizontalLayout(ciudad, calle, numero, cp);
 		HorizontalLayout form4 = new HorizontalLayout(image, foto_btn, image2, foto_btn2, image3, foto_btn3);
+		HorizontalLayout btnBorrarFotos = new HorizontalLayout(btnDeleteFoto1,btnDeleteFoto2,btnDeleteFoto3);
 		
-		addComponents(form, form2, form3, form4, actions);
+		btnDeleteFoto1.addClickListener(eventFoto1 -> {
+			if(apartamento.getFoto1() != null && !apartamento.getFoto1().equals("/apartamentos/null.png")) {
+				apartamento.setFoto1("/apartamentos/null.png");
+				image.setSource(new ExternalResource(apartamento.getFoto1()));
+				service.save(apartamento);
+				Notification.show("Se ha eliminado la Foto 1 del apartamento");
+			}
+			else
+				Notification.show("No se puede eliminar la foto por defecto");
+		});
+		
+		btnDeleteFoto2.addClickListener(eventFoto2 -> {
+			if(apartamento.getFoto2() != null) {
+				apartamento.setFoto2(null);
+				image2.setSource(null);
+				service.save(apartamento);
+				Notification.show("Se ha eliminado la Foto 2 del apartamento");
+			}
+			else
+				Notification.show("La imagen 2 no está definida");
+		});
+		
+		btnDeleteFoto3.addClickListener(eventFoto3 -> {
+			if(apartamento.getFoto3() != null) {
+				apartamento.setFoto3(null);
+				image3.setSource(null);
+				service.save(apartamento);
+				Notification.show("Se ha eliminado la Foto 3 del apartamento");
+			}
+			else
+				Notification.show("La imagen 3 no está definida");
+		});
+		
+		addComponents(form, form2, form3, form4, btnBorrarFotos, actions);
 		
 		// Con esto se muestra un * rojo en los campos deseados indicando que es obligatorio
 		nombre.setRequiredIndicatorVisible(true);
@@ -233,7 +270,6 @@ public class ApartamentoEditor extends VerticalLayout{
 
 		// wire action buttons to save, delete and reset
 		save.addClickListener(e -> validar());
-		delete.addClickListener(e -> service.delete(apartamento));
 		cancel.addClickListener(e -> {return;});
 		setVisible(false);
 		
@@ -362,7 +398,6 @@ public class ApartamentoEditor extends VerticalLayout{
 		// is clicked
 		save.addClickListener(e -> 
 				h.onChange());
-		delete.addClickListener(e -> h.onChange());
 		cancel.addClickListener(e -> h.onChange());
 	}
 
