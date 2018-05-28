@@ -18,8 +18,8 @@ rm -r /src/test
 printf "# Introduzca su clave de mysql para importar la base de datos\n"
 mysql -u root -p < UCApartment.sql
 
-printf "A continuación se parará todo proceso escuchando por el puerto 8080...\n"
-kill -9 $(lsof -t -i:8080)
+printf "A continuación se parará el servicio tomcat8 por si está activo...\n"
+sudo service tomcat8 stop
 
 printf "# Se procede a desplegar la aplicación...\n"
 mvn spring-boot:run
