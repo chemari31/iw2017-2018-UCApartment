@@ -35,6 +35,11 @@ public class UsuarioService implements UserDetailsService {
 		usuario.setPassword(passwordEncoder.encode(usuario.getPassword() != null ? usuario.getPassword() : "default"));
 		return repo.save(usuario);
 	}
+	
+	public Usuario update(Usuario usuario) {
+		return repo.save(usuario);
+	}
+	
 
 	public List<Usuario> findByApellidosStartsWithIgnoreCase(String Apellidos) {
 		return repo.findByApellidosStartsWithIgnoreCase(Apellidos);

@@ -177,7 +177,7 @@ public class MiPerfilView extends VerticalLayout implements View {
  		    }
 
  		    public void uploadSucceeded(SucceededEvent event) {
- 		    	usuarioService.save(usuario);
+ 		    	usuarioService.update(usuario);
  		    	image.setSource(new FileResource(file));
  		    	image.setWidth(300, Unit.PIXELS);
  		    	image.setHeight(300, Unit.PIXELS);
@@ -203,7 +203,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 			popupDesactivar.setDraggable(false);
 			btn_aceptar_res.addClickListener(eventAceptar -> {
 				usuario.setDesbloqueo(false);
-				usuarioService.save(usuario);
+				usuarioService.update(usuario);
 				Notification.show("La cuenta del usuario "+usuario.getUsername() + " ha sido bloqueada.");
 				btnBloquear.setEnabled(false);
 				getUI().getPage().reload();
@@ -325,9 +325,14 @@ public class MiPerfilView extends VerticalLayout implements View {
                 	if(!usuario.getNombre().equals(sNombre)) usuario.setNombre(sNombre);
                 	if(!usuario.getApellidos().equals(sApell)) usuario.setApellidos(sApell);
                 	if(!usuario.getDni().equals(sDNI)) usuario.setDni(sDNI);
-                	if(!sPassword.isEmpty()) usuario.setPassword(sPassword);
                 	
-                	usuarioService.save(usuario);
+                	if(!sPassword.isEmpty()) {
+                		usuario.setPassword(sPassword);
+                    	usuarioService.save(usuario);
+                	}else {
+                	usuarioService.update(usuario);
+                	}
+                	
                 	vNombre.setValue(usuario.getNombre());
                 	vApell.setValue(usuario.getApellidos());
                 	vDNI.setValue(usuario.getDni());

@@ -148,7 +148,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		btnCambioRolAnfitrion.addClickListener(event -> {
 			usuario.setRol(Rol.ANFITRION);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			Notification.show("Se ha modificado el rol del usuario " +usuario.getUsername() + " a ANFITRION.", Notification.Type.TRAY_NOTIFICATION);
 			vRol.setCaption(usuario.getRol().toString());
 			btnCambioRolAnfitrion.setEnabled(false);
@@ -158,7 +158,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		btnCambioRolGerente.addClickListener(event -> {
 			usuario.setRol(Rol.GERENTE);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			Notification.show("Se ha modificado el rol del usuario " +usuario.getUsername() + " a GERENTE.", Notification.Type.TRAY_NOTIFICATION);
 			vRol.setCaption(usuario.getRol().toString());
 			btnCambioRolAnfitrion.setEnabled(true);
@@ -168,7 +168,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		btnCambioRolAdmin.addClickListener(event -> {
 			usuario.setRol(Rol.ADMINISTRADOR);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			Notification.show("Se ha modificado el rol del usuario " +usuario.getUsername() + " a ADMINISTRADOR.", Notification.Type.TRAY_NOTIFICATION);
 			vRol.setCaption(usuario.getRol().toString());
 			btnCambioRolAnfitrion.setEnabled(true);
@@ -205,7 +205,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
  		    }
 
  		    public void uploadSucceeded(SucceededEvent event) {
- 		    	usuarioService.save(usuario);
+ 		    	usuarioService.update(usuario);
  		    	image.setSource(new FileResource(file));
  		    	image.setWidth(300, Unit.PIXELS);
  		    	image.setHeight(300, Unit.PIXELS);
@@ -228,7 +228,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		btnBloquear.addClickListener(event -> {
 			usuario.setDesbloqueo(false);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			lAct.setValue("Cuenta bloqueada");
 			Notification.show("La cuenta del usuario "+usuario.getUsername() + " ha sido bloqueada.");
 			btnBloquear.setEnabled(false);
@@ -237,7 +237,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
 		
 		btnDesbloquear.addClickListener(event -> {
 			usuario.setDesbloqueo(true);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			lAct.setValue("Cuenta activa");
 			Notification.show("La cuenta del usuario "+usuario.getUsername() + " ha sido desbloqueada.");
 			btnBloquear.setEnabled(true);
@@ -342,7 +342,7 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
                 	if(!usuario.getApellidos().equals(sApell)) usuario.setApellidos(sApell);
                 	if(!usuario.getDni().equals(sDNI)) usuario.setDni(sDNI);
                 	
-                	usuarioService.save(usuario);
+                	usuarioService.update(usuario);
                 	vNombre.setValue(usuario.getNombre());
                 	vApell.setValue(usuario.getApellidos());
                 	vDNI.setValue(usuario.getDni());

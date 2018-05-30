@@ -125,6 +125,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		//gestion.addItem("Reservas", null, createNavigationButton("ReservasView", ReservasView.VIEW_NAME));
 		
 		if(SecurityUtils.isLoggedIn()) {
+			System.out.printf("ENTRO EN EL HOME");
 			menuSuperior.addComponent(createNavigationButton("Mi perfil", MiPerfilView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis apartamentos", ApartamentoManagementView.VIEW_NAME));
 			menuSuperior.addComponent(createNavigationButton("Mis Reserva", MisReserva.VIEW_NAME));
