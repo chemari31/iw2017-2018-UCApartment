@@ -138,7 +138,8 @@ public class ApartamentoView extends VerticalLayout implements View {
 		if(SecurityUtils.isLoggedIn() && !apartamento.getUsuario().getUsername().equals(user.getUsername()))
 		{
 			if(entrada != null && salida != null)
-				layoutIzquierdo.addComponent(reserva);
+				if(!serviceReserva.estaReservado(apartamento, entrada, salida))
+					layoutIzquierdo.addComponent(reserva);
 		}
 		
 		layoutIzquierdo.addComponent(panelApartamento);
@@ -422,9 +423,24 @@ public class ApartamentoView extends VerticalLayout implements View {
 	            		entrada = null;
 	            		salida = null;
 	            	}
-	            	else if(!serviceReserva.intervaloDisponible(entrada, salida, id_apart)) {
-	            		entrada = null;
-	            		salida = null;
+	            	else {
+	            		Date fecha_hoy = java.sql.Date.valueOf(LocalDate.now());
+	            		if(entrada.before(fecha_hoy) || salida.before(fecha_hoy)) {
+	            			entrada = null;
+	            			salida = null;
+	            		}
+	            		else {
+	            			if(entrada.equals(salida)) {
+	            				entrada = null;
+	            				salida = null;
+	            			}
+	            			else {
+		            			if(!serviceReserva.intervaloDisponible(entrada, salida, id_apart)) {
+		    	            		entrada = null;
+		    	            		salida = null;
+		    	            	}
+	            			}
+	            		}
 	            	}
 	            }
 	        } catch (ParseException e) {

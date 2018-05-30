@@ -24,9 +24,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long>
 	public List<Reserva> findByEstadoValor(@Param("valor")Valor valor);
 	public Reserva findById(Long id);
 
-		@Query("Select e.reserva from Estado e Where e.valor = :valor and e.reserva.apartamento.id = :id_apart "
+	@Query("Select e.reserva from Estado e Where e.valor = :valor and e.reserva.apartamento.id = :id_apart "
 				+ "and e.reserva.fechaInicio >= :fIni and e.reserva.fechaFin <= :fFin")
 	public List<Reserva> findByEstadoIntervalo(@Param("valor")Valor valor, 
 			@Param("fIni") Date fechaInicio, @Param("fFin") Date fechaFin, @Param("id_apart") Long id_apart);
-	
 }
