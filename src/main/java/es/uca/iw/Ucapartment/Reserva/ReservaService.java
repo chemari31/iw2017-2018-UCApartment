@@ -146,5 +146,20 @@ public class ReservaService {
 		else
 			return true;
 	}
+	
+	public boolean estaReservado(Apartamento a, Date fI, Date fF) {
+		boolean reservado = false;
+		List<Reserva> pendientes = repo.findByEstadoIntervalo(Valor.PENDIENTE, fI, fF, a.getId());
+		List<Reserva> aceptadas = repo.findByEstadoIntervalo(Valor.ACEPTADA, fI, fF, a.getId());
+		List<Reserva> realizadas = repo.findByEstadoIntervalo(Valor.REALIZADA, fI, fF, a.getId());
+		
+		if(pendientes.size() > 0)
+			reservado = true;
+		if(aceptadas.size() > 0)
+			reservado = true;
+		if(realizadas.size() > 0)
+			reservado = true;
+		return reservado;
+	}
 
 }
