@@ -164,7 +164,9 @@ public class Home extends VerticalLayout implements View {
 		//Mostrar filtros
 		ComboBox<String> Ciudad = new ComboBox<>("Ciudad");
 		ComboBox<String> Precio = new ComboBox<>("Precio");
-		
+		Ciudad.setEmptySelectionAllowed(false);
+		Precio.setEmptySelectionAllowed(false);
+
 		Collections.sort(listDistinctPrecio);
 		Collections.sort(listDistinctCiudad);
 		Ciudad.setItems(listDistinctCiudad);
@@ -179,7 +181,8 @@ public class Home extends VerticalLayout implements View {
 		
 		select2.setItems("Todo","1", "2","3","4","5","6","7","8");
 		select2.setValue("Todo");
-		
+		select2.setEmptySelectionAllowed(false);
+
 		//Funcion al pulsar el boton "Buscar"
 		input.addClickListener(new ClickListener() 
 		{
