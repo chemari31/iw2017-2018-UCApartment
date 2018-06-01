@@ -59,6 +59,7 @@ public class ApartamentoNuevo extends VerticalLayout{
 	@Autowired
 	private final PrecioService precioService;
 
+	private boolean esValido;
 
 	private Binder<Apartamento> binder = new Binder<>(Apartamento.class);
 	
@@ -80,6 +81,7 @@ public class ApartamentoNuevo extends VerticalLayout{
 		this.apartamento = new Apartamento("", "", "", "", "", 0, 0,user, 0, 0, false,0);
 		this.service = service;
 		this.precioService = precioService;
+		esValido = false;
 		
 		habitaciones.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		habitaciones.setValue(0);
@@ -135,10 +137,12 @@ public class ApartamentoNuevo extends VerticalLayout{
 				service.save(apartamento);
 				limpiar();
 				setVisible(false);
+				esValido = true;
 			}
 			else {
 				Notification.show("Por favor, comprueba los datos introducidos");
 				setVisible(true);
+				esValido = false;
 			}
 		});
 		cancel.addClickListener(e -> {return;});
@@ -147,6 +151,10 @@ public class ApartamentoNuevo extends VerticalLayout{
 	public interface ChangeHandler {
 
 		void onChange();
+	}
+	
+	public boolean valido() {
+		return esValido; 
 	}
 	
 	public void limpiar() {

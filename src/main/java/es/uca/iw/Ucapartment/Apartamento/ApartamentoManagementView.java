@@ -172,12 +172,16 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		editarPrecioBtn.addClickListener(clickEvent -> { new EstablecerPrecioEspeciales(selection.getValue(), precioService); });
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {
-			editor.setVisible(false);
-			listApartamentos(filter.getValue());
+			if(editor.valido()) {
+				editor.setVisible(false);
+				listApartamentos(filter.getValue());
+			}
 		});
 		nuevo.setChangeHandler(() -> {
-			nuevo.setVisible(false);
-			listApartamentos(filter.getValue());
+			if(nuevo.valido()) {
+				nuevo.setVisible(false);
+				listApartamentos(filter.getValue());
+			}
 		});
 
 		// Initialize listing

@@ -39,6 +39,7 @@ public class RegistroScreen extends VerticalLayout implements View{
 	// Campos del formulario
 	TextField nombreUsuario = new TextField("Nombre de usuario");
 	PasswordField password = new PasswordField("Contraseña");
+	PasswordField confPassword = new PasswordField("Confirmar contraseña");
 	TextField nombre = new TextField("Nombre");
 	TextField apellidos = new TextField("Apellidos");
 	TextField dni = new TextField("DNI");
@@ -70,6 +71,7 @@ public class RegistroScreen extends VerticalLayout implements View{
 		registerLayout.setWidth(500, Unit.PIXELS);
 		registerLayout.addComponent(nombreUsuario);
 		registerLayout.addComponent(password);
+		registerLayout.addComponent(confPassword);
 		registerLayout.addComponent(email);
 		registerLayout.addComponent(nombre);
 		registerLayout.addComponent(apellidos);
@@ -80,6 +82,7 @@ public class RegistroScreen extends VerticalLayout implements View{
 		// Con esto se muestra un * rojo en los campos deseados indicando que es obligatorio
 		nombreUsuario.setRequiredIndicatorVisible(true);
 		password.setRequiredIndicatorVisible(true);
+		confPassword.setRequiredIndicatorVisible(true);
 		email.setRequiredIndicatorVisible(true);
 		dni.setRequiredIndicatorVisible(true);
 		
@@ -91,6 +94,12 @@ public class RegistroScreen extends VerticalLayout implements View{
 		binder.forField(password)
 		.asRequired("El campo Contraseña es obligatorio")
 		.withValidator(new StringLengthValidator("El campo Contraseña ha de tener una longitud "
+				+" mínima de 6 caracteres y máximo 12",6,12))
+		.bind(Usuario::getPassword, Usuario::setPassword);
+		
+		binder.forField(confPassword)
+		.asRequired("El campo Confirmar contraseña es obligatorio")
+		.withValidator(new StringLengthValidator("El campo Confirmar contraseña ha de tener una longitud "
 				+" mínima de 6 caracteres y máximo 12",6,12))
 		.bind(Usuario::getPassword, Usuario::setPassword);
 		
@@ -110,25 +119,31 @@ public class RegistroScreen extends VerticalLayout implements View{
         Button registro = new Button("Registro", evt -> {
         	if(binder.isValid()) { // Si todas las validaciones se han pasado
         		
-        		String sNombreUsuario, sPassword, sNombre, sApellidos, sDNI, sEmail;
+        		String sNombreUsuario, sPassword, sConfPassword, sNombre, sApellidos, sDNI, sEmail;
         		// Obtenemos todos los valores del formulario y creamos el usuario
                 sNombreUsuario = nombreUsuario.getValue();
                 sPassword = password.getValue();
+                sConfPassword = confPassword.getValue();
                 sEmail = email.getValue();
                 sNombre = nombre.getValue();
                 sApellidos = apellidos.getValue();
                 sDNI = dni.getValue();
                 
-                Usuario usuario = new Usuario(sNombre, sApellidos, sDNI, sEmail, sNombreUsuario, sPassword);
-
-                // Llamamos a la funcion registro definidad en VaadinUI con el usuario
-                // la cual comprueba que el usuario con ese username y email no existe en la BD ya
-               if(!registro(usuario)) {
-                	Notification.show("Nombre de usuario "+usuario.getNombreUsuario()
-                	+ ", Correo electrónico "+usuario.getEmail()+" o DNI "+usuario.getDni()+" ya existentes");
-                    nombreUsuario.focus(); // Esto lo que hace es que el cursor para introducir texto
-                    						// aparezca al fallar directamente en el campo de username
+                if(sPassword.equals(sConfPassword)) {
+                
+	                Usuario usuario = new Usuario(sNombre, sApellidos, sDNI, sEmail, sNombreUsuario, sPassword);
+	
+	                // Llamamos a la funcion registro definidad en VaadinUI con el usuario
+	                // la cual comprueba que el usuario con ese username y email no existe en la BD ya
+	               if(!registro(usuario)) {
+	                	Notification.show("Nombre de usuario "+usuario.getNombreUsuario()
+	                	+ ", Correo electrónico "+usuario.getEmail()+" o DNI "+usuario.getDni()+" ya existentes");
+	                    nombreUsuario.focus(); // Esto lo que hace es que el cursor para introducir texto
+	                    						// aparezca al fallar directamente en el campo de username
+	                }
                 }
+                else
+                	Notification.show("Las contraseñas no coinciden");
         	}
         	else // Si ha fallado la validación muestra un mensajito
         		Notification.show("Comprueba los datos introducidos");

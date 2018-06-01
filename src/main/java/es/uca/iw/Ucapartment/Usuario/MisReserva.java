@@ -1,5 +1,6 @@
 package es.uca.iw.Ucapartment.Usuario;
 
+import java.io.File;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -11,12 +12,15 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
+import com.vaadin.data.ValueProvider;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.converter.StringToLongConverter;
 import com.vaadin.data.validator.LongRangeValidator;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FileResource;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -31,6 +35,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
@@ -96,7 +101,7 @@ public class MisReserva extends VerticalLayout implements View
 	private VerticalLayout popupLayout = new VerticalLayout();
 	private HorizontalLayout horizontal;
 	private PopupPago sub = new PopupPago();
-	private Button factura = new Button("Generar Factura");
+	private PopupPago popupFactura = new PopupPago();
 	private Button aceptar = new Button("Aceptar");
 	private Button pagar = new Button("Pagar");
 	private Button incidencia = new Button("Enviar Incidencia");
@@ -143,24 +148,92 @@ public class MisReserva extends VerticalLayout implements View
 		
 		
 		grid.setItems(listReserva);
-		grid.setWidth("755px");
-		grid.addColumn(Reserva::getFecha).setCaption("Fecha");
+		grid.setWidth("1100px");
+		grid.addColumn(Reserva::getFecha).setCaption("Fecha").setResizable(false)
+		.setDescriptionGenerator(e -> { return e.getFecha().toString(); });
 		grid.addColumn(reserva -> {
 			  apart = reserva.getApartamento();
 			  
 			  return apart.getNombre();
-			}).setCaption("Apartamento");
-		grid.addColumn(Reserva::getPrecio).setCaption("Precio");
+			}).setCaption("Apartamento").setResizable(false).setDescriptionGenerator(e -> { return e.getApartamento().getNombre(); });
+		grid.addColumn(Reserva::getPrecio).setCaption("Precio (€)").setResizable(false)
+		.setDescriptionGenerator(e -> { return String.valueOf(e.getPrecio()); });
 		
 		grid.addColumn(e ->{
 			estado = repoEstado.findByReserva(e);
 			return estado.getValor();	
-		}, new ButtonRenderer(clickEvent-> {
+		}).setCaption("Estado").setResizable(false);
+		
+		//Columna boton valoraciones
+		grid.addColumn(reserva -> "Valoraciones", new ButtonRenderer(clickEvent -> {
+			r = ((Reserva) clickEvent.getItem());
+			valoraciones = serviceValoracion.findByReserva(r);
+			if(valoraciones.size() == 0) {
+				popupLayout.removeAllComponents();
+				popupLayout.addComponent(new Label("No se han realizado valoraciones sobre"
+					+ " esta reserva"));
+				popupLayout.addComponent(aceptar);
+				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
+				sub.setWidth("500px");
+				sub.setHeight("150px");
+				sub.setPosition(550, 200);
+				sub.setContent(popupLayout);
+				sub.center();
+				UI.getCurrent().addWindow(sub);
+			}
+			else {
+				valoraciones.sort((o1,o2) -> o1.getFecha().compareTo(o2.getFecha()));
+				Grid<Valoracion> valGrid = new Grid();
+				valGrid.setItems(valoraciones);
+				valGrid.setWidth("900px");
+				valGrid.setHeight("250px");
+				valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150);
+				valGrid.addColumn(Valoracion->Valoracion.getUsuario().getNombreUsuario())
+					.setCaption("Usuario").setWidth(200);
+				valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800);
+				popupLayout.removeAllComponents();
+				popupLayout.addComponent(new Label("Valoraciones realizadas sobre la reserva"));
+				popupLayout.addComponent(valGrid);
+				popupLayout.addComponent(aceptar);
+				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
+				sub.setWidth("1000px");
+				sub.setHeight("400px");
+				sub.setPosition(550, 200);
+				sub.setContent(popupLayout);
+				sub.center();
+				UI.getCurrent().addWindow(sub);
+			}
+		})).setCaption("Valoraciones").setResizable(false);
+		
+		VerticalLayout layoutPopupFactura = new VerticalLayout();
+		grid.addColumn(reserva->"Generar factura", new ButtonRenderer(clickEvent -> {
+			layoutPopupFactura.removeAllComponents();
+			Reserva res = ((Reserva) clickEvent.getItem());
+			if(!serviceEstado.findByReserva(res).getValor().equals(Valor.REALIZADA)) {
+				layoutPopupFactura.addComponent(new Label("La reserva aún no se ha completado"));
+			}
+			else {
+				Button factura = new Button("Generar factura");
+				FileResource frFactura = new FileResource(new File("facturas/"+res.getId()+"factura.pdf"));
+				if(frFactura != null) {
+					FileDownloader fdFactura = new FileDownloader(frFactura);
+					fdFactura.extend(factura);
+				}
+				layoutPopupFactura.addComponent(new Label("Pulse a continuación para realizar la descarga de la factura"));
+				layoutPopupFactura.addComponent(factura);
+				layoutPopupFactura.setComponentAlignment(factura, Alignment.BOTTOM_RIGHT);
+			}
+			popupFactura.setWidth("500px");
+			popupFactura.setHeight("150px");
+			popupFactura.setPosition(550, 200);
+			popupFactura.setContent(layoutPopupFactura);
+			popupFactura.center();
+			UI.getCurrent().addWindow(popupFactura);
+		})).setCaption("Factura").setResizable(false);
+		grid.addColumn(e -> "Gestión", new ButtonRenderer(clickEvent-> {
 			
 			r = ((Reserva) clickEvent.getItem());
 			long idReserva = r.getId();
-			
-			
 			
 			estado = repoEstado.findByReserva((Reserva) clickEvent.getItem());
 			if(estado.getValor() == Valor.ACEPTADA)
@@ -181,8 +254,7 @@ public class MisReserva extends VerticalLayout implements View
 					estado.setValor(Valor.CANCELADA);
 					serviceEstado.save(estado);
 					sub.close();
-					layout.removeAllComponents();
-					init();
+					grid.clearSortOrder();
 				});
 
 				horizontal.addComponent(cancelar);
@@ -194,10 +266,9 @@ public class MisReserva extends VerticalLayout implements View
 						
 						correo.enviaremailpropietario2(r);
 						correo.enviaremailcliente2(r);
-						
+						serviceReserva.generarfactura(r);
 						sub.close();
-						layout.removeAllComponents();
-						init();
+						grid.clearSortOrder();
 					} else
 						Notification.show("Comprueba el número de cuenta");
 				});
@@ -233,8 +304,7 @@ public class MisReserva extends VerticalLayout implements View
 					correo.enviaremailpropietario3(r);
 
 					sub.close();
-					layout.removeAllComponents();
-					init();
+					grid.clearSortOrder();
 				});
 				
 				ModificarReserva.addClickListener(event ->{
@@ -301,7 +371,7 @@ public class MisReserva extends VerticalLayout implements View
 						r.setPrecio(precioTotal);
 						serviceReserva.save(r);
 						sub.close();
-						layout.removeAllComponents();
+						grid.clearSortOrder();
 						Notification.show("Su reserva se ha modificado", Notification.Type.WARNING_MESSAGE);
 						
 						getUI().getNavigator().navigateTo(MisReserva.VIEW_NAME);
@@ -375,18 +445,15 @@ public class MisReserva extends VerticalLayout implements View
 					serviceValoracion.save(v);
 					Notification.show("Su comentario se ha realizado satisfactoriamente", Notification.Type.HUMANIZED_MESSAGE );	
 					sub.close();
-					layout.removeAllComponents();
+					grid.clearSortOrder();
 					getUI().getNavigator().navigateTo(MisReserva.VIEW_NAME);
 				});
 				cancelarIncidencia.addClickListener(event ->{
 					sub.close();
 				});
-				factura.addClickListener(event ->{
-					serviceReserva.generarfactura(r);
-				});
 				
 				horizontal.addComponent(cancelarIncidencia);
-				horizontal.addComponent(factura);
+				//horizontal.addComponent(factura);
 				popupLayout.addComponent(horizontal);
 				sub.setWidth("600px");
 				sub.setHeight("400px");
@@ -396,50 +463,7 @@ public class MisReserva extends VerticalLayout implements View
 				UI.getCurrent().addWindow(sub);
 			}
 
-				})).setCaption("Estado");
-		
-		//Columna boton valoraciones
-		grid.addColumn(reserva -> "Valoraciones", new ButtonRenderer(clickEvent -> {
-			r = ((Reserva) clickEvent.getItem());
-			valoraciones = serviceValoracion.findByReserva(r);
-			if(valoraciones.size() == 0) {
-				popupLayout.removeAllComponents();
-				popupLayout.addComponent(new Label("No se han realizado valoraciones sobre"
-					+ " esta reserva"));
-				popupLayout.addComponent(aceptar);
-				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
-				sub.setWidth("500px");
-				sub.setHeight("150px");
-				sub.setPosition(550, 200);
-				sub.setContent(popupLayout);
-				sub.center();
-				UI.getCurrent().addWindow(sub);
-			}
-			else {
-				valoraciones.sort((o1,o2) -> o1.getFecha().compareTo(o2.getFecha()));
-				Grid<Valoracion> valGrid = new Grid();
-				valGrid.setItems(valoraciones);
-				valGrid.setWidth("900px");
-				valGrid.setHeight("250px");
-				valGrid.addColumn(Valoracion::getFecha).setCaption("Fecha").setWidth(150);
-				valGrid.addColumn(Valoracion->Valoracion.getUsuario().getNombreUsuario())
-					.setCaption("Usuario").setWidth(200);
-				valGrid.addColumn(Valoracion::getDescripcion).setCaption("Descripcion").setWidth(800);
-				popupLayout.removeAllComponents();
-				popupLayout.addComponent(new Label("Valoraciones realizadas sobre la reserva"));
-				popupLayout.addComponent(valGrid);
-				popupLayout.addComponent(aceptar);
-				popupLayout.setComponentAlignment(aceptar, Alignment.BOTTOM_RIGHT);
-				sub.setWidth("1000px");
-				sub.setHeight("400px");
-				sub.setPosition(550, 200);
-				sub.setContent(popupLayout);
-				sub.center();
-				UI.getCurrent().addWindow(sub);
-			}
-		})).setCaption("Valoraciones");		
-				
-				
+				})).setCaption("Gestionar reserva").setResizable(false);
 		
 		addComponent(layout);
 	}

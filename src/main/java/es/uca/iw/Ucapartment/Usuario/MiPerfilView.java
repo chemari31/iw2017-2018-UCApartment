@@ -115,13 +115,14 @@ public class MiPerfilView extends VerticalLayout implements View {
 		HorizontalLayout hlDNI = new HorizontalLayout();
 		HorizontalLayout hlUsername = new HorizontalLayout();
 		HorizontalLayout hlPassword = new HorizontalLayout();
+		HorizontalLayout hlConfPassword = new HorizontalLayout();
 		HorizontalLayout hlEmail = new HorizontalLayout();
 		HorizontalLayout hlRol = new HorizontalLayout();
 		HorizontalLayout hlBtnCambioImagen = new HorizontalLayout();
 		HorizontalLayout hlBtnCambiosActivo = new HorizontalLayout();
 		HorizontalLayout hlBtnModificarDatos = new HorizontalLayout();
 		
-		Label lNombre, lApell, lDNI, lUsername, lPassword, lEmail, lRol;
+		Label lNombre, lApell, lDNI, lUsername, lPassword, lConfPassword, lEmail, lRol;
 		Label vNombre, vApell, vDNI, vUsername, vEmail, vRol;
 		
 		lNombre = new Label("Nombre: ");
@@ -129,10 +130,12 @@ public class MiPerfilView extends VerticalLayout implements View {
 		lDNI = new Label("DNI: ");
 		lUsername = new Label("Nombre de usuario: ");
 		lPassword = new Label("Contraseña: ");
+		lConfPassword = new Label("Repetir contraseña: ");
 		lEmail = new Label("Correo electrónico: ");
 		lRol = new Label("Rol: ");
 		
 		lPassword.setVisible(false);
+		lConfPassword.setVisible(false);
 		
 		vNombre = new Label();
 		vApell = new Label(); 
@@ -157,6 +160,11 @@ public class MiPerfilView extends VerticalLayout implements View {
  		class ImageUploader implements Receiver, SucceededListener {
  			
  			public File file;
+ 			public boolean subida;
+ 			
+ 			public ImageUploader() {
+				this.subida = false;
+			}
  		    
  			public OutputStream receiveUpload(String filename,
                      String mimeType) {
@@ -172,16 +180,26 @@ public class MiPerfilView extends VerticalLayout implements View {
  		                .show(Page.getCurrent());
  		            return null;
  		        }
- 		        usuario.setFoto1("/usuarios/" + usuario.getId()+"/"+ filename);
- 		        return fos; // Return the output stream to write to 
+ 		       if(mimeType.equals("image/jpeg") || (mimeType.equals("image/png"))){
+		        	subida = true;
+		        	usuario.setFoto1("/usuarios/" + usuario.getId()+"/"+ filename);
+		        	return fos; // Return the output stream to write to 
+ 		       }
+				else {
+					subida = false;
+					Notification.show("Tipo de archivo no válido");
+					return fos;
+				}
  		    }
 
  		    public void uploadSucceeded(SucceededEvent event) {
- 		    	usuarioService.update(usuario);
- 		    	image.setSource(new FileResource(file));
- 		    	image.setWidth(300, Unit.PIXELS);
- 		    	image.setHeight(300, Unit.PIXELS);
- 				getUI().getPage().reload();
+ 		    	if(subida) {
+	 		    	usuarioService.update(usuario);
+	 		    	image.setSource(new FileResource(file));
+	 		    	image.setWidth(300, Unit.PIXELS);
+	 		    	image.setHeight(300, Unit.PIXELS);
+	 				getUI().getPage().reload();
+ 		    	}
  		    }
  		};
 		
@@ -228,6 +246,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 		TextField tfDNI = new TextField();
 		TextField tfUsername = new TextField();
 		PasswordField tfPassword = new PasswordField();
+		PasswordField tfConfPassword = new PasswordField();
 		TextField tfEmail = new TextField();
 		
 		// Con esto se muestra un * rojo en los campos deseados indicando que es obligatorio
@@ -256,6 +275,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 		tfDNI.setVisible(false);
 		tfUsername.setVisible(false);
 		tfPassword.setVisible(false);
+		tfConfPassword.setVisible(false);
 		tfEmail.setVisible(false);
 		
 		btnModificarDatos.addClickListener(event -> {
@@ -267,6 +287,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 			vDNI.setVisible(false);
 			vUsername.setVisible(false);
 			lPassword.setVisible(true);
+			lConfPassword.setVisible(true);
 			vEmail.setVisible(false);
 			
 			tfNombre.setVisible(true);
@@ -274,6 +295,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 			tfDNI.setVisible(true);
 			tfUsername.setVisible(true);
 			tfPassword.setVisible(true);
+			tfConfPassword.setVisible(true);
 			tfEmail.setVisible(true);
 			
 			tfNombre.setValue(usuario.getNombre());
@@ -284,85 +306,118 @@ public class MiPerfilView extends VerticalLayout implements View {
 		});
 		
 		btnGuardar.addClickListener(event -> {
-			if(!tfPassword.isEmpty())
+			boolean pass = false, confPass = false;
+			if(!tfPassword.isEmpty()) {
 				binder.forField(tfPassword)
 				.withValidator(new StringLengthValidator("El campo Contraseña ha de tener una longitud "
 						+" mínima de 6 caracteres y máximo 12",6,12))
 				.bind(Usuario::getPassword, Usuario::setPassword);
-			if(binder.isValid()) { // Si todas las validaciones se han pasado
-				String sUsername, sPassword, sNombre, sApell, sDNI, sEmail;
-				String notificacion = "";
-				boolean existeUsuario = false;
-				boolean existeEmail = false;
-        		// Obtenemos todos los valores del formulario y actualizamos el usuario
-                sUsername = tfUsername.getValue();
-                sPassword = tfPassword.getValue();
-                sEmail = tfEmail.getValue();
-                sNombre = tfNombre.getValue();
-                sApell = tfApell.getValue();
-                sDNI = tfDNI.getValue();
-                
-                if(!usuario.getUsername().equals(sUsername)) {
-                	if(usuarioService.nombreUsuarioExistente(sUsername)) {
-                		notificacion = notificacion +"Ese nombre de usuario ya existe";
-                		existeUsuario = true;
-                	}
-                	else
-                		usuario.setNombreUsuario(sUsername);
-                }
-                
-                if(!usuario.getEmail().equals(sEmail)) {
-                	
-                	if(usuarioService.emailExistente(sEmail)) {
-                		notificacion = notificacion +"\nEse email ya existe";
-                		existeEmail = true;
-                	}
-                	else
-                		usuario.setEmail(sEmail);
-                }
-                
-                if(!existeUsuario && !existeEmail) {
-                	if(!usuario.getNombre().equals(sNombre)) usuario.setNombre(sNombre);
-                	if(!usuario.getApellidos().equals(sApell)) usuario.setApellidos(sApell);
-                	if(!usuario.getDni().equals(sDNI)) usuario.setDni(sDNI);
-                	
-                	if(!sPassword.isEmpty()) {
-                		usuario.setPassword(sPassword);
-                    	usuarioService.save(usuario);
-                	}else {
-                	usuarioService.update(usuario);
-                	}
-                	
-                	vNombre.setValue(usuario.getNombre());
-                	vApell.setValue(usuario.getApellidos());
-                	vDNI.setValue(usuario.getDni());
-                	vUsername.setValue(usuario.getNombreUsuario());
-                	vEmail.setValue(usuario.getEmail());
-                	
-        			vNombre.setVisible(true);
-        			vApell.setVisible(true);
-        			vDNI.setVisible(true);
-        			vUsername.setVisible(true);
-        			lPassword.setVisible(false);
-        			vEmail.setVisible(true);
-
-        			tfNombre.setVisible(false);
-        			tfApell.setVisible(false);
-        			tfDNI.setVisible(false);
-        			tfUsername.setVisible(false);
-        			tfPassword.setVisible(false);
-        			tfEmail.setVisible(false);
-        			
-        			btnModificarDatos.setVisible(true);
-        			btnGuardar.setVisible(false);
-        			btnCancelar.setVisible(false);
-        			tfPassword.setValue("");
-                }
-                else
-                	Notification.show(notificacion);
+				binder.forField(tfConfPassword)
+				.withValidator(new StringLengthValidator("El campo Confirmar contraseña ha de tener una longitud "
+						+" mínima de 6 caracteres y máximo 12",6,12))
+				.asRequired("Las contraseñas no coinciden")
+				.bind(Usuario::getPassword, Usuario::setPassword);
+				if(tfPassword.getValue().equals(tfConfPassword.getValue()))
+					pass = true;
+				else
+					Notification.show("Las contraseñas no coinciden");
 			}
-        	else // Si ha fallado la validación muestra un mensajito
-        		Notification.show("Comprueba los datos introducidos");
+			if(!tfConfPassword.isEmpty()) {
+				binder.forField(tfPassword)
+				.withValidator(new StringLengthValidator("El campo Contraseña ha de tener una longitud "
+						+" mínima de 6 caracteres y máximo 12",6,12))
+				.asRequired("Las contraseñas no coinciden")
+				.bind(Usuario::getPassword, Usuario::setPassword);
+				binder.forField(tfConfPassword)
+				.withValidator(new StringLengthValidator("El campo Confirmar contraseña ha de tener una longitud "
+						+" mínima de 6 caracteres y máximo 12",6,12))
+				.bind(Usuario::getPassword, Usuario::setPassword);
+				if(tfConfPassword.getValue().equals(tfPassword.getValue()))
+					confPass = true;
+				else
+					Notification.show("Las contraseñas no coinciden");
+			}
+			if(pass && confPass) {
+				if(binder.isValid()) { // Si todas las validaciones se han pasado
+					String sUsername, sPassword, sConfPassword, sNombre, sApell, sDNI, sEmail;
+					String notificacion = "";
+					boolean existeUsuario = false;
+					boolean existeEmail = false;
+	        		// Obtenemos todos los valores del formulario y actualizamos el usuario
+	                sUsername = tfUsername.getValue();
+	                sPassword = tfPassword.getValue();
+	                sConfPassword = tfConfPassword.getValue();
+	                sEmail = tfEmail.getValue();
+	                sNombre = tfNombre.getValue();
+	                sApell = tfApell.getValue();
+	                sDNI = tfDNI.getValue();
+	                
+	                if(!usuario.getUsername().equals(sUsername)) {
+	                	if(usuarioService.nombreUsuarioExistente(sUsername)) {
+	                		notificacion = notificacion +"Ese nombre de usuario ya existe";
+	                		existeUsuario = true;
+	                	}
+	                	else
+	                		usuario.setNombreUsuario(sUsername);
+	                }
+	                
+	                if(!usuario.getEmail().equals(sEmail)) {
+	                	
+	                	if(usuarioService.emailExistente(sEmail)) {
+	                		notificacion = notificacion +"\nEse email ya existe";
+	                		existeEmail = true;
+	                	}
+	                	else
+	                		usuario.setEmail(sEmail);
+	                }
+	                
+	                if(!existeUsuario && !existeEmail) {
+	                	if(!usuario.getNombre().equals(sNombre)) usuario.setNombre(sNombre);
+	                	if(!usuario.getApellidos().equals(sApell)) usuario.setApellidos(sApell);
+	                	if(!usuario.getDni().equals(sDNI)) usuario.setDni(sDNI);
+	                	
+	                	if(!sPassword.isEmpty() && !sConfPassword.isEmpty()) {
+		                		usuario.setPassword(sPassword);
+		                    	usuarioService.save(usuario);
+	                	}
+	                	else {
+	                		usuarioService.update(usuario);
+	                	}
+	                	
+	                	vNombre.setValue(usuario.getNombre());
+	                	vApell.setValue(usuario.getApellidos());
+	                	vDNI.setValue(usuario.getDni());
+	                	vUsername.setValue(usuario.getNombreUsuario());
+	                	vEmail.setValue(usuario.getEmail());
+	                	
+	        			vNombre.setVisible(true);
+	        			vApell.setVisible(true);
+	        			vDNI.setVisible(true);
+	        			vUsername.setVisible(true);
+	        			lPassword.setVisible(false);
+	        			lConfPassword.setVisible(false);
+	        			vEmail.setVisible(true);
+	
+	        			tfNombre.setVisible(false);
+	        			tfApell.setVisible(false);
+	        			tfDNI.setVisible(false);
+	        			tfUsername.setVisible(false);
+	        			tfPassword.setVisible(false);
+	        			tfConfPassword.setVisible(false);
+	        			tfEmail.setVisible(false);
+	        			
+	        			btnModificarDatos.setVisible(true);
+	        			btnGuardar.setVisible(false);
+	        			btnCancelar.setVisible(false);
+	        			tfPassword.clear();
+	        			tfConfPassword.clear();
+	                }
+	                else
+	                	Notification.show(notificacion);
+				}
+	        	else // Si ha fallado la validación muestra un mensajito
+	        		Notification.show("Comprueba los datos introducidos");
+			}
 
 		});
 		
@@ -372,6 +427,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 			vDNI.setVisible(true);
 			vUsername.setVisible(true);
 			lPassword.setVisible(false);
+			lConfPassword.setVisible(false);
 			vEmail.setVisible(true);
 
 			tfNombre.setVisible(false);
@@ -379,6 +435,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 			tfDNI.setVisible(false);
 			tfUsername.setVisible(false);
 			tfPassword.setVisible(false);
+			tfConfPassword.setVisible(false);
 			tfEmail.setVisible(false);
 			
 			btnModificarDatos.setVisible(true);
@@ -404,6 +461,7 @@ public class MiPerfilView extends VerticalLayout implements View {
     	hlDNI.addComponents(lDNI, vDNI, tfDNI);
     	hlUsername.addComponents(lUsername, vUsername, tfUsername);
     	hlPassword.addComponents(lPassword, tfPassword);
+    	hlConfPassword.addComponents(lConfPassword, tfConfPassword);
     	hlEmail.addComponents(lEmail, vEmail,tfEmail);
     	hlRol.addComponents(lRol, vRol);
     	hlBtnCambioImagen.addComponent(btnFoto);
@@ -411,7 +469,7 @@ public class MiPerfilView extends VerticalLayout implements View {
     	hlBtnModificarDatos.addComponents(btnModificarDatos, btnGuardar,btnCancelar);
     	
     	elementosUsuario.addComponents(hlNombre, hlApellidos, hlDNI, hlUsername,
-    			hlEmail,hlPassword, hlRol, hlBtnCambioImagen, hlBtnModificarDatos, hlBtnCambiosActivo); 
+    			hlEmail, hlPassword, hlConfPassword, hlRol, hlBtnCambioImagen, hlBtnModificarDatos, hlBtnCambiosActivo); 
     	
 		//Comentarios
 		Grid<Valoracion> gridValoracion = new Grid<>();

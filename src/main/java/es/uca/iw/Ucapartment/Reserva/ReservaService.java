@@ -121,16 +121,16 @@ public class ReservaService {
 			doc.add(new Paragraph("La reserva se ha realizado a fecha de: " + reserva.getFecha() + " con un precio total de " + reserva.getPrecio() + " euros."));
 
 			doc.close();
-			Notification.show("Factura generada.");
+			//Notification.show("Factura generada.");
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Notification.show("Se produjo un error generando la factura.");
+			//Notification.show("Se produjo un error generando la factura.");
 		} catch (DocumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Notification.show("Se produjo un error generando la factura.");
+			//Notification.show("Se produjo un error generando la factura.");
 		}
 	}
 	

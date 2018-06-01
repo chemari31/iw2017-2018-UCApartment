@@ -119,9 +119,11 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 			
 			public File file;
 			public int tipo; // Con esto sabremos que imagen hemos almacenado (1, 2 o 3)
+			public boolean subida;
 			
 			public ImageUploader(int i) {
 				this.tipo = i;
+				this.subida = false;
 			}
 		    
 			public OutputStream receiveUpload(String filename,
@@ -138,18 +140,26 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		                .show(Page.getCurrent());
 		            return null;
 		        }
-		        if(tipo == 1) // Asignamos la ruta de la foto al atributo de la clase
-		        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        else if(tipo == 2)
-		        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        else if(tipo == 3)
-		        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
-		        return fos; // Return the output stream to write to 
+		        if(mimeType.equals("image/jpeg") || (mimeType.equals("image/png"))){
+		        	subida = true;
+			        if(tipo == 1) // Asignamos la ruta de la foto al atributo de la clase
+			        	apartamento.setFoto1("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        else if(tipo == 2)
+			        	apartamento.setFoto2("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        else if(tipo == 3)
+			        	apartamento.setFoto3("/apartamentos/" + apartamento.getId() +"/"+ filename);
+			        return fos; // Return the output stream to write to 
+				}
+				else {
+					subida = false;
+					Notification.show("Tipo de archivo no válido");
+					return fos;
+				}
 		    }
 
 		    public void uploadSucceeded(SucceededEvent event) {
 		    	apartamentoService.save(apartamento);
-		    	if(tipo == 1) {
+		    	if(tipo == 1 && subida) {
 		    		image.setSource(new FileResource(file));
 		    		image.setWidth(300, Unit.PIXELS);
 		    		image.setHeight(300, Unit.PIXELS);
@@ -157,12 +167,12 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		    		image1.setWidth(400, Unit.PIXELS);
 		    		image1.setHeight(400, Unit.PIXELS);
 		    	}
-		    	else if(tipo == 2) {
+		    	else if(tipo == 2 && subida) {
 		    		image2.setSource(new FileResource(file));
 		    		image2.setWidth(400, Unit.PIXELS);
 		    		image2.setHeight(400, Unit.PIXELS);
 		    	}
-		    	else if(tipo == 3) {
+		    	else if(tipo == 3 && subida) {
 		    		image3.setSource(new FileResource(file));
 		    		image3.setWidth(400, Unit.PIXELS);
 		    		image3.setHeight(400, Unit.PIXELS);

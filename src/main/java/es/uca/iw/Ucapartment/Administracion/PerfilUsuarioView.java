@@ -185,6 +185,12 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
  		class ImageUploader implements Receiver, SucceededListener {
  			
  			public File file;
+ 			
+ 			public boolean subida;
+ 			
+ 			public ImageUploader() {
+				this.subida = false;
+			}
  		    
  			public OutputStream receiveUpload(String filename,
                      String mimeType) {
@@ -200,17 +206,27 @@ public class PerfilUsuarioView extends VerticalLayout implements View {
  		                .show(Page.getCurrent());
  		            return null;
  		        }
- 		        usuario.setFoto1("/usuarios/" + usuario.getId() +"/"+ filename);
- 		        return fos; // Return the output stream to write to 
+ 		       if(mimeType.equals("image/jpeg") || (mimeType.equals("image/png"))){
+		        	subida = true;
+		        	usuario.setFoto1("/usuarios/" + usuario.getId()+"/"+ filename);
+		        	return fos; // Return the output stream to write to 
+		       }
+				else {
+					subida = false;
+					Notification.show("Tipo de archivo no válido");
+					return fos;
+				}
  		    }
 
  		    public void uploadSucceeded(SucceededEvent event) {
- 		    	usuarioService.update(usuario);
- 		    	image.setSource(new FileResource(file));
- 		    	image.setWidth(300, Unit.PIXELS);
- 		    	image.setHeight(300, Unit.PIXELS);
- 		    	if(usuario.getUsername().equals(SecurityUtils.LogedUser().getUsername()))
- 	 				getUI().getPage().reload();
+ 		    	if(subida) {
+	 		    	usuarioService.update(usuario);
+	 		    	image.setSource(new FileResource(file));
+	 		    	image.setWidth(300, Unit.PIXELS);
+	 		    	image.setHeight(300, Unit.PIXELS);
+	 		    	if(usuario.getUsername().equals(SecurityUtils.LogedUser().getUsername()))
+	 	 				getUI().getPage().reload();
+ 		    	}
  		    }
  		};
 		

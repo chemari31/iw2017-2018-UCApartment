@@ -57,6 +57,7 @@ public class ApartamentoEditor extends VerticalLayout{
 	 */
 	private Apartamento apartamento;
 
+	private boolean esValido;
 
 	private Binder<Apartamento> binder = new Binder<>(Apartamento.class);
 	 
@@ -90,7 +91,7 @@ public class ApartamentoEditor extends VerticalLayout{
 	@Autowired
 	public ApartamentoEditor(ApartamentoService service) {
 		this.service = service;
-		
+		esValido = false;
 		ac.setItems(true, false);
 	    ac.setItemCaptionGenerator(bool -> {return bool?"Si":"No";});
 		habitaciones.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
@@ -289,6 +290,10 @@ public class ApartamentoEditor extends VerticalLayout{
 		void onChange();
 	}
 	
+	public boolean valido() {
+		return esValido;
+	}
+	
 	public void validar() {
 		// Con los binder lo que hacemos es validar los datos introducidos
 		binder.forField(nombre)
@@ -342,10 +347,12 @@ public class ApartamentoEditor extends VerticalLayout{
 		if(binder.isValid()) { // Si todas las validaciones se han pasado
 			binder.setBean(apartamento);
 			service.save(apartamento);
+			esValido = true;
 		}
 		else{
 			Notification.show("El apartamento no se pudo guardar, " +
 		        "por favor comprueba cada campo");
+			esValido = false;
 		}
 		setVisible(false);
 	}
