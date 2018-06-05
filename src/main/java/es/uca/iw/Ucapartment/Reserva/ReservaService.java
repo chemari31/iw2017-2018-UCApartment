@@ -29,10 +29,12 @@ import org.springframework.stereotype.Service;
 import es.uca.iw.Ucapartment.Estado.Estado;
 import es.uca.iw.Ucapartment.Estado.EstadoRepository;
 import es.uca.iw.Ucapartment.Estado.Valor;
+import es.uca.iw.Ucapartment.Periodo.PeriodoService;
 import es.uca.iw.Ucapartment.Transaccion.Transaccion;
 import es.uca.iw.Ucapartment.Transaccion.TransaccionService;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
+import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
 
 
 @Service
@@ -43,6 +45,12 @@ public class ReservaService {
 	
 	@Autowired
 	private EstadoRepository repoEstado;
+	
+	@Autowired
+	private PeriodoService periodoService;
+	
+	@Autowired
+	private ApartamentoService apartamentoService;
 	
 	@Autowired
 	private TransaccionService transaccionService;
@@ -141,10 +149,14 @@ public class ReservaService {
 	public boolean intervaloDisponible(Date fechaInicio, Date fechaFin, Long id_apart) {
 		List<Reserva> aceptadas =  repo.findByEstadoIntervalo(Valor.ACEPTADA, fechaInicio, fechaFin, id_apart);
 		List<Reserva> realizadas = repo.findByEstadoIntervalo(Valor.REALIZADA, fechaInicio, fechaFin, id_apart);
+		boolean disponible = true;
+		
 		if(aceptadas.size() > 0 || realizadas.size() > 0)
-			return false;
-		else
-			return true;
+			disponible = false;
+		if(!periodoService.noExistePeriodo(fechaInicio, fechaFin, apartamentoService.findById(id_apart)))
+			disponible = false;
+		
+		return disponible;
 	}
 	
 	public boolean estaReservado(Apartamento a, Date fI, Date fF) {

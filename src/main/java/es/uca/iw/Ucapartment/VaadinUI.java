@@ -26,6 +26,7 @@ import es.uca.iw.Ucapartment.Apartamento.ApartamentoManagementView;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoRepository;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoView;
+import es.uca.iw.Ucapartment.Periodo.PeriodoService;
 import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
@@ -69,6 +70,9 @@ public class VaadinUI extends UI {
 	
 	@Autowired
 	ValoracionService valoracionService;
+	
+	@Autowired
+	PeriodoService periodoService;
 	
 	List<Apartamento> apartamento;
 	
@@ -123,7 +127,8 @@ public class VaadinUI extends UI {
 	}
 	
 	private void showApartamentosScreen() {
-		setContent(new ApartamentoManagementView(service, serviceReserva, new ApartamentoEditor(service), precioService, servicio, valoracionService));
+		setContent(new ApartamentoManagementView(service, serviceReserva, new ApartamentoEditor(service), precioService, 
+				servicio, valoracionService, periodoService));
 	}
 	
 	

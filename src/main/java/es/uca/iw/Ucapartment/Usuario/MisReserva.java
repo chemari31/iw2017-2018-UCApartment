@@ -100,8 +100,8 @@ public class MisReserva extends VerticalLayout implements View
 	private VerticalLayout layout = new VerticalLayout();
 	private VerticalLayout popupLayout = new VerticalLayout();
 	private HorizontalLayout horizontal;
-	private PopupPago sub = new PopupPago();
-	private PopupPago popupFactura = new PopupPago();
+	private Popup sub = new Popup();
+	private Popup popupFactura = new Popup();
 	private Button aceptar = new Button("Aceptar");
 	private Button pagar = new Button("Pagar");
 	private Button incidencia = new Button("Enviar Incidencia");

@@ -1,5 +1,8 @@
 package es.uca.iw.Ucapartment.Precio;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +36,8 @@ public class EstablecerPrecioEspeciales extends Window{
         VerticalLayout subContent = new VerticalLayout();
         subWindow.setContent(subContent);
         /* Action buttons */
-    	Button save = new Button("Save", FontAwesome.SAVE);
-    	Button cancel = new Button("Cancel");
+    	Button save = new Button("Guardar", FontAwesome.SAVE);
+    	Button cancel = new Button("Cancelar");
     	/* Layout for buttons */
     	CssLayout actions = new CssLayout(save, cancel);
     	DateField fechaInicio = new DateField("Fecha Inicio");
@@ -56,12 +59,25 @@ public class EstablecerPrecioEspeciales extends Window{
 		    new StringToDoubleConverter("Por favor introduce un número decimal"))
 		  .bind(Precio::getValor, Precio::setValor);
     	
-    	save.addClickListener(e -> { if (binder.isValid()) { Precio pre = new Precio(Double.parseDouble(precio.getValue().replace(',', '.')), 
-    			java.sql.Date.valueOf(fechaInicio.getValue()), java.sql.Date.valueOf(fechaFin.getValue()), null, apartamento);
-    			if(pre.getFecha_fin().compareTo(pre.getFecha_inicio()) > 0) {
-    				precioService.save(pre); subWindow.close();}
-    			else
-    				Notification.show("La fecha de fin no puede ser anterior a la fecha de inicio"); 
+    	save.addClickListener(e -> { 
+    		if (binder.isValid()) { 
+    			if(fechaInicio.isEmpty() || fechaFin.isEmpty())
+					Notification.show("Compruebe que ha introducido una fecha con formato dd/mm/aa válido");
+				else {
+					Date fInicio = java.sql.Date.valueOf(fechaInicio.getValue());
+					Date fFin =  java.sql.Date.valueOf(fechaFin.getValue());
+					Date hoy = java.sql.Date.valueOf(LocalDate.now());
+					if(fInicio.after(fFin) || (fInicio.before(hoy) || fFin.before(hoy))
+							|| fInicio.equals(fFin)) {
+						Notification.show("Error en las fechas. Introduzca un intervalo válido");
+					}
+					else {
+						Precio pre = new Precio(Double.parseDouble(precio.getValue().replace(',', '.')), fInicio, fFin, 
+								null, apartamento);
+						precioService.save(pre);
+						subWindow.close();
+					}
+				}
     		}else Notification.show("Compruebe los campos");});
     	
     	cancel.addClickListener(e -> subWindow.close());

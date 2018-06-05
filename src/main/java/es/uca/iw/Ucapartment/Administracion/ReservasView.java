@@ -44,7 +44,7 @@ import es.uca.iw.Ucapartment.Estado.Valor;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Transaccion.Transaccion;
-import es.uca.iw.Ucapartment.Usuario.PopupPago;
+import es.uca.iw.Ucapartment.Usuario.Popup;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Usuario.UsuarioService;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
@@ -69,7 +69,7 @@ public class ReservasView extends VerticalLayout implements View{
 	private Estado estado = null;
 	private Reserva reservaRow = null;
 	private EmailServiceImpl correo = new EmailServiceImpl();
-	private PopupPago popupFactura = new PopupPago();
+	private Popup popupFactura = new Popup();
 
 	
 	@Autowired
@@ -99,8 +99,8 @@ public class ReservasView extends VerticalLayout implements View{
 		List<Apartamento> lista_apartamentos;
 		List<Usuario> lista_usuarios;
 		Label lFiltrar = new Label("Filtrar por ");
-		PopupPago popupValoraciones = new PopupPago();
-		PopupPago popupReservas = new PopupPago();
+		Popup popupValoraciones = new Popup();
+		Popup popupReservas = new Popup();
 
 		cbFiltros.setItems("Apartamento","Usuario", "Estado"); 
 		

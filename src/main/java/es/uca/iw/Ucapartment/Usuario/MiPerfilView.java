@@ -89,7 +89,7 @@ public class MiPerfilView extends VerticalLayout implements View {
 		Panel panelUsuario = new Panel("Usuario "+usuario.getUsername());
 		Panel panelFoto = new Panel("Foto");
 		Panel panelComentario = new Panel("Comentarios y valoraciones");
-		PopupPago popupDesactivar = new PopupPago();
+		Popup popupDesactivar = new Popup();
 		
 		panelComentario.setWidth("900px");
 		

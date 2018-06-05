@@ -4,12 +4,12 @@ import com.vaadin.ui.Button;
 
 import com.vaadin.ui.Window;
 
-public class PopupPago extends Window {
+public class Popup extends Window {
 	
 	
 	private static final long serialVersionUID = 1L;
 
-	public PopupPago() {
+	public Popup() {
         super("Ventana emergente");
         center();
         

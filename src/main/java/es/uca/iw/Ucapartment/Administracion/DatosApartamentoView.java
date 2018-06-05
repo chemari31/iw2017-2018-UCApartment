@@ -43,7 +43,7 @@ import com.vaadin.ui.renderers.ImageRenderer;
 
 import es.uca.iw.Ucapartment.Apartamento.Apartamento;
 import es.uca.iw.Ucapartment.Apartamento.ApartamentoService;
-import es.uca.iw.Ucapartment.Usuario.PopupPago;
+import es.uca.iw.Ucapartment.Usuario.Popup;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionService;
@@ -88,7 +88,7 @@ public class DatosApartamentoView extends VerticalLayout implements View{
 		Panel panelDuenio = new Panel("Dueño del apartamento");
 		Panel panelComentario = new Panel("Comentarios y valoraciones");
 		
-		PopupPago imagenes = new PopupPago();
+		Popup imagenes = new Popup();
 		
 		panelApartamento.setCaption("Apartamento "+apartamento.getNombre());
 		

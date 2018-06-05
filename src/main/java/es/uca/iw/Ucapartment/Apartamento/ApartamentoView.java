@@ -64,7 +64,7 @@ import es.uca.iw.Ucapartment.Precio.PrecioService;
 import es.uca.iw.Ucapartment.Reserva.Reserva;
 import es.uca.iw.Ucapartment.Reserva.ReservaService;
 import es.uca.iw.Ucapartment.Usuario.MiPerfilView;
-import es.uca.iw.Ucapartment.Usuario.PopupPago;
+import es.uca.iw.Ucapartment.Usuario.Popup;
 import es.uca.iw.Ucapartment.Usuario.Usuario;
 import es.uca.iw.Ucapartment.Valoracion.Valoracion;
 import es.uca.iw.Ucapartment.Valoracion.ValoracionRepository;
@@ -96,7 +96,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 	private Apartamento apartamento;
 	private Date entrada;
 	private Date salida;
-	private PopupPago sub = new PopupPago();
+	private Popup sub = new Popup();
 	private Usuario user;
 	private List<Valoracion> listValoracion = new ArrayList<>();
 	private EmailServiceImpl correo = new EmailServiceImpl();
@@ -125,7 +125,7 @@ public class ApartamentoView extends VerticalLayout implements View {
 		Panel panelDuenio = new Panel("Dueño del apartamento");
 		Panel panelComentario = new Panel("Comentarios y valoraciones");
 		
-		PopupPago imagenes = new PopupPago();
+		Popup imagenes = new Popup();
 		
 		reserva.setWidth("600px");
 		reserva.setHeight("250px");
