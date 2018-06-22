@@ -127,7 +127,7 @@ public class VaadinUI extends UI {
 	}
 	
 	private void showApartamentosScreen() {
-		setContent(new ApartamentoManagementView(service, serviceReserva, new ApartamentoEditor(service), precioService, 
+		setContent(new ApartamentoManagementView(service, serviceReserva, precioService, 
 				servicio, valoracionService, periodoService));
 	}
 	

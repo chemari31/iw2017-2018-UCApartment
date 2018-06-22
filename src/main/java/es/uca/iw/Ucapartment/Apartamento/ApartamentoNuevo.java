@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
@@ -15,21 +17,26 @@ import com.vaadin.data.converter.StringToFloatConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -49,7 +56,9 @@ import es.uca.iw.Ucapartment.Precio.PrecioService;
 
 @SpringComponent
 @UIScope
-public class ApartamentoNuevo extends VerticalLayout{
+@SpringView(name = ApartamentoNuevo.VIEW_NAME)
+public class ApartamentoNuevo extends VerticalLayout implements View{
+	public static final String VIEW_NAME = "apartamentoNuevo";
 	private final ApartamentoService service;	
 	/**
 	 * The currently edited user
@@ -62,6 +71,8 @@ public class ApartamentoNuevo extends VerticalLayout{
 	private boolean esValido;
 
 	private Binder<Apartamento> binder = new Binder<>(Apartamento.class);
+	
+	Panel panelNuevo = new Panel("NUEVO APARTAMENTO");
 	
 	/*Campos para crear un nuevo Apartamento*/
 	TextField nombre = new TextField("Nombre");
@@ -76,18 +87,28 @@ public class ApartamentoNuevo extends VerticalLayout{
 	/* Layout for buttons */
 	CssLayout actions = new CssLayout(save, cancel);
 	
+	
 	@Autowired
 	public ApartamentoNuevo(ApartamentoService service, PrecioService precioService) {
 		this.apartamento = new Apartamento("", "", "", "", "", 0, 0,user, 0, 0, false,0);
 		this.service = service;
 		this.precioService = precioService;
 		esValido = false;
+	}
+	@PostConstruct
+	void init() {
 		
 		habitaciones.setItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		habitaciones.setValue(0);
 		
-		HorizontalLayout form = new HorizontalLayout(nombre, ciudad, habitaciones, precio);
-		addComponents(form, actions);
+		FormLayout form = new FormLayout();
+		form.addComponent(nombre);
+		form.addComponent(ciudad);
+		form.addComponent(habitaciones);
+		form.addComponent(precio);
+		form.setMargin(true);
+		panelNuevo.setContent(form);
+		addComponents(panelNuevo, actions);
 		
 		nombre.setRequiredIndicatorVisible(true);
 		ciudad.setRequiredIndicatorVisible(true);
@@ -136,16 +157,17 @@ public class ApartamentoNuevo extends VerticalLayout{
 				apartamento.setFoto1("/apartamentos/null.png");
 				service.save(apartamento);
 				limpiar();
-				setVisible(false);
 				esValido = true;
+				getUI().getNavigator().navigateTo(ApartamentoManagementView.VIEW_NAME);
 			}
 			else {
 				Notification.show("Por favor, comprueba los datos introducidos");
-				setVisible(true);
 				esValido = false;
 			}
 		});
-		cancel.addClickListener(e -> {return;});
+		cancel.addClickListener(e -> { limpiar();
+			getUI().getNavigator().navigateTo(ApartamentoManagementView.VIEW_NAME);
+		});
 		
 	}
 	public interface ChangeHandler {
@@ -164,13 +186,11 @@ public class ApartamentoNuevo extends VerticalLayout{
 		habitaciones.clear();
 		precio.clear();
 	}
-	
-	public void setChangeHandler(ChangeHandler h) {
-		// ChangeHandler is notified when either save or delete
-		// is clicked
-		save.addClickListener(e -> 
-				h.onChange());
-		cancel.addClickListener(e -> h.onChange());	
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

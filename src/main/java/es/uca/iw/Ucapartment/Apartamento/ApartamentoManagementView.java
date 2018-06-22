@@ -81,9 +81,6 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	Window ventanaValoracion = new Window("Introducir una Valoración");
 	
 
-	private ApartamentoEditor editor;
-	private ApartamentoNuevo nuevo;
-
 	@Autowired
 	private final ApartamentoService service;
 	@Autowired
@@ -114,7 +111,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 
 	
 	@Autowired
-	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, ApartamentoEditor editor, 
+	public ApartamentoManagementView(ApartamentoService service, ReservaService serviceReserva, 
 			PrecioService precioService, UsuarioService usuarioService, ValoracionService valoracionService,
 			PeriodoService periodoService) {
 		this.service = service;
@@ -123,8 +120,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		this.usuarioService = usuarioService;
 		this.valoracionService = valoracionService;
 		this.periodoService = periodoService;
-		this.editor = editor;
-		nuevo = new ApartamentoNuevo(service, precioService);
+		new ApartamentoNuevo(service, precioService);
 		this.grid = new Grid<>(Apartamento.class);
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo Apartamento", FontAwesome.PLUS);
@@ -144,10 +140,9 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		VerticalLayout popupLayout = new VerticalLayout();
 		layout.removeAllComponents();
 		
-		layout.addComponents(nuevo, editor, actions, grid, gridReservas);
+		layout.addComponents(actions, grid, gridReservas);
 		actions.setVisible(true);
 		grid.setVisible(true);
-		nuevo.setVisible(false);
 
 		grid.setHeight(300, Unit.PIXELS);
 		grid.setWidth(1000, Unit.PIXELS);
@@ -193,8 +188,10 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 																			Notification.show("No se ha seleccionado ningún apartamento");
 																	});
 		// Instantiate and edit new Apartamento the new button is clicked
-		addNewBtn.addClickListener(e -> { nuevo.setVisible(true); } );
-		editarBtn.addClickListener(clickEvent -> { editor.editApartamento(selection.getValue()); });
+		addNewBtn.addClickListener(e -> { getUI().getNavigator().navigateTo(ApartamentoNuevo.VIEW_NAME); } );
+		editarBtn.addClickListener(clickEvent -> { if (selection.getValue() != null) 
+				getUI().getNavigator().navigateTo(ApartamentoEditor.VIEW_NAME + "/" + selection.getValue().getId());
+			else Notification.show("Selecciona un Apartamento"); });
 		editarPrecioBtn.addClickListener(clickEvent -> { 
 			if(selection.getValue()!= null) {
 				VerticalLayout layoutPopupPrecios = new VerticalLayout();
@@ -465,18 +462,6 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 			else
 				Notification.show("No se ha seleccionado ningún apartamento");
 		});
-		editor.setChangeHandler(() -> {
-			if(editor.valido()) {
-				editor.setVisible(false);
-				listApartamentos(filter.getValue());
-			}
-		});
-		nuevo.setChangeHandler(() -> {
-			if(nuevo.valido()) {
-				nuevo.setVisible(false);
-				listApartamentos(filter.getValue());
-			}
-		});
 
 		// Initialize listing
 		listApartamentos(null);
@@ -545,11 +530,6 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
     							});
 	}
 	
-	private void addComponents(HorizontalLayout actions, Grid<Apartamento> grid2, ApartamentoEditor editor2) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void listApartamentos(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
 			grid.setItems(service.findByUsuario(user));
@@ -584,6 +564,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
+		listApartamentos(null);
+		//init();
 		// TODO Auto-generated method stub
 		
 	}

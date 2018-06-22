@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
@@ -12,22 +14,27 @@ import com.vaadin.data.converter.StringToDoubleConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinService;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -42,7 +49,9 @@ import es.uca.iw.Ucapartment.Usuario.Usuario;
 
 @SpringComponent
 @UIScope
-public class ApartamentoEditor extends VerticalLayout{
+@SpringView(name = ApartamentoEditor.VIEW_NAME)
+public class ApartamentoEditor extends VerticalLayout implements View{
+	public static final String VIEW_NAME = "apartamentoEditor";
 	/**
 	 * 
 	 */
@@ -60,6 +69,12 @@ public class ApartamentoEditor extends VerticalLayout{
 	private boolean esValido;
 
 	private Binder<Apartamento> binder = new Binder<>(Apartamento.class);
+	
+	Panel panelEditar = new Panel("EDITAR APARTAMENTO");
+	Panel datosApar = new Panel("Datos del Apartamento");
+	Panel datosUbi = new Panel("Ubicación del Apartamento");
+	Panel fotosApar = new Panel("Fotos del Apartamento");
+	VerticalLayout paneles = new VerticalLayout();
 	 
 	/* Fields to edit properties in Apartamento entity */
 	TextField nombre = new TextField("Nombre");
@@ -196,12 +211,27 @@ public class ApartamentoEditor extends VerticalLayout{
 		foto_btn3.setImmediateMode(true);
 		foto_btn3.setButtonCaption("Subir Ahora");
 		
+		FormLayout content = new FormLayout();
+		FormLayout content2 = new FormLayout();
+		FormLayout content3 = new FormLayout();
 		HorizontalLayout form = new HorizontalLayout(nombre, descripcion, contacto, precio);
 		HorizontalLayout form2 = new HorizontalLayout(habitaciones, camas, ac);
 		HorizontalLayout form3 = new HorizontalLayout(ciudad, calle, numero, cp);
 		HorizontalLayout form4 = new HorizontalLayout(image, foto_btn, image2, foto_btn2, image3, foto_btn3);
 		HorizontalLayout btnBorrarFotos = new HorizontalLayout(btnDeleteFoto1,btnDeleteFoto2,btnDeleteFoto3);
-		
+		content.addComponent(form);
+		content.addComponent(form2);
+		content2.addComponent(form3);
+		content3.addComponent(form4);
+		content3.addComponent(btnBorrarFotos);
+		content.setMargin(true);
+		content2.setMargin(true);
+		content3.setMargin(true);
+		datosApar.setContent(content);
+		datosUbi.setContent(content2);
+		fotosApar.setContent(content3);
+		paneles.addComponents(datosApar, datosUbi, fotosApar);
+		panelEditar.setContent(paneles);
 		btnDeleteFoto1.addClickListener(eventFoto1 -> {
 			if(apartamento.getFoto1() != null && !apartamento.getFoto1().equals("/apartamentos/null.png")) {
 				apartamento.setFoto1("/apartamentos/null.png");
@@ -235,7 +265,7 @@ public class ApartamentoEditor extends VerticalLayout{
 				Notification.show("La imagen 3 no está definida");
 		});
 		
-		addComponents(form, form2, form3, form4, btnBorrarFotos, actions);
+		addComponents(panelEditar, actions);
 		
 		// Con esto se muestra un * rojo en los campos deseados indicando que es obligatorio
 		nombre.setRequiredIndicatorVisible(true);
@@ -280,7 +310,7 @@ public class ApartamentoEditor extends VerticalLayout{
 
 		// wire action buttons to save, delete and reset
 		save.addClickListener(e -> validar());
-		cancel.addClickListener(e -> {return;});
+		cancel.addClickListener(e -> {getUI().getNavigator().navigateTo(ApartamentoManagementView.VIEW_NAME);});
 		setVisible(false);
 		
 	}
@@ -348,57 +378,46 @@ public class ApartamentoEditor extends VerticalLayout{
 			binder.setBean(apartamento);
 			service.save(apartamento);
 			esValido = true;
+			getUI().getNavigator().navigateTo(ApartamentoManagementView.VIEW_NAME);
 		}
 		else{
 			Notification.show("El apartamento no se pudo guardar, " +
 		        "por favor comprueba cada campo");
 			esValido = false;
 		}
-		setVisible(false);
 	}
 	
 	
-	public final void editApartamento(Apartamento apar) {
+	void init() {
+		setVisible(true);
 		//borra las imagenes para cuando se cambia de apartamento o se le da a nuevo.
 		image.setVisible(false);
 		image2.setVisible(false);
 		image3.setVisible(false);
-		if (apar == null) {
-			setVisible(false);
-			return;
-		}
-		final boolean persisted = apar.getId() != null;
-		if (persisted) {
-			// Find fresh entity for editing
-			apartamento = service.findById(apar.getId());
-			if(apartamento.getFoto1() != null) {
-				File file = new File(apartamento.getFoto1());
-				image.setVisible(true);
-				image.setSource(new ExternalResource(apartamento.getFoto1()));
-				image.setWidth(200, Unit.PIXELS);
-				image.setHeight(200, Unit.PIXELS);
-			}else
-				image.setVisible(false);
-			if(apartamento.getFoto2() != null) {
-				File file = new File(apartamento.getFoto2());
-				image2.setVisible(true);
-				image2.setSource(new ExternalResource(apartamento.getFoto2()));
-				image2.setWidth(200, Unit.PIXELS);
-				image2.setHeight(200, Unit.PIXELS);
-			}else
-				image2.setVisible(false);
-			if(apartamento.getFoto3() != null) {
-				File file = new File(apartamento.getFoto3());
-				image3.setVisible(true);
-				image3.setSource(new ExternalResource(apartamento.getFoto3()));
-				image3.setWidth(200, Unit.PIXELS);
-				image3.setHeight(200, Unit.PIXELS);
-			}else
-				image3.setVisible(false);
-		}
-		else {
-			apartamento = apar;
-		}
+		if(apartamento.getFoto1() != null) {
+			File file = new File(apartamento.getFoto1());
+			image.setVisible(true);
+			image.setSource(new ExternalResource(apartamento.getFoto1()));
+			image.setWidth(200, Unit.PIXELS);
+			image.setHeight(200, Unit.PIXELS);
+		}else
+			image.setVisible(false);
+		if(apartamento.getFoto2() != null) {
+			File file = new File(apartamento.getFoto2());
+			image2.setVisible(true);
+			image2.setSource(new ExternalResource(apartamento.getFoto2()));
+			image2.setWidth(200, Unit.PIXELS);
+			image2.setHeight(200, Unit.PIXELS);
+		}else
+			image2.setVisible(false);
+		if(apartamento.getFoto3() != null) {
+			File file = new File(apartamento.getFoto3());
+			image3.setVisible(true);
+			image3.setSource(new ExternalResource(apartamento.getFoto3()));
+			image3.setWidth(200, Unit.PIXELS);
+			image3.setHeight(200, Unit.PIXELS);
+		}else
+			image3.setVisible(false);
 		binder.setBean(apartamento);
 		setVisible(true);
 
@@ -415,6 +434,20 @@ public class ApartamentoEditor extends VerticalLayout{
 		save.addClickListener(e -> 
 				h.onChange());
 		cancel.addClickListener(e -> h.onChange());
+	}
+
+	@Override
+	public void enter(ViewChangeEvent event) {
+		String args[] = event.getParameters().split("/");
+	    String value1 = args[0];
+	    
+	    long id_apart = Long.parseLong(value1); 
+	    ApartamentoEditor editor = new ApartamentoEditor(service);
+	    apartamento = service.findById(id_apart); 
+	    init();
+	    
+		// TODO Auto-generated method stub
+		
 	}
 
 }
