@@ -183,9 +183,11 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 																				Reserva res = serviceReserva.findById(selReserva.getValue().getId());
 																				mostrarVentanaValoracion(apartam, res);
 																			}
+																			if(estado.getValor() == Valor.CANCELADA)
+																				Notification.show("Esta reserva está cancelada");
+																			if(estado.getValor() == Valor.ACEPTADA)
+																				Notification.show("Esta reserva está aceptada");
 																		}}
-																		else
-																			Notification.show("No se ha seleccionado ningún apartamento");
 																	});
 		// Instantiate and edit new Apartamento the new button is clicked
 		addNewBtn.addClickListener(e -> { getUI().getNavigator().navigateTo(ApartamentoNuevo.VIEW_NAME); } );
@@ -508,6 +510,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
         TextArea descripcionValoracion = new TextArea("Descripcion");
         ComboBox<Integer> valoracion = new ComboBox<>("Valoracion");
         valoracion.setItems(1, 2, 3, 4, 5);
+        valoracion.setSelectedItem(1);
+        valoracion.setEmptySelectionAllowed(false);
         /* Action buttons */
     	Button aceptar = new Button("Aceptar");
     	Button cancelar = new Button("Cancel");
@@ -555,7 +559,7 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 		gridReservas.addColumn(e -> {
 			estado = repoEstado.findByReserva(e);
 			return estado.getValor();
-		}).setCaption("Estado");
+		}).setDescriptionGenerator(e -> { return "Pulsa para gestionar"; }).setCaption("Estado");
 		gridReservas.addColumn(e -> "Perfil del Solicitante"
 		, new ButtonRenderer(ClickEvent ->  { usuario = ((Reserva) ClickEvent.getItem()).getUsuario();
 		getUI().getNavigator().navigateTo(PerfilUsuarioView.VIEW_NAME + '/'+String.valueOf(usuario.getId()));
