@@ -208,8 +208,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 				SingleSelect<Precio> precio_seleccionado = precios.asSingleSelect();
 				precios.setWidth("860px");
 				precios.setHeight("250px");
-				precios.addColumn(Precio::getFecha_inicio).setCaption("Fecha inicio").setWidth(330).setResizable(false);
-				precios.addColumn(Precio::getFecha_fin).setCaption("Fecha fin").setWidth(330).setResizable(false);
+				precios.addColumn(Precio::getFecha_inicio).setCaption("Fecha entrada").setWidth(330).setResizable(false);
+				precios.addColumn(Precio::getFecha_fin).setCaption("Fecha salida").setWidth(330).setResizable(false);
 				precios.addColumn(Precio::getValor).setCaption("Valor (€)").setWidth(200).setResizable(false);
 				layoutPopupPrecios.removeAllComponents();
 				layoutPopupPrecios.addComponent(new Label("Nombre apartamento: "+selection.getValue().getNombre()));
@@ -226,8 +226,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 				VerticalLayout layoutPopupPrecio = new VerticalLayout();
 				btn_anadir.addClickListener(e -> {
 					HorizontalLayout hlFechas = new HorizontalLayout();
-					DateField fechaInicio = new DateField("Inicio");
-					DateField fechaFin = new DateField("Fin");
+					DateField fechaInicio = new DateField("Entrada");
+					DateField fechaFin = new DateField("Salida");
 					TextField tfPrecio = new TextField("Precio Especial");
 					Date hoy = java.sql.Date.valueOf(LocalDate.now());
 					Button btn_nuevoPrecio = new Button("Añadir",FontAwesome.PLUS);
@@ -347,8 +347,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 				SingleSelect<Periodo> periodo_seleccionado = periodos.asSingleSelect();
 				periodos.setWidth("660px");
 				periodos.setHeight("250px");
-				periodos.addColumn(Periodo::getFechaInicio).setCaption("Fecha inicio").setWidth(330).setResizable(false);
-				periodos.addColumn(Periodo::getFechaFin).setCaption("Fecha fin").setWidth(330).setResizable(false);
+				periodos.addColumn(Periodo::getFechaInicio).setCaption("Fecha entrada").setWidth(330).setResizable(false);
+				periodos.addColumn(Periodo::getFechaFin).setCaption("Fecha salida").setWidth(330).setResizable(false);
 				popupLayout.removeAllComponents();
 				popupLayout.addComponent(new Label("Nombre apartamento: "+selection.getValue().getNombre()));
 				popupLayout.addComponent(new Label("Periodos de no disponibilidad del apartamento (no se tienen en cuenta para "
@@ -364,8 +364,8 @@ public class ApartamentoManagementView extends VerticalLayout implements View{
 				VerticalLayout layoutPopupPeriodo = new VerticalLayout();
 				btn_anadir.addClickListener(e -> {
 					HorizontalLayout hlFechas = new HorizontalLayout();
-					DateField fechaInicio = new DateField("Inicio");
-					DateField fechaFin = new DateField("Fin");
+					DateField fechaInicio = new DateField("Entrada");
+					DateField fechaFin = new DateField("Salida");
 					Date hoy = java.sql.Date.valueOf(LocalDate.now());
 					Button btn_nuevoPeriodo = new Button("Añadir",FontAwesome.PLUS);
 
